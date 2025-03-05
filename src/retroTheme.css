@@ -1,0 +1,41 @@
+/* src/retroTheme.css */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #111; /* ダークな背景 */
+    color: #eee;           /* 文字色を薄めに */
+    font-family: 'Press Start 2P', monospace;
+  }
+  
+  a {
+    color: #53c3f0;
+    text-decoration: none;
+  }
+  
+  h1, h2, h3 {
+    text-shadow: 2px 2px 0px #555;
+  }
+  
+  .header, .footer {
+    background-color: #222;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .main-content {
+    padding: 20px;
+  }
+  
+  /* レトロボタン */
+  .button-retro {
+    display: inline-block;
+    color: #fff;
+    background-color: #333;
+    border: 4px double #fff;
+    padding: 8px 16px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .button-retro:hover {
+    background-color: #666;
+  }
