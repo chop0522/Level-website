@@ -1,31 +1,81 @@
 // src/App.jsx
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import Home from './pages/Home';
-import Menu from './pages/Menu';
-import Calendar from './pages/Calendar';
-import FAQ from './pages/FAQ';
-import Reservation from './pages/Reservation';
+import Register from './pages/Register';
+import Login from './pages/Login';
 import MyPage from './pages/MyPage';
-import AdminDashboard from './pages/AdminDashboard';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { AppBar, Toolbar, Button, Typography } from '@mui/material';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2'
+    }
+  }
+});
 
 function App() {
+  const [token, setToken] = useState(localStorage.getItem('token') || '');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // 保存されているトークンを再読み込み
+    setToken(localStorage.getItem('token') || '');
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setToken('');
+    navigate('/');
+  };
+
   return (
-    <>
-      <Header />
+    <ThemeProvider theme={theme}>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Board Game Cafe
+          </Typography>
+          {token ? (
+            <>
+              <Button color="inherit" onClick={() => navigate('/mypage')}>
+                My Page
+              </Button>
+              <Button color="inherit" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button color="inherit" onClick={() => navigate('/login')}>
+                Login
+              </Button>
+              <Button color="inherit" onClick={() => navigate('/register')}>
+                Register
+              </Button>
+            </>
+          )}
+        </Toolbar>
+      </AppBar>
+
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/menu" element={<Menu />} />
-        <Route path="/calendar" element={<Calendar />} />
-        <Route path="/faq" element={<FAQ />} />
-        <Route path="/reservation" element={<Reservation />} />
-        <Route path="/mypage" element={<MyPage />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route
+          path="/register"
+          element={<Register token={token} setToken={setToken} />}
+        />
+        <Route
+          path="/login"
+          element={<Login token={token} setToken={setToken} />}
+        />
+        <Route
+          path="/mypage"
+          element={<MyPage token={token} />}
+        />
       </Routes>
-      <Footer />
-    </>
+    </ThemeProvider>
   );
 }
 

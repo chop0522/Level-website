@@ -1,16 +1,15 @@
 // src/pages/Home.jsx
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Container, Typography } from '@mui/material';
 
 function Home() {
   return (
-    <div className="main-content">
-      <h1>ボードゲームカフェへようこそ！</h1>
-      <p>レトロなゲームの世界を体験しよう。</p>
-      <div>
-        <Link to="/menu" className="button-retro">メニューを見る</Link>
-      </div>
-    </div>
+    <Container sx={{ mt: 4 }}>
+      <Typography variant="h4" gutterBottom>Welcome to Board Game Cafe</Typography>
+      <Typography>
+        ここではボードゲームカフェの情報を管理し、ユーザーはマイページでスコアや麻雀役などを確認できます。
+      </Typography>
+    </Container>
   );
 }
 

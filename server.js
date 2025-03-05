@@ -1,131 +1,195 @@
 // server.js
 require('dotenv').config();
-const path = require('path');
 const express = require('express');
 const { Client } = require('@notionhq/client');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const cors = require('cors');
+const path = require('path');
 
+// 1) Expressアプリ作成
 const app = express();
 app.use(express.json());
+app.use(cors()); // 開発時のみ許可。本番では設定調整
 
-// Notion APIクライアントの初期化
-const notion = new Client({ auth: process.env.NOTION_API_KEY });
+// 2) 環境変数の読み込み
+const {
+  NOTION_API_KEY,
+  NOTION_DB_ID_USER,
+  JWT_SECRET,
+  PORT
+} = process.env;
 
-// DB IDを環境変数から取得
-const DB_FAQ = process.env.NOTION_DB_ID_FAQ;
-const DB_RESERVATION = process.env.NOTION_DB_ID_RESERVATION;
-const DB_SCORE = process.env.NOTION_DB_ID_SCORE;
+// 3) Notionクライアント初期化
+const notion = new Client({ auth: NOTION_API_KEY });
 
-// ▼ FAQ問い合わせのPOST
-app.post('/api/faq', async (req, res) => {
-  const { question } = req.body;
-  if (!question) return res.status(400).json({ success: false, error: 'No question provided' });
+// -----------------------------
+// ユーザーデータのヘルパー関数
+// -----------------------------
 
-  try {
-    await notion.pages.create({
-      parent: { database_id: DB_FAQ },
-      properties: {
-        "Question": { title: [{ text: { content: question } }] },
-        "Status": { select: { name: '未回答' } }
+// 3-1) Notion内でEmailが一致するユーザーを検索
+async function findUserByEmail(email) {
+  // DB queryでEmailプロパティが一致するページを探す
+  const response = await notion.databases.query({
+    database_id: NOTION_DB_ID_USER,
+    filter: {
+      property: "Email",
+      email: {
+        equals: email
       }
-    });
-    return res.json({ success: true });
+    }
+  });
+  if (response.results.length > 0) {
+    return response.results[0]; // 該当ユーザー(page)を返す
+  }
+  return null;
+}
+
+// 3-2) NotionのUser DBに新規ユーザーを作成
+async function createUserInNotion(name, email, passwordHash) {
+  const newPage = await notion.pages.create({
+    parent: { database_id: NOTION_DB_ID_USER },
+    properties: {
+      "Name": {
+        title: [{ text: { content: name } }]
+      },
+      "Email": {
+        email: email
+      },
+      "PasswordHash": {
+        rich_text: [{ text: { content: passwordHash } }]
+      }
+    }
+  });
+  return newPage;
+}
+
+// 3-3) Notionのユーザーページから必要な情報を抽出
+function extractUserProps(page) {
+  // page.properties から Name, Email, PasswordHash を取得
+  const { Name, Email, PasswordHash } = page.properties;
+  return {
+    id: page.id,
+    name: Name.title?.[0]?.plain_text || "",
+    email: Email.email || "",
+    passwordHash: PasswordHash.rich_text?.[0]?.plain_text || ""
+  };
+}
+
+// -----------------------------
+// JWT関連のミドルウェア
+// -----------------------------
+
+// JWTトークンを検証するミドルウェア
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+    return res.status(401).json({ error: "No authorization header" });
+  }
+  const token = authHeader.split(' ')[1]; // "Bearer <token>"
+  if (!token) {
+    return res.status(401).json({ error: "Token missing" });
+  }
+  // 検証
+  jwt.verify(token, JWT_SECRET, (err, userData) => {
+    if (err) {
+      return res.status(403).json({ error: "Invalid token" });
+    }
+    // デコードされたペイロードをreq.userに格納
+    req.user = userData;
+    next();
+  });
+}
+
+// -----------------------------
+// 認証系エンドポイント
+// -----------------------------
+
+// 新規登録
+app.post('/auth/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "Missing fields" });
+    }
+    // 1) 既に同じメールのユーザーが存在するか確認
+    const existing = await findUserByEmail(email);
+    if (existing) {
+      return res.status(409).json({ error: "Email already registered" });
+    }
+    // 2) パスワードをハッシュ化
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+    // 3) Notion DBに登録
+    const newPage = await createUserInNotion(name, email, passwordHash);
+    // 4) JWTトークンを発行し、ユーザー情報を返す
+    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
+    return res.json({ success: true, token });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// ▼ 予約作成
-app.post('/api/reservation', async (req, res) => {
-  const { dateTime, people, userId } = req.body;
-  if (!dateTime || !people) {
-    return res.status(400).json({ success: false, error: 'Invalid data' });
-  }
+// ログイン
+app.post('/auth/login', async (req, res) => {
   try {
-    await notion.pages.create({
-      parent: { database_id: DB_RESERVATION },
-      properties: {
-        "DateTime": { date: { start: dateTime } },
-        "NumberOfPeople": { number: people },
-        "Status": { select: { name: '予約受付済' } },
-        // RelationでユーザーIDに紐づける例 (DB側にRelationプロパティが必要)
-        "User": userId ? { relation: [{ id: userId }] } : undefined
-      }
-    });
-    return res.json({ success: true });
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "Missing email or password" });
+    }
+    // 1) ユーザー検索
+    const userPage = await findUserByEmail(email);
+    if (!userPage) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+    // 2) パスワードチェック
+    const userProps = extractUserProps(userPage);
+    const match = await bcrypt.compare(password, userProps.passwordHash);
+    if (!match) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+    // 3) JWT発行
+    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
+    res.json({ success: true, token });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// ▼ スコア一覧取得
-app.get('/api/scores', async (req, res) => {
-  const { userId } = req.query;
-  if (!userId) {
-    return res.status(400).json({ error: 'userId is required' });
-  }
+// -----------------------------
+// ユーザー情報API (要JWT)
+// -----------------------------
+app.get('/api/userinfo', authenticateToken, async (req, res) => {
   try {
-    const response = await notion.databases.query({
-      database_id: DB_SCORE,
-      filter: {
-        property: 'User',
-        relation: {
-          contains: userId
-        }
-      }
-    });
-    const scores = response.results.map(page => {
-      const props = page.properties;
-      const gameName = props['GameName']?.select?.name || '';
-      const scoreVal = props['Score']?.number || 0;
-      const dateVal = props['Date']?.date?.start || '';
-      return {
-        id: page.id,
-        gameName,
-        score: scoreVal,
-        date: dateVal
-      };
-    });
-    return res.json(scores);
+    const { email } = req.user; // JWTに埋め込んだemail
+    const userPage = await findUserByEmail(email);
+    if (!userPage) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const userProps = extractUserProps(userPage);
+    // パスワードハッシュは返さない
+    delete userProps.passwordHash;
+    return res.json(userProps);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// ▼ スコア追加
-app.post('/api/scores', async (req, res) => {
-  const { userId, gameName, score } = req.body;
-  if (!userId || !gameName) {
-    return res.status(400).json({ success: false, error: 'Missing userId or gameName' });
-  }
-  try {
-    const newPage = await notion.pages.create({
-      parent: { database_id: DB_SCORE },
-      properties: {
-        "User": { relation: [{ id: userId }] },
-        "GameName": { select: { name: gameName } },
-        "Score": { number: score },
-        "Date": { date: { start: new Date().toISOString() } }
-      }
-    });
-    return res.json({ success: true, id: newPage.id });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, error: err.message });
-  }
-});
-
-// ▼ フロントエンドのビルド結果を配信 (本番用)
+// -----------------------------
+// フロントエンドのビルド成果物を返す(本番用)
+// -----------------------------
 app.use(express.static(path.join(__dirname, 'build')));
-
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-// ▼ サーバー起動
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+// -----------------------------
+// サーバー起動
+// -----------------------------
+const port = PORT || 3001;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
