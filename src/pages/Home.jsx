@@ -73,7 +73,7 @@ function Home() {
       <HeroSection>
         <Box textAlign="center" sx={{ backgroundColor: 'rgba(0,0,0,0.4)', p: 2 }}>
           <Typography variant="h3" component="h1" sx={{ color: '#fff' }}>
-            ボードゲームカフェへようこそ！
+　　　　　　　ゲームカフェ.Levelへようこそ！
           </Typography>
           <Typography variant="h6" sx={{ color: '#fff', mt: 1 }}>
             ここにキャッチコピーなどを表示できます
@@ -89,7 +89,7 @@ function Home() {
           </Typography>
           <Typography variant="body1">
             {/* コンセプト、こだわり等をここに入力 */}
-            例）「初心者でも安心！豊富なボードゲームと美味しいコーヒーでゆったり過ごせる空間を提供しています。」
+            1000種類以上のボードゲームを取り揃えております。お一人様での相席、グループでのご来店も大歓迎です！
           </Typography>
         </Paper>
       </Container>
@@ -102,11 +102,13 @@ function Home() {
           </Typography>
           <Typography variant="body2">
             {/* ここに営業時間や定休日を入力 */}
-            例）平日 12:00 - 22:00 / 土日祝 10:00 - 22:00 / 定休日：火曜
+            例）平日 13:00 - 24:00 / 土日祝 13:00 - 24:00 / 定休日：月曜
           </Typography>
           <Typography variant="body2" sx={{ mt: 1 }}>
             {/* 料金プラン・予約方法など簡易情報 */}
-            例）1時間 ¥500 / ドリンクバー付き / ゲームプレイ無料
+            30分300円　4時間パック1,200円　1日パック2,400円　ワンドリンク制
+            貸切プラン　平日2時間20,000円　4時間30,000円
+            　　　　　　土日祝日　9時から12時30分　30,000円　※お時間はご相談ください
           </Typography>
         </Paper>
       </Container>
@@ -173,7 +175,7 @@ function Home() {
           </Typography>
           <Typography variant="body1">
             {/* 住所など */}
-            例）東京都千代田区丸の内1丁目 ゲームタワー3F 
+          　千葉県市川市湊新田2−1−１８ビアメゾンロジェール１０１
           </Typography>
           <Box sx={{ mt: 2 }}>
             <iframe
