@@ -157,7 +157,7 @@ function Home() {
         </Typography>
         <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden' }}>
           <iframe
-            src="https://glass-jade-d4c.notion.site/1b18fda9d98d80aa994fc8b3091c62d2?v=1b18fda9d98d809b8e87000ccca0a291&pvs=4"
+            src="https://www.notion.so/1b18fda9d98d80aa994fc8b3091c62d2?v=1b18fda9d98d809b8e87000ccca0a291&pvs=4"
             style={{ width: '100%', height: '300px', border: 'none' }}
             title="Mini Notion Calendar"
           />
@@ -200,7 +200,7 @@ function Home() {
           {/* X (旧Twitter) */}
           <Grid item>
             <IconButton 
-              onClick={() => window.open('https://x.com/あなたのアカウント', '_blank')}
+              onClick={() => window.open('https://x.com/GamecafeLevel', '_blank')}
               color="primary"
             >
               <XIcon />
@@ -209,7 +209,7 @@ function Home() {
           {/* LINE */}
           <Grid item>
             <IconButton
-              onClick={() => window.open('https://line.me/あなたのアカウント', '_blank')}
+              onClick={() => window.open('https://lin.ee/pyc6UjM', '_blank')}
               color="primary"
             >
               <LineIcon />
