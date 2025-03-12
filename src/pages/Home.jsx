@@ -73,7 +73,7 @@ function Home() {
       <HeroSection>
         <Box textAlign="center" sx={{ backgroundColor: 'rgba(0,0,0,0.4)', p: 2 }}>
           <Typography variant="h3" component="h1" sx={{ color: '#fff' }}>
-　　　　　　　ゲームカフェ.Levelへようこそ！
+ゲームカフェ.Levelへようこそ！
           </Typography>
           <Typography variant="h6" sx={{ color: '#fff', mt: 1 }}>
             ここにキャッチコピーなどを表示できます
@@ -102,7 +102,7 @@ function Home() {
           </Typography>
           <Typography variant="body2">
             {/* ここに営業時間や定休日を入力 */}
-            例）平日 13:00 - 24:00 / 土日祝 13:00 - 24:00 / 定休日：月曜
+            平日 15:00 - 24:00 / 土日祝 13:00 - 24:00 / 定休日：月曜
           </Typography>
           <Typography variant="body2" sx={{ mt: 1 }}>
             {/* 料金プラン・予約方法など簡易情報 */}
@@ -157,7 +157,7 @@ function Home() {
         </Typography>
         <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden' }}>
           <iframe
-            src="https://www.notion.so/your-workspace-calendar-url"
+            src="https://www.notion.so/1b18fda9d98d80aa994fc8b3091c62d2?v=1b18fda9d98d809b8e87000ccca0a291"
             style={{ width: '100%', height: '300px', border: 'none' }}
             title="Mini Notion Calendar"
           />
@@ -180,7 +180,7 @@ function Home() {
           <Box sx={{ mt: 2 }}>
             <iframe
               title="GoogleMap"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3240.888600269498!2d139.7665745155892!3d35.68124078019379!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6020965a3e2f9df7%3A0x8b5effdb19def56b!2z5pel5pys44CB44CSMTAwLTAwMTIg5p2x5Lqs6YO95riv5Yy65L2P5ZCM77yR77yS77yRIOWkp-moiQ!5e0!3m2!1sja!2sjp!4v1679545491800"
+              src="https://maps.app.goo.gl/8gYGwfJTvZrPVA5G8"
               width="100%"
               height="300"
               style={{ border: 0 }}
