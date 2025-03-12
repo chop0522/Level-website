@@ -180,7 +180,7 @@ function Home() {
           <Box sx={{ mt: 2 }}>
             <iframe
               title="GoogleMap"
-              src="https://maps.app.goo.gl/8gYGwfJTvZrPVA5G8"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3240.867767207533!2d139.90914127620368!3d35.6802578300267!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188768af217c7b%3A0x42dc8c85cafabf51!2z44Ky44O844Og44Kr44OV44KnLkxldmVs!5e0!3m2!1sja!2sjp!4v1741783603258!5m2!1sja!2sjp"
               width="100%"
               height="300"
               style={{ border: 0 }}
