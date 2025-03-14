@@ -157,7 +157,7 @@ function Home() {
         </Typography>
         <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden' }}>
           <iframe
-            src="https://glass-jade-d4c.notion.site/1b18fda9d98d80aa994fc8b3091c62d2?v=1b18fda9d98d809b8e87000ccca0a291"
+            src="https://wqq7xo9jvyqx193.embednotionpage.com/1b18fda9d98d80aa994fc8b3091c62d2?v=1b18fda9d98d809b8e87000ccca0a291&pvs=4"
             style={{ width: '100%', height: '300px', border: 'none' }}
             title="Mini Notion Calendar"
           />
