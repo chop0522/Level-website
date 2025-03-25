@@ -5,92 +5,56 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
-const { Pool } = require('pg'); // ← PostgreSQLを使う
+const { Pool } = require('pg'); // PostgreSQL
 
-// 1) Expressアプリ作成
+// 1) Expressアプリ初期化
 const app = express();
 app.use(express.json());
-app.use(cors()); // 開発時のみ許可。本番では設定調整
+app.use(cors());
 
-// 2) 環境変数の読み込み
+// 2) 環境変数
 const {
-  DATABASE_URL="postgresql://level_db_user:cY30w001byMPCH2F36Y4iH09UzqWneuM@dpg-cvamt75rie7s7396eie0-a/level_db",
+  DATABASE_URL,
   JWT_SECRET,
   PORT=3001
 } = process.env;
 
-// 3) PostgreSQLプール初期化
+// 3) PostgreSQL接続
 const pool = new Pool({
   connectionString: DATABASE_URL
 });
 
 // -----------------------------
-// DBユーザーデータのヘルパー関数
+// 3-1. ヘルパー関数
 // -----------------------------
 
-// (A) findUserByEmail: emailからユーザーを検索
+// findUserByEmail
 async function findUserByEmail(email) {
-  const query = 'SELECT * FROM users WHERE email = $1';
-  const result = await pool.query(query, [email]);
-  if (result.rows.length > 0) {
-    // { id, name, email, password_hash, xp(追加済み), etc }
-    return result.rows[0];
+  const sql = 'SELECT * FROM users WHERE email = $1';
+  const res = await pool.query(sql, [email]);
+  if (res.rows.length > 0) {
+    return res.rows[0]; // { id, name, email, password_hash, xp_stealth, xp_heavy, etc... }
   }
   return null;
 }
 
-// (B) createUserInDB: ユーザーをDBに作成
-//   CREATE TABLE users (
-//     id SERIAL PRIMARY KEY,
-//     name TEXT,
-//     email TEXT UNIQUE,
-//     password_hash TEXT,
-//     xp INTEGER DEFAULT 0
-//   );
+// createUserInDB
 async function createUserInDB(name, email, passwordHash) {
-  const query = `
+  // usersテーブル: id, name, email, password_hash
+  // + xp_stealth, xp_heavy, xp_light, xp_party, xp_gamble, xp_quiz (default 0)
+  const sql = `
     INSERT INTO users (name, email, password_hash)
     VALUES ($1, $2, $3)
     RETURNING id, name, email
   `;
   const values = [name, email, passwordHash];
-  const result = await pool.query(query, values);
-  return result.rows[0]; // { id, name, email }
+  const res = await pool.query(sql, values);
+  return res.rows[0]; // { id, name, email }
 }
 
-// -----------------------------
-// XP操作用のユーティリティ
-// -----------------------------
+// daily_category: (id, user_id, category, date)
 
-// gainXP: ユーザーのxpに加算
-async function gainXP(userId, xpGained) {
-  // 1) 現在xp取得
-  const query1 = 'SELECT xp FROM users WHERE id = $1';
-  const res1 = await pool.query(query1, [userId]);
-  if (res1.rows.length === 0) {
-    throw new Error("User not found for gainXP");
-  }
-  let currentXp = res1.rows[0].xp || 0;
-
-  // 2) 新しいXP
-  let newXp = currentXp + xpGained;
-
-  // 3) DB更新
-  const query2 = 'UPDATE users SET xp = $1 WHERE id = $2 RETURNING xp';
-  const res2 = await pool.query(query2, [newXp, userId]);
-  return res2.rows[0].xp; // updated xp
-}
-
-// -----------------------------
-// 1日1回制限テーブル (daily_category)
-// 
-// CREATE TABLE daily_category (
-//   id SERIAL PRIMARY KEY,
-//   user_id INT REFERENCES users(id),
-//   category TEXT,
-//   date DATE DEFAULT CURRENT_DATE
-// );
-//
+// checkDailyCategory => 同じ日 & 同じカテゴリを既に取得済みか
 async function checkDailyCategory(userId, category) {
   const sql = `
     SELECT * FROM daily_category
@@ -99,22 +63,45 @@ async function checkDailyCategory(userId, category) {
        AND date = CURRENT_DATE
   `;
   const res = await pool.query(sql, [userId, category]);
-  return (res.rows.length > 0);
+  return (res.rows.length > 0); // true if found
 }
 
+// insertDailyRecord => 当日取得済みとして記録
 async function insertDailyRecord(userId, category) {
   const sql = `
-    INSERT INTO daily_category (user_id, category)
+    INSERT INTO daily_category(user_id, category)
     VALUES ($1, $2)
   `;
   await pool.query(sql, [userId, category]);
 }
 
+// xp加算 => 6列(stealth, heavy, light, party, gamble, quiz)のどれを上げるか
+async function gainCategoryXP(userId, category, xpGained) {
+  let sql;
+  if (category === 'stealth') {
+    sql = 'UPDATE users SET xp_stealth = xp_stealth + $1 WHERE id=$2 RETURNING xp_stealth';
+  } else if (category === 'heavy') {
+    sql = 'UPDATE users SET xp_heavy = xp_heavy + $1 WHERE id=$2 RETURNING xp_heavy';
+  } else if (category === 'light') {
+    sql = 'UPDATE users SET xp_light = xp_light + $1 WHERE id=$2 RETURNING xp_light';
+  } else if (category === 'party') {
+    sql = 'UPDATE users SET xp_party = xp_party + $1 WHERE id=$2 RETURNING xp_party';
+  } else if (category === 'gamble') {
+    sql = 'UPDATE users SET xp_gamble = xp_gamble + $1 WHERE id=$2 RETURNING xp_gamble';
+  } else if (category === 'quiz') {
+    sql = 'UPDATE users SET xp_quiz = xp_quiz + $1 WHERE id=$2 RETURNING xp_quiz';
+  } else {
+    throw new Error('Unknown category: ' + category);
+  }
+
+  const res = await pool.query(sql, [xpGained, userId]);
+  return res.rows[0]; // updated value
+}
+
 // -----------------------------
-// JWT関連のミドルウェア
+// 3-2. JWTミドルウェア
 // -----------------------------
 
-// トークン検証
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   if (!authHeader) {
@@ -134,7 +121,7 @@ function authenticateToken(req, res, next) {
 }
 
 // -----------------------------
-// 認証系エンドポイント
+// 4. 認証エンドポイント
 // -----------------------------
 
 // 新規登録
@@ -144,16 +131,17 @@ app.post('/auth/register', async (req, res) => {
     if (!name || !email || !password) {
       return res.status(400).json({ error: "Missing fields" });
     }
-    // 1) 既存ユーザー確認
+
+    // 1) 重複チェック
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
       return res.status(409).json({ error: "Email already registered" });
     }
     // 2) パスワードハッシュ
     const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
-    // 3) DBにユーザー作成
-    const newUser = await createUserInDB(name, email, passwordHash);
+    const hashed = await bcrypt.hash(password, saltRounds);
+    // 3) DBに登録
+    const newUser = await createUserInDB(name, email, hashed);
     // 4) JWT発行
     const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
     return res.json({ success: true, token, user: newUser });
@@ -170,19 +158,18 @@ app.post('/auth/login', async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ error: "Missing email or password" });
     }
-    // 1) DB検索
+
     const userRow = await findUserByEmail(email);
     if (!userRow) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-    // 2) パスワード照合
+
     const match = await bcrypt.compare(password, userRow.password_hash);
     if (!match) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-    // 3) JWT発行
+
     const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
-    // パスワードハッシュを除くユーザー情報を返す
     const userData = {
       id: userRow.id,
       name: userRow.name,
@@ -195,7 +182,7 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
-// ユーザー情報API (要JWT)
+// ユーザー情報 (要JWT)
 app.get('/api/userinfo', authenticateToken, async (req, res) => {
   try {
     const { email } = req.user;
@@ -203,12 +190,17 @@ app.get('/api/userinfo', authenticateToken, async (req, res) => {
     if (!userRow) {
       return res.status(404).json({ error: "User not found" });
     }
-    // パスワードハッシュを除いて返す
+    // レーダーチャートに使う6列を含めて返す
     const userData = {
       id: userRow.id,
       name: userRow.name,
       email: userRow.email,
-      xp: userRow.xp || 0 // ここでXPを返す
+      xp_stealth: userRow.xp_stealth,
+      xp_heavy:   userRow.xp_heavy,
+      xp_light:   userRow.xp_light,
+      xp_party:   userRow.xp_party,
+      xp_gamble:  userRow.xp_gamble,
+      xp_quiz:    userRow.xp_quiz
     };
     return res.json(userData);
   } catch (err) {
@@ -218,8 +210,10 @@ app.get('/api/userinfo', authenticateToken, async (req, res) => {
 });
 
 // -----------------------------
-// ゲームカテゴリ選択API (1日1回制限)
-// 例: POST /api/gameCategory { category: "party" }
+// 5. カテゴリXP加算 (1日1回制限)
+// -----------------------------
+
+// 例: POST /api/gameCategory { category: "quiz" }
 app.post('/api/gameCategory', authenticateToken, async (req, res) => {
   try {
     const { email } = req.user;
@@ -227,37 +221,60 @@ app.post('/api/gameCategory', authenticateToken, async (req, res) => {
     if (!category) {
       return res.status(400).json({ error: "Missing category" });
     }
-    // 1) ユーザー検索
+
     const userRow = await findUserByEmail(email);
     if (!userRow) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // 2) 1日1回制限チェック
+    // 1日1回判定
     const alreadyGot = await checkDailyCategory(userRow.id, category);
     if (alreadyGot) {
       return res.json({ success: false, msg: "You already got XP for this category today." });
     }
 
-    // 3) XP加算
-    const xpGained = 10; // 必要ならカテゴリに応じて変化させてもOK
-    const newXp = await gainXP(userRow.id, xpGained);
+    // カテゴリ別に+10
+    const xpGain = 10;
+    const updatedVal = await gainCategoryXP(userRow.id, category, xpGain);
 
-    // 4) DB記録
+    // daily_categoryに記録
     await insertDailyRecord(userRow.id, category);
 
-    // 5) レスポンス
-    res.json({ success: true, xpGained, newXp });
+    // レスポンス
+    res.json({ success: true, xpGain, updatedVal });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
+// gainCategoryXP: 6カテゴリに応じて該当列を+10
+async function gainCategoryXP(userId, category, xpValue) {
+  let sql;
+  if (category === 'stealth') {
+    sql = 'UPDATE users SET xp_stealth = xp_stealth + $1 WHERE id=$2 RETURNING xp_stealth';
+  } else if (category === 'heavy') {
+    sql = 'UPDATE users SET xp_heavy = xp_heavy + $1 WHERE id=$2 RETURNING xp_heavy';
+  } else if (category === 'light') {
+    sql = 'UPDATE users SET xp_light = xp_light + $1 WHERE id=$2 RETURNING xp_light';
+  } else if (category === 'party') {
+    sql = 'UPDATE users SET xp_party = xp_party + $1 WHERE id=$2 RETURNING xp_party';
+  } else if (category === 'gamble') {
+    sql = 'UPDATE users SET xp_gamble = xp_gamble + $1 WHERE id=$2 RETURNING xp_gamble';
+  } else if (category === 'quiz') {
+    sql = 'UPDATE users SET xp_quiz = xp_quiz + $1 WHERE id=$2 RETURNING xp_quiz';
+  } else {
+    throw new Error("Unknown category: " + category);
+  }
+  const res = await pool.query(sql, [xpValue, userId]);
+  return res.rows[0];
+}
+
 // -----------------------------
-// フロントエンドのビルド成果物を返す(本番用)
+// フロントエンドのビルド成果物 (本番用)
 // -----------------------------
 app.use(express.static(path.join(__dirname, 'build')));
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
@@ -265,7 +282,6 @@ app.get('*', (req, res) => {
 // -----------------------------
 // サーバー起動
 // -----------------------------
-const port = PORT || 3001;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
