@@ -1,5 +1,5 @@
 // src/pages/Home.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Container, 
   Box, 
@@ -11,6 +11,11 @@ import {
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
+
+// ▼ big-calendar関連 import
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { format, parse, startOfWeek, getDay } from 'date-fns';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 // ▼ X(旧Twitter)アイコン (ダミーSVG)
 const XIcon = () => (
@@ -66,7 +71,42 @@ const HeroSection = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
 }));
 
+// --- Big Calendar localizer (date-fns)
+const locales = {
+  'en-US': require('date-fns/locale/en-US'),
+  'ja': require('date-fns/locale/ja'), 
+};
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
+
+// サンプル用イベント（実際はサーバーfetchに置き換え推奨）
+const sampleEvents = [
+  {
+    title: '店休日',
+    start: new Date(2023, 9, 15, 0, 0),
+    end: new Date(2023, 9, 15, 23, 59),
+    allDay: true
+  },
+  {
+    title: 'ボードゲーム大会',
+    start: new Date(2023, 9, 20, 18, 0),
+    end: new Date(2023, 9, 20, 21, 0),
+  },
+  {
+    title: 'クイズナイト',
+    start: new Date(2023, 9, 25, 19, 0),
+    end: new Date(2023, 9, 25, 22, 0),
+  }
+];
+
 function Home() {
+  const [events, setEvents] = useState(sampleEvents);
+
   return (
     <>
       {/* ----- Hero Section ----- */}
@@ -88,7 +128,6 @@ function Home() {
             当店のコンセプト
           </Typography>
           <Typography variant="body1">
-            {/* コンセプト、こだわり等をここに入力 */}
             1000種類以上のボードゲームを取り揃えております。お一人様での相席、グループでのご来店も大歓迎です！
           </Typography>
         </Paper>
@@ -101,13 +140,11 @@ function Home() {
             営業情報
           </Typography>
           <Typography variant="body2">
-            {/* ここに営業時間や定休日を入力 */}
             平日 15:00 - 24:00 / 土日祝 13:00 - 24:00 / 定休日：月曜
           </Typography>
           <Typography variant="body2" sx={{ mt: 1 }}>
-            {/* 料金プラン・予約方法など簡易情報 */}
-            30分300円　4時間パック1,200円　1日パック2,400円　ワンドリンク制
-            貸切プラン　平日2時間20,000円　4時間30,000円
+            30分300円　4時間パック1,200円　1日パック2,400円　ワンドリンク制<br/>
+            貸切プラン　平日2時間20,000円　4時間30,000円<br/>
             　　　　　　土日祝日　9時から12時30分　30,000円　※お時間はご相談ください
           </Typography>
         </Paper>
@@ -146,14 +183,35 @@ function Home() {
               予約フォーム
             </Button>
           </Grid>
-          {/* 必要に応じて他のボタン追加 */}
         </Grid>
       </Container>
 
-      {/* ----- ミニカレンダー (Notion iframe) ----- */}
+      {/* ----- React-Big-Calendarを使った大型カレンダー ----- */}
       <Container sx={{ mt: 4 }}>
         <Typography variant="h5" gutterBottom>
-          ミニカレンダー
+          大きなカレンダー
+        </Typography>
+        <Paper sx={{ p: 2 }}>
+          <div style={{ height: '500px' }}>
+            <Calendar
+              localizer={localizer}
+              events={events}
+              startAccessor="start"
+              endAccessor="end"
+              style={{ height: '100%' }}
+            />
+          </div>
+        </Paper>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          イベントや定休日をローカル管理するカレンダーです。<br/>
+          実際にはサーバーAPIやDBと連携してイベント情報を取得してください。
+        </Typography>
+      </Container>
+
+      {/* ----- もしNotionのミニカレンダーを残すならコメントアウトを外してください -----
+      <Container sx={{ mt: 4 }}>
+        <Typography variant="h5" gutterBottom>
+          ミニカレンダー（Notion）
         </Typography>
         <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden' }}>
           <iframe
@@ -166,6 +224,7 @@ function Home() {
           例）お店のイベントや営業日をカレンダーでご確認いただけます。
         </Typography>
       </Container>
+      */}
 
       {/* ----- アクセス (Google Map埋め込み) ----- */}
       <Container sx={{ mt: 4 }}>
@@ -174,7 +233,6 @@ function Home() {
             アクセス
           </Typography>
           <Typography variant="body1">
-            {/* 住所など */}
           　千葉県市川市湊新田2−1−１８ビアメゾンロジェール１０１
           </Typography>
           <Box sx={{ mt: 2 }}>
