@@ -72,9 +72,9 @@ const HeroSection = styled(Box)(({ theme }) => ({
 }));
 
 // --- Big Calendar localizer (date-fns)
+import ja from 'date-fns/locale/ja';
 const locales = {
-  'en-US': require('date-fns/locale/en-US'),
-  'ja': require('date-fns/locale/ja'), 
+  'ja': ja,
 };
 const localizer = dateFnsLocalizer({
   format,
@@ -113,7 +113,7 @@ function Home() {
       <HeroSection>
         <Box textAlign="center" sx={{ backgroundColor: 'rgba(0,0,0,0.4)', p: 2 }}>
           <Typography variant="h3" component="h1" sx={{ color: '#fff' }}>
-ゲームカフェ.Levelへようこそ！
+            ゲームカフェ.Levelへようこそ！
           </Typography>
           <Typography variant="h6" sx={{ color: '#fff', mt: 1 }}>
             ここにキャッチコピーなどを表示できます
@@ -208,7 +208,7 @@ function Home() {
         </Typography>
       </Container>
 
-      {/* ----- もしNotionのミニカレンダーを残すならコメントアウトを外してください -----
+      {/* ----- Notionのミニカレンダーを残す場合はコメントアウトを外す -----
       <Container sx={{ mt: 4 }}>
         <Typography variant="h5" gutterBottom>
           ミニカレンダー（Notion）

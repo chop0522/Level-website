@@ -8,12 +8,25 @@ import MyPage from './pages/MyPage';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AppBar, Toolbar, Button, Typography } from '@mui/material';
 
+// ▼ 店内色合い (茶,青,赤,白,黒) を反映したテーマ
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2'
+      main: '#3e2723' // 茶色
+    },
+    secondary: {
+      main: '#0d47a1' // 青
+    },
+    error: {
+      main: '#b71c1c' // 赤
+    },
+    background: {
+      default: '#ffffff' // 白
+    },
+    text: {
+      primary: '#000000' // 黒
     }
-  }
+  },
 });
 
 function App() {
@@ -33,7 +46,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <AppBar position="static">
+      <AppBar position="static" color="primary">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Board Game Cafe
