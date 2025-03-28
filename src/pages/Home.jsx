@@ -107,6 +107,21 @@ const sampleEvents = [
 function Home() {
   const [events, setEvents] = useState(sampleEvents);
 
+  // ▼ 以下は将来的にサーバーと連携する例
+  // useEffect(() => {
+  //   fetch('/api/events')
+  //     .then(res => res.json())
+  //     .then(data => {
+  //       const mapped = data.map(evt => ({
+  //         ...evt,
+  //         start: new Date(evt.start),
+  //         end: new Date(evt.end)
+  //       }));
+  //       setEvents(mapped);
+  //     })
+  //     .catch(console.error);
+  // }, []);
+
   return (
     <>
       {/* ----- Hero Section ----- */}
