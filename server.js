@@ -242,9 +242,8 @@ app.post('/api/gameCategory', authenticateToken, async (req, res) => {
 });
 
 // -----------------------------
-// 追加: /api/events CRUD (for Calendar usage)
+// /api/events CRUD (Calendar usage)
 // -----------------------------
-
 // DB例: CREATE TABLE events (
 //   id SERIAL PRIMARY KEY,
 //   title TEXT NOT NULL,
