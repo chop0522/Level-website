@@ -1,5 +1,5 @@
 // src/pages/Home.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Container, 
   Box, 
@@ -84,43 +84,117 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-// サンプル用イベント（実際はサーバーfetchに置き換え推奨）
-const sampleEvents = [
-  {
-    title: '店休日',
-    start: new Date(2023, 9, 15, 0, 0),
-    end: new Date(2023, 9, 15, 23, 59),
-    allDay: true
-  },
-  {
-    title: 'ボードゲーム大会',
-    start: new Date(2023, 9, 20, 18, 0),
-    end: new Date(2023, 9, 20, 21, 0),
-  },
-  {
-    title: 'クイズナイト',
-    start: new Date(2023, 9, 25, 19, 0),
-    end: new Date(2023, 9, 25, 22, 0),
-  }
-];
-
 function Home() {
-  const [events, setEvents] = useState(sampleEvents);
+  const [events, setEvents] = useState([]);
 
-  // ▼ 以下は将来的にサーバーと連携する例
-  // useEffect(() => {
-  //   fetch('/api/events')
-  //     .then(res => res.json())
-  //     .then(data => {
-  //       const mapped = data.map(evt => ({
-  //         ...evt,
-  //         start: new Date(evt.start),
-  //         end: new Date(evt.end)
-  //       }));
-  //       setEvents(mapped);
-  //     })
-  //     .catch(console.error);
-  // }, []);
+  // ▼ 1) 起動時: DBからイベント一覧を取得
+  useEffect(() => {
+    fetch('/api/events')
+      .then(res => res.json())
+      .then(data => {
+        // DBから返った start/end は string → JS Date に変換
+        const mapped = data.map(evt => ({
+          ...evt,
+          start: new Date(evt.start),
+          end: new Date(evt.end)
+        }));
+        setEvents(mapped);
+      })
+      .catch(err => console.error(err));
+  }, []);
+
+  // ▼ 2) 新規イベント追加
+  const handleSelectSlot = async (slotInfo) => {
+    const title = window.prompt("新しいイベントのタイトルは？");
+    if (!title) return;
+
+    // POST送信用オブジェクト
+    const newEvent = {
+      title,
+      start: slotInfo.start.toISOString(),
+      end: slotInfo.end.toISOString(),
+      allDay: false
+    };
+
+    try {
+      const res = await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newEvent)
+      });
+      const created = await res.json();
+      if (!created.error) {
+        // 返ってきた created.start/end を JS Dateに
+        setEvents(prev => [
+          ...prev,
+          {
+            ...created,
+            start: new Date(created.start),
+            end: new Date(created.end)
+          }
+        ]);
+      } else {
+        alert(created.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('イベント追加中にエラー発生');
+    }
+  };
+
+  // ▼ 3) イベント削除
+  const handleSelectEvent = async (event) => {
+    if (!window.confirm(`"${event.title}" を削除しますか？`)) return;
+
+    try {
+      const res = await fetch(`/api/events/${event.id}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEvents(prev => prev.filter(e => e.id !== event.id));
+      } else {
+        alert('削除に失敗');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('削除中にエラーが発生');
+    }
+  };
+
+  // ▼ 4) ドラッグ移動/リサイズ
+  const handleEventDropOrResize = async ({ event, start, end, allDay }) => {
+    const updated = {
+      title: event.title,
+      start: start.toISOString(),
+      end: end.toISOString(),
+      allDay: !!allDay
+    };
+
+    try {
+      const res = await fetch(`/api/events/${event.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
+      const data = await res.json();
+      if (!data.error) {
+        // 更新結果を反映
+        setEvents(prev => prev.map(e => e.id === data.id ? {
+          ...e,
+          title: data.title,
+          start: new Date(data.start),
+          end: new Date(data.end),
+          allDay: data.all_day
+        } : e));
+      } else {
+        alert(data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('移動/リサイズ中にエラー');
+    }
+  };
 
   return (
     <>
@@ -201,7 +275,7 @@ function Home() {
         </Grid>
       </Container>
 
-      {/* ----- React-Big-Calendarを使った大型カレンダー ----- */}
+      {/* ----- React-Big-Calendarを使った大型カレンダー (編集対応) ----- */}
       <Container sx={{ mt: 4 }}>
         <Typography variant="h5" gutterBottom>
           大きなカレンダー
@@ -214,12 +288,20 @@ function Home() {
               startAccessor="start"
               endAccessor="end"
               style={{ height: '100%' }}
+
+              // ▼ イベント編集用
+              selectable
+              onSelectSlot={handleSelectSlot}   // 新規追加
+              onSelectEvent={handleSelectEvent} // 削除
+              draggableAccessor={() => true}
+              onEventDrop={handleEventDropOrResize}   // ドラッグ移動
+              onEventResize={handleEventDropOrResize} // リサイズ
             />
           </div>
         </Paper>
         <Typography variant="body2" sx={{ mt: 1 }}>
-          イベントや定休日をローカル管理するカレンダーです。<br/>
-          実際にはサーバーAPIやDBと連携してイベント情報を取得してください。
+          クリックで新規追加・ドラッグで移動/リサイズ・クリックで削除が可能です。<br/>
+          サーバーAPI (/api/events) とDBを連携してイベントを保存/更新します。
         </Typography>
       </Container>
 
