@@ -28,33 +28,31 @@ const pool = new Pool({
 // ヘルパー関数
 // -----------------------------
 
-// findUserByEmail
+// (A) findUserByEmail
 async function findUserByEmail(email) {
   const sql = 'SELECT * FROM users WHERE email = $1';
   const res = await pool.query(sql, [email]);
   if (res.rows.length > 0) {
-    // { id, name, email, password_hash, xp_stealth, xp_heavy, etc... }
+    // { id, name, email, password_hash, role, xp_stealth, xp_heavy, ... }
     return res.rows[0];
   }
   return null;
 }
 
-// createUserInDB
+// (B) createUserInDB
+// roleカラムを 'user' としてデフォルト登録
 async function createUserInDB(name, email, passwordHash) {
-  // usersテーブル: id, name, email, password_hash
-  // + xp_stealth, xp_heavy, xp_light, xp_party, xp_gamble, xp_quiz (default 0)
   const sql = `
-    INSERT INTO users (name, email, password_hash)
-    VALUES ($1, $2, $3)
-    RETURNING id, name, email
+    INSERT INTO users (name, email, password_hash, role)
+    VALUES ($1, $2, $3, 'user')
+    RETURNING id, name, email, role
   `;
   const values = [name, email, passwordHash];
   const res = await pool.query(sql, values);
-  return res.rows[0]; // { id, name, email }
+  return res.rows[0]; // { id, name, email, role }
 }
 
-// daily_category: (id, user_id, category, date)
-// checkDailyCategory => 同じ日 & 同じカテゴリを既に取得済みか
+// (C) daily_category
 async function checkDailyCategory(userId, category) {
   const sql = `
     SELECT * FROM daily_category
@@ -63,7 +61,7 @@ async function checkDailyCategory(userId, category) {
        AND date = CURRENT_DATE
   `;
   const res = await pool.query(sql, [userId, category]);
-  return (res.rows.length > 0); // true if found
+  return (res.rows.length > 0);
 }
 
 async function insertDailyRecord(userId, category) {
@@ -74,7 +72,7 @@ async function insertDailyRecord(userId, category) {
   await pool.query(sql, [userId, category]);
 }
 
-// gainCategoryXP => 6列(stealth, heavy, light, party, gamble, quiz)を+X
+// (D) gainCategoryXP => 6列(stealth, heavy, light, party, gamble, quiz)を+X
 async function gainCategoryXP(userId, category, xpGained) {
   let sql;
   if (category === 'stealth') {
@@ -92,9 +90,8 @@ async function gainCategoryXP(userId, category, xpGained) {
   } else {
     throw new Error("Unknown category: " + category);
   }
-
   const res = await pool.query(sql, [xpGained, userId]);
-  return res.rows[0]; // updated value
+  return res.rows[0];
 }
 
 // -----------------------------
@@ -119,6 +116,26 @@ function authenticateToken(req, res, next) {
 }
 
 // -----------------------------
+// Adminチェックミドルウェア
+// -----------------------------
+async function authenticateAdmin(req, res, next) {
+  try {
+    const email = req.user.email; // authenticateToken通過後なのでユーザー判別可
+    const userRow = await findUserByEmail(email);
+    if (!userRow) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    if (userRow.role !== 'admin') {
+      return res.status(403).json({ error: "Admin only" });
+    }
+    next();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// -----------------------------
 // 認証エンドポイント
 // -----------------------------
 
@@ -129,18 +146,17 @@ app.post('/auth/register', async (req, res) => {
     if (!name || !email || !password) {
       return res.status(400).json({ error: "Missing fields" });
     }
-
-    // 1) 既存メールチェック
+    // 既存メールチェック
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
       return res.status(409).json({ error: "Email already registered" });
     }
-    // 2) ハッシュ化
+    // パスワードハッシュ
     const saltRounds = 10;
     const hashed = await bcrypt.hash(password, saltRounds);
-    // 3) DBに登録
+    // DB登録 (role='user' デフォルト)
     const newUser = await createUserInDB(name, email, hashed);
-    // 4) JWT
+    // JWT発行
     const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
     return res.json({ success: true, token, user: newUser });
   } catch (err) {
@@ -160,17 +176,17 @@ app.post('/auth/login', async (req, res) => {
     if (!userRow) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-
     const match = await bcrypt.compare(password, userRow.password_hash);
     if (!match) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-
     const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
+    // role も返す場合: userRow.role
     const userData = {
       id: userRow.id,
       name: userRow.name,
-      email: userRow.email
+      email: userRow.email,
+      role: userRow.role
     };
     res.json({ success: true, token, user: userData });
   } catch (err) {
@@ -187,11 +203,12 @@ app.get('/api/userinfo', authenticateToken, async (req, res) => {
     if (!userRow) {
       return res.status(404).json({ error: "User not found" });
     }
-    // 6列（stealth, heavy, light, party, gamble, quiz）を含めて返す
+    // 6列 + role
     const userData = {
       id: userRow.id,
       name: userRow.name,
       email: userRow.email,
+      role: userRow.role, // 'admin' or 'user'
       xp_stealth: userRow.xp_stealth,
       xp_heavy:   userRow.xp_heavy,
       xp_light:   userRow.xp_light,
@@ -214,26 +231,19 @@ app.post('/api/gameCategory', authenticateToken, async (req, res) => {
     if (!category) {
       return res.status(400).json({ error: "Missing category" });
     }
-
     const userRow = await findUserByEmail(email);
     if (!userRow) {
       return res.status(404).json({ error: "User not found" });
     }
-
-    // すでに当日同じカテゴリを取得済みか
+    // 当日同カテゴリチェック
     const alreadyGot = await checkDailyCategory(userRow.id, category);
     if (alreadyGot) {
       return res.json({ success: false, msg: "You already got XP for this category today." });
     }
-
     // +10XP
     const xpGain = 10;
     const updatedVal = await gainCategoryXP(userRow.id, category, xpGain);
-
-    // daily_categoryに記録
     await insertDailyRecord(userRow.id, category);
-
-    // レスポンス
     res.json({ success: true, xpGain, updatedVal });
   } catch (err) {
     console.error(err);
@@ -244,16 +254,9 @@ app.post('/api/gameCategory', authenticateToken, async (req, res) => {
 // -----------------------------
 // /api/events CRUD (Calendar usage)
 // -----------------------------
-// DB例: CREATE TABLE events (
-//   id SERIAL PRIMARY KEY,
-//   title TEXT NOT NULL,
-//   start TIMESTAMP NOT NULL,
-//   "end" TIMESTAMP NOT NULL,
-//   all_day BOOLEAN DEFAULT FALSE
-// );
-
 app.get('/api/events', async (req, res) => {
   try {
+    // 誰でも閲覧可（管理者限定にしたければ authenticateToken & authenticateAdmin）
     const sql = 'SELECT id, title, start, "end", all_day FROM events ORDER BY start ASC';
     const result = await pool.query(sql);
     res.json(result.rows);
@@ -263,7 +266,8 @@ app.get('/api/events', async (req, res) => {
   }
 });
 
-app.post('/api/events', async (req, res) => {
+// ★ POST/PUT/DELETE => adminのみ
+app.post('/api/events', authenticateToken, authenticateAdmin, async (req, res) => {
   try {
     const { title, start, end, allDay } = req.body;
     if (!title || !start || !end) {
@@ -283,7 +287,7 @@ app.post('/api/events', async (req, res) => {
   }
 });
 
-app.put('/api/events/:id', async (req, res) => {
+app.put('/api/events/:id', authenticateToken, authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { title, start, end, allDay } = req.body;
@@ -308,7 +312,7 @@ app.put('/api/events/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/events/:id', async (req, res) => {
+app.delete('/api/events/:id', authenticateToken, authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const sql = 'DELETE FROM events WHERE id=$1 RETURNING id';
