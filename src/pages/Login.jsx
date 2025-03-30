@@ -27,7 +27,7 @@ function Login({ token, setToken }) {
         localStorage.setItem('token', res.token);
         setToken(res.token);
         alert('Login success!');
-        // ログイン後、任意のページへ
+        // ログイン後にマイページへ
         navigate('/mypage');
       } else {
         // ログイン失敗時
@@ -41,8 +41,10 @@ function Login({ token, setToken }) {
 
   return (
     <>
-      {/* Header (もしHeader.jsxが存在するなら) */}
-      <Header />
+      {/*
+        // ★ Headerをコメントアウトして二重表示を防ぐ
+        // <Header />
+      */}
 
       <Container sx={{ mt: 4, mb: 4, maxWidth: 'sm' }}>
         <Typography variant="h5" gutterBottom>
@@ -84,8 +86,10 @@ function Login({ token, setToken }) {
         </Box>
       </Container>
 
-      {/* Footer (もしFooter.jsxが存在するなら) */}
-      <Footer />
+      {/*
+        // ★ Footerもコメントアウトして二重表示を防ぐ
+        // <Footer />
+      */}
     </>
   );
 }
