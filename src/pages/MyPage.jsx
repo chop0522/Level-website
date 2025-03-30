@@ -31,11 +31,13 @@ function MyPage({ token }) {
   const [userInfo, setUserInfo] = useState(null);
 
   useEffect(() => {
+    // 未ログインならログインページへ
     if (!token) {
       alert('ログインしてください');
       navigate('/login');
       return;
     }
+    // ログイン済みならユーザー情報を取得
     fetchUserInfo();
   }, [token]);
 
@@ -53,11 +55,11 @@ function MyPage({ token }) {
     }
   };
 
-  // レーダーチャート用データを生成
-  // カラム順：heavy, light, quiz, party, stealth, gamble
+  // レーダーチャート用データ生成
   const createRadarData = () => {
     if (!userInfo) return null;
 
+    // userInfo内のxp_heavy等を展開
     const {
       xp_heavy = 0,
       xp_light = 0,
@@ -110,28 +112,44 @@ function MyPage({ token }) {
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h5" gutterBottom>My Page</Typography>
-      {userInfo ? (
+      <Typography variant="h5" gutterBottom>
+        My Page
+      </Typography>
+
+      {/* ユーザー情報がまだ取得できていない場合 */}
+      {!userInfo && (
+        <Typography>Loading...</Typography>
+      )}
+
+      {/* ユーザー情報が取得済みの場合 */}
+      {userInfo && (
         <>
           <Typography>ようこそ, {userInfo.name}さん</Typography>
           <Typography>登録メール: {userInfo.email}</Typography>
-          {/* ここで麻雀の役リストやスコアを表示する機能を実装可能 */}
+
+          {/* 管理者の場合のみメッセージ等を表示 (role==='admin') */}
+          {userInfo.role === 'admin' && (
+            <Typography sx={{ mt: 2, color: 'red' }}>
+              ※管理者モードで閲覧中
+            </Typography>
+          )}
+
+          {/* 麻雀の役リストやスコアを表示する機能はここに実装可能 */}
 
           {/* レーダーチャート: カテゴリ別XP */}
           <div style={{ marginTop: '30px', maxWidth: '600px' }}>
             <Typography variant="h6" gutterBottom>
               カテゴリ別XPレーダーチャート
             </Typography>
+            {/* レーダーデータ生成後に存在するかチェック */}
             {createRadarData() && (
-              <Radar 
-                data={createRadarData()} 
+              <Radar
+                data={createRadarData()}
                 options={radarOptions}
               />
             )}
           </div>
         </>
-      ) : (
-        <Typography>Loading...</Typography>
       )}
     </Container>
   );
