@@ -51,16 +51,25 @@ function Login({ token, setToken }) {
           ログイン
         </Typography>
 
-        {/* Email */}
+        {/* Emailフィールド: 白背景＋黒文字 */}
         <TextField
           label="Email"
           fullWidth
           margin="normal"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: '#ffffff', // 白背景
+              color: '#000000'            // 黒文字
+            },
+            '& .MuiFormLabel-root': {
+              color: '#000000'            // ラベル文字色（黒）
+            }
+          }}
         />
 
-        {/* Password */}
+        {/* Passwordフィールド: 白背景＋黒文字 */}
         <TextField
           label="Password"
           fullWidth
@@ -68,6 +77,15 @@ function Login({ token, setToken }) {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: '#ffffff',
+              color: '#000000'
+            },
+            '& .MuiFormLabel-root': {
+              color: '#000000'
+            }
+          }}
         />
 
         <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
