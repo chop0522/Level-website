@@ -155,4 +155,4 @@ function MyPage({ token }) {
   );
 }
 
-export default MyPage;c
+export default MyPage;
