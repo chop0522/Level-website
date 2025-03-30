@@ -1,0 +1,19 @@
+/* src/components/Header.module.css */
+.header {
+    padding: 10px 20px;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .logo {
+    font-size: 1.5rem;
+    margin-right: 20px;
+  }
+  
+  .navLinks a {
+    margin: 0 10px;
+    text-decoration: none;
+    color: #333;
+  }
