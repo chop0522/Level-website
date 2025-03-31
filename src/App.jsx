@@ -5,11 +5,11 @@ import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import MyPage from './pages/MyPage';
-import Header from './components/Header';  // ★ 追加
-import Footer from './components/Footer';  // ★ 追加
+import Header from './components/Header';  
+import Footer from './components/Footer';  
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-// import { AppBar, Toolbar, Button, Typography } from '@mui/material'; // ★ コメントアウト
+// import { AppBar, Toolbar, Button, Typography } from '@mui/material'; // コメントアウト
 
 // ▼ 店内色合い (茶,青,赤,白,黒) を反映したテーマ
 const theme = createTheme({
@@ -34,10 +34,10 @@ const theme = createTheme({
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
-  const [userRole, setUserRole] = useState('user'); // デフォルトuser
+  const [userRole, setUserRole] = useState('user'); // デフォルト=一般ユーザー
   const navigate = useNavigate();
 
-  // ▼ トークン読み込み後、ユーザー情報を取得しroleを判定
+  // ▼ トークンを読み込み、ユーザー情報を取得してroleを判定
   useEffect(() => {
     const storedToken = localStorage.getItem('token') || '';
     setToken(storedToken);
@@ -53,10 +53,10 @@ function App() {
         .then(data => {
           if (data.error) {
             console.error(data.error);
-            // トークンエラーなど → ログアウト処理
+            // 無効トークン等 → ログアウト処理
             handleLogout();
           } else {
-            // roleを取得
+            // roleを更新
             if (data.role === 'admin') {
               setUserRole('admin');
             } else {
@@ -66,16 +66,17 @@ function App() {
         })
         .catch(err => {
           console.error(err);
-          // 失敗時はroleをuserに戻す
+          // エラー時は一般ユーザー扱い
           setUserRole('user');
         });
     } else {
-      // トークンが無い場合
+      // トークンが無い場合、ユーザーを「user」扱いに
       setUserRole('user');
     }
   }, []);
 
   const handleLogout = () => {
+    // ログアウト時の処理
     localStorage.removeItem('token');
     setToken('');
     setUserRole('user');
@@ -85,44 +86,17 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
 
-      {/* 
-        ★ コメントアウト: MUIのAppBar/Toolbar部分
-        <AppBar position="static" color="primary">
-          <Toolbar>
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
-              Board Game Cafe
-            </Typography>
-
-            {token ? (
-              <>
-                {userRole === 'admin' && (
-                  <Button color="inherit" onClick={() => navigate('/admin')}>
-                    Admin
-                  </Button>
-                )}
-                <Button color="inherit" onClick={() => navigate('/mypage')}>
-                  My Page
-                </Button>
-                <Button color="inherit" onClick={handleLogout}>
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button color="inherit" onClick={() => navigate('/login')}>
-                  Login
-                </Button>
-                <Button color="inherit" onClick={() => navigate('/register')}>
-                  Register
-                </Button>
-              </>
-            )}
-          </Toolbar>
-        </AppBar>
+      {/*
+        以前使っていた MUIのAppBarはコメントアウトのまま
+        ヘッダーとフッターを独立したコンポーネントで表示
       */}
 
-      {/* ★ 代わりに「Header」コンポーネントを表示 */}
-      <Header userRole={userRole} />
+      {/* ヘッダーを表示 (token, userRole, handleLogout を渡す) */}
+      <Header 
+        token={token}
+        userRole={userRole}
+        handleLogout={handleLogout}
+      />
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -139,14 +113,14 @@ function App() {
           element={<MyPage token={token} />}
         />
 
-        {/*
-          任意: Admin専用ページ(まだ作ってないならコメントアウト)
+        {/* 
+          もし管理者専用ページを作るなら:
           import AdminPage from './pages/AdminPage';
           <Route path="/admin" element={<AdminPage />} />
         */}
       </Routes>
 
-      {/* ★ 新たに「Footer」コンポーネントを表示 */}
+      {/* フッターを表示 */}
       <Footer />
 
     </ThemeProvider>

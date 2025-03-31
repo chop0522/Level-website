@@ -15,7 +15,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 function Login({ token, setToken }) {
-  const navigate = useNavigate(); // ページ遷移に使う
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -23,26 +23,27 @@ function Login({ token, setToken }) {
     try {
       const res = await loginUser(email, password);
       if (res.success) {
-        // ログイン成功
+        // ログイン成功 → トークンを保存＆App.jsxに反映
         localStorage.setItem('token', res.token);
         setToken(res.token);
-        alert('Login success!');
+        alert('ログインに成功しました！');
         // ログイン後にマイページへ
         navigate('/mypage');
       } else {
         // ログイン失敗時
-        alert(res.error || 'Login failed');
+        alert(res.error || 'ログインに失敗しました');
       }
     } catch (err) {
       console.error(err);
-      alert('Login error');
+      alert('ログイン時にエラーが発生しました');
     }
   };
 
   return (
     <>
       {/*
-        // ★ Headerをコメントアウトして二重表示を防ぐ
+        // Header, Footerを使う場合はコメントアウト解除
+        // ただしApp.jsxで表示しているなら二重表示を防ぐためにコメントアウトのまま
         // <Header />
       */}
 
@@ -51,7 +52,7 @@ function Login({ token, setToken }) {
           ログイン
         </Typography>
 
-        {/* Emailフィールド: 白背景＋黒文字 */}
+        {/* メールアドレス入力 (白背景＋黒文字) */}
         <TextField
           label="Email"
           fullWidth
@@ -64,12 +65,12 @@ function Login({ token, setToken }) {
               color: '#000000'            // 黒文字
             },
             '& .MuiFormLabel-root': {
-              color: '#000000'            // ラベル文字色（黒）
+              color: '#000000'            // ラベルも黒に
             }
           }}
         />
 
-        {/* Passwordフィールド: 白背景＋黒文字 */}
+        {/* パスワード入力 (白背景＋黒文字) */}
         <TextField
           label="Password"
           fullWidth
@@ -93,7 +94,7 @@ function Login({ token, setToken }) {
             Login
           </Button>
 
-          {/* Registerへの導線 */}
+          {/* 新規登録への導線 */}
           <Button
             variant="outlined"
             component={RouterLink}
@@ -105,7 +106,6 @@ function Login({ token, setToken }) {
       </Container>
 
       {/*
-        // ★ Footerもコメントアウトして二重表示を防ぐ
         // <Footer />
       */}
     </>
