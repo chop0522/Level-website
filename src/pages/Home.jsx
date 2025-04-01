@@ -87,7 +87,7 @@ const localizer = dateFnsLocalizer({
 function Home() {
   const [events, setEvents] = useState([]);
 
-  // ▼ 1) 起動時: DBからイベント一覧を取得
+  // ▼ 1) 起動時: DBからイベント一覧を取得 (GETは認証不要でもOK想定)
   useEffect(() => {
     fetch('/api/events')
       .then(res => res.json())
@@ -105,10 +105,15 @@ function Home() {
 
   // ▼ 2) 新規イベント追加
   const handleSelectSlot = async (slotInfo) => {
+    // まずトークンを取得
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert("ログインが必要です (管理者のみ編集可能)");
+      return;
+    }
     const title = window.prompt("新しいイベントのタイトルは？");
     if (!title) return;
 
-    // POST送信用オブジェクト
     const newEvent = {
       title,
       start: slotInfo.start.toISOString(),
@@ -119,23 +124,28 @@ function Home() {
     try {
       const res = await fetch('/api/events', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          // ★ 認証ヘッダーを付与
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(newEvent)
       });
       const created = await res.json();
-      if (!created.error) {
-        // 返ってきた created.start/end を JS Dateに
-        setEvents(prev => [
-          ...prev,
-          {
-            ...created,
-            start: new Date(created.start),
-            end: new Date(created.end)
-          }
-        ]);
-      } else {
-        alert(created.error);
+      if (!res.ok) {
+        // HTTPステータスがokでない => エラー
+        alert(created.error || 'イベント追加に失敗しました');
+        return;
       }
+      // 返ってきた created.start/end を JS Dateに
+      setEvents(prev => [
+        ...prev,
+        {
+          ...created,
+          start: new Date(created.start),
+          end: new Date(created.end)
+        }
+      ]);
     } catch (err) {
       console.error(err);
       alert('イベント追加中にエラー発生');
@@ -146,16 +156,24 @@ function Home() {
   const handleSelectEvent = async (event) => {
     if (!window.confirm(`"${event.title}" を削除しますか？`)) return;
 
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert("ログインが必要です (管理者のみ編集可能)");
+      return;
+    }
     try {
       const res = await fetch(`/api/events/${event.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       const data = await res.json();
-      if (data.success) {
-        setEvents(prev => prev.filter(e => e.id !== event.id));
-      } else {
-        alert('削除に失敗');
+      if (!res.ok) {
+        alert(data.error || '削除に失敗');
+        return;
       }
+      setEvents(prev => prev.filter(e => e.id !== event.id));
     } catch (err) {
       console.error(err);
       alert('削除中にエラーが発生');
@@ -164,6 +182,12 @@ function Home() {
 
   // ▼ 4) ドラッグ移動/リサイズ
   const handleEventDropOrResize = async ({ event, start, end, allDay }) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert("ログインが必要です (管理者のみ編集可能)");
+      return;
+    }
+
     const updated = {
       title: event.title,
       start: start.toISOString(),
@@ -174,22 +198,25 @@ function Home() {
     try {
       const res = await fetch(`/api/events/${event.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(updated)
       });
       const data = await res.json();
-      if (!data.error) {
-        // 更新結果を反映
-        setEvents(prev => prev.map(e => e.id === data.id ? {
-          ...e,
-          title: data.title,
-          start: new Date(data.start),
-          end: new Date(data.end),
-          allDay: data.all_day
-        } : e));
-      } else {
-        alert(data.error);
+      if (!res.ok) {
+        alert(data.error || '移動/リサイズ中に失敗');
+        return;
       }
+      // 更新結果を反映
+      setEvents(prev => prev.map(e => e.id === data.id ? {
+        ...e,
+        title: data.title,
+        start: new Date(data.start),
+        end: new Date(data.end),
+        allDay: data.all_day
+      } : e));
     } catch (err) {
       console.error(err);
       alert('移動/リサイズ中にエラー');
@@ -289,13 +316,13 @@ function Home() {
               endAccessor="end"
               style={{ height: '100%' }}
 
-              // ▼ イベント編集用
+              // イベント編集用 (新規, 削除, ドラッグ移動, リサイズ)
               selectable
-              onSelectSlot={handleSelectSlot}   // 新規追加
-              onSelectEvent={handleSelectEvent} // 削除
+              onSelectSlot={handleSelectSlot}
+              onSelectEvent={handleSelectEvent}
               draggableAccessor={() => true}
-              onEventDrop={handleEventDropOrResize}   // ドラッグ移動
-              onEventResize={handleEventDropOrResize} // リサイズ
+              onEventDrop={handleEventDropOrResize}
+              onEventResize={handleEventDropOrResize}
             />
           </div>
         </Paper>
@@ -305,25 +332,9 @@ function Home() {
         </Typography>
       </Container>
 
-      {/* ----- Notionのミニカレンダーを残す場合はコメントアウトを外す -----
-      <Container sx={{ mt: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          ミニカレンダー（Notion）
-        </Typography>
-        <Box sx={{ border: '1px solid #ccc', borderRadius: 1, overflow: 'hidden' }}>
-          <iframe
-            src="https://o66j4yxvq3g5xpm.embednotionpage.com/1b18fda9d98d80aa994fc8b3091c62d2?v=1b18fda9d98d809b8e87000ccca0a291"
-            style={{ width: '100%', height: '300px', border: 'none' }}
-            title="Mini Notion Calendar"
-          />
-        </Box>
-        <Typography variant="body2" sx={{ mt: 1 }}>
-          例）お店のイベントや営業日をカレンダーでご確認いただけます。
-        </Typography>
-      </Container>
-      */}
+      {/* ----- アクセス情報, SNSなどは変わらず省略なしで表示 ----- */}
 
-      {/* ----- アクセス (Google Map埋め込み) ----- */}
+      {/* アクセス */}
       <Container sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h4" gutterBottom>
@@ -346,7 +357,7 @@ function Home() {
         </Paper>
       </Container>
 
-      {/* ----- SNSアイコン (X, LINE, Note) ----- */}
+      {/* SNSアイコン */}
       <Container sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h5" gutterBottom>
           SNSをフォローしよう！

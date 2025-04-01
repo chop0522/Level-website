@@ -1,4 +1,4 @@
-// rc/components/Header.jsx
+// src/components/Header.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Header.module.css';
@@ -10,51 +10,54 @@ function Header({
 }) {
   return (
     <header className={styles.header}>
-      <h1 className={styles.logo}>Board Game Cafe</h1>
+      {/* 左側ブロック: ロゴ＋主要リンク */}
+      <div className={styles.navLeft}>
+        <h1 className={styles.logo}>Board Game Cafe</h1>
 
-      <nav className={styles.navLinks}>
-        {/* ホーム */}
-        <Link to="/">Home</Link>
+        <nav className={styles.navLinks}>
+          {/* ホーム */}
+          <Link to="/">Home</Link>
 
-        {/* メニュー */}
-        <Link to="/menu">Menu</Link>
+          {/* メニュー */}
+          <Link to="/menu">Menu</Link>
 
-        {/* 予約 */}
-        <Link to="/reservation">Reservation</Link>
+          {/* 予約 */}
+          <Link to="/reservation">Reservation</Link>
 
-        {/* FAQ */}
-        <Link to="/faq">FAQ</Link>
+          {/* FAQ */}
+          <Link to="/faq">FAQ</Link>
 
-        {/*
-          - トークンが無い => Login 
-          - トークンが有る => MyPage
-        */}
-        {!token ? (
-          <Link to="/login">Login</Link>
-        ) : (
-          <Link to="/mypage">MyPage</Link>
-        )}
+          {/*
+            - トークンが無い => Login 
+            - トークンが有る => MyPage
+          */}
+          {!token ? (
+            <Link to="/login">Login</Link>
+          ) : (
+            <Link to="/mypage">MyPage</Link>
+          )}
 
-        {/*
-          管理者なら Adminリンクも
-        */}
-        {token && userRole === 'admin' && (
-          <Link to="/admin">Admin</Link>
-        )}
+          {/*
+            管理者なら Adminリンクも
+          */}
+          {token && userRole === 'admin' && (
+            <Link to="/admin">Admin</Link>
+          )}
+        </nav>
+      </div>
 
-        {/*
-          Logoutボタン（token & handleLogoutがある場合のみ表示）
-        */}
+      {/* 右側ブロック: Logoutボタン (ある場合のみ) */}
+      <div className={styles.navRight}>
         {token && handleLogout && (
           <button
             onClick={handleLogout}
             type="button"
-            style={{ marginLeft: '10px' }}
+            className={styles.logoutButton}
           >
             Logout
           </button>
         )}
-      </nav>
+      </div>
     </header>
   );
 }

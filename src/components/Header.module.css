@@ -1,19 +1,56 @@
 /* src/components/Header.module.css */
+
+/* 全体ヘッダー */
 .header {
-    padding: 10px 20px;
-    border-bottom: 1px solid #ccc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .logo {
-    font-size: 1.5rem;
-    margin-right: 20px;
-  }
-  
-  .navLinks a {
-    margin: 0 10px;
-    text-decoration: none;
-    color: #333;
-  }
+  padding: 10px 20px;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 左側ブロック (ロゴ + リンク集) */
+.navLeft {
+  display: flex;
+  align-items: center;
+}
+
+/* 右側ブロック (Logoutだけ) */
+.navRight {
+  display: flex;
+  align-items: center;
+}
+
+/* ロゴ */
+.logo {
+  font-size: 1.5rem;
+  margin-right: 20px;
+}
+
+/* リンク集 */
+.navLinks {
+  display: flex;
+  align-items: center;
+}
+
+/* 各リンク */
+.navLinks a {
+  margin: 0 10px;
+  text-decoration: none;
+  color: #333;
+}
+
+/* Logoutボタンの見た目(任意) */
+.logoutButton {
+  padding: 6px 12px;
+  background-color: #f44336;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  border-radius: 4px;
+}
+
+.logoutButton:hover {
+  background-color: #e53935;
+}
