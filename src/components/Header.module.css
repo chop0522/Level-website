@@ -15,10 +15,11 @@
   align-items: center;
 }
 
-/* 右側ブロック (Logoutだけ) */
+/* 右側ブロック (Logoutボタン + ハンバーガー) */
 .navRight {
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 /* ロゴ */
@@ -27,20 +28,20 @@
   margin-right: 20px;
 }
 
-/* リンク集 */
+/* リンク集 (PC時は横並び、スマホ時は隠す→showMenuで表示) */
 .navLinks {
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 /* 各リンク */
 .navLinks a {
-  margin: 0 10px;
   text-decoration: none;
   color: #333;
 }
 
-/* Logoutボタンの見た目(任意) */
+/* Logoutボタンの見た目 */
 .logoutButton {
   padding: 6px 12px;
   background-color: #f44336;
@@ -53,4 +54,52 @@
 
 .logoutButton:hover {
   background-color: #e53935;
+}
+
+/* ハンバーガー(PC時は非表示、スマホ時は表示) */
+.hamburgerBtn {
+  display: none;
+  flex-direction: column;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.hamburgerLine {
+  width: 25px;
+  height: 3px;
+  background-color: #333;
+  margin: 4px 0;
+}
+
+/* メディアクエリ: スマホ幅(768px以下) */
+@media (max-width: 768px) {
+  /* navLinksはデフォルト非表示にして、.showMenu時だけ表示 */
+  .navLinks {
+    position: absolute;
+    top: 60px; 
+    right: 20px;
+    background-color: #fff;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    display: none; /* 初期は非表示 */
+  }
+
+  /* メニュー展開 */
+  .navLinks.showMenu {
+    display: flex;
+  }
+
+  /* ロゴとリンクを左側に */
+  .navLeft {
+    flex: 1;
+  }
+
+  /* ハンバーガーボタンはスマホ時に表示 */
+  .hamburgerBtn {
+    display: flex;
+  }
 }
