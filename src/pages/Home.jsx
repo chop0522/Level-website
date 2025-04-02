@@ -7,7 +7,11 @@ import {
   Button, 
   Grid, 
   Paper, 
-  IconButton 
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
@@ -89,6 +93,10 @@ const localizer = dateFnsLocalizer({
 function Home() {
   const [events, setEvents] = useState([]);
 
+  // ▼ 削除用モーダルの開閉状態と、選択されたイベントを管理
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
   // ▼ 1) 起動時: DBからイベント一覧を取得 (GETは認証不要でもOK想定)
   useEffect(() => {
     fetch('/api/events')
@@ -107,7 +115,6 @@ function Home() {
 
   // ▼ 2) 新規イベント追加
   const handleSelectSlot = async (slotInfo) => {
-    // まずトークンを取得
     const token = localStorage.getItem('token');
     if (!token) {
       alert("ログインが必要です (管理者のみ編集可能)");
@@ -128,18 +135,15 @@ function Home() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // ★ 認証ヘッダーを付与
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(newEvent)
       });
       const created = await res.json();
       if (!res.ok) {
-        // HTTPステータスがokでない => エラー
         alert(created.error || 'イベント追加に失敗しました');
         return;
       }
-      // 返ってきた created.start/end を JS Dateに
       setEvents(prev => [
         ...prev,
         {
@@ -154,9 +158,21 @@ function Home() {
     }
   };
 
-  // ▼ 3) イベント削除
-  const handleSelectEvent = async (event) => {
-    if (!window.confirm(`"${event.title}" を削除しますか？`)) return;
+  // ▼ 3) イベントをクリック → 削除用モーダルを表示
+  const handleSelectEvent = (event) => {
+    setSelectedEvent(event);
+    setShowDeleteModal(true);
+  };
+
+  // ▼ モーダルを閉じる
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+    setSelectedEvent(null);
+  };
+
+  // ▼ 選択中のイベントを削除
+  const handleDeleteEvent = async () => {
+    if (!selectedEvent) return;
 
     const token = localStorage.getItem('token');
     if (!token) {
@@ -164,7 +180,7 @@ function Home() {
       return;
     }
     try {
-      const res = await fetch(`/api/events/${event.id}`, {
+      const res = await fetch(`/api/events/${selectedEvent.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -175,11 +191,13 @@ function Home() {
         alert(data.error || '削除に失敗');
         return;
       }
-      setEvents(prev => prev.filter(e => e.id !== event.id));
+      // イベント一覧から削除
+      setEvents(prev => prev.filter(e => e.id !== selectedEvent.id));
     } catch (err) {
       console.error(err);
       alert('削除中にエラーが発生');
     }
+    handleCloseDeleteModal();
   };
 
   // ▼ 4) ドラッグ移動/リサイズ
@@ -189,14 +207,12 @@ function Home() {
       alert("ログインが必要です (管理者のみ編集可能)");
       return;
     }
-
     const updated = {
       title: event.title,
       start: start.toISOString(),
       end: end.toISOString(),
       allDay: !!allDay
     };
-
     try {
       const res = await fetch(`/api/events/${event.id}`, {
         method: 'PUT',
@@ -211,7 +227,6 @@ function Home() {
         alert(data.error || '移動/リサイズ中に失敗');
         return;
       }
-      // 更新結果を反映
       setEvents(prev => prev.map(e => e.id === data.id ? {
         ...e,
         title: data.title,
@@ -329,14 +344,12 @@ function Home() {
           </div>
         </Paper>
         <Typography variant="body2" sx={{ mt: 1 }}>
-          クリックで新規追加・ドラッグで移動/リサイズ・クリックで削除が可能です。<br/>
+          クリック(タップ)でイベント詳細→削除確認 / ドラッグ移動 / リサイズが可能です。<br/>
           サーバーAPI (/api/events) とDBを連携してイベントを保存/更新します。
         </Typography>
       </Container>
 
-      {/* ----- アクセス情報, SNSなどは変わらず省略なしで表示 ----- */}
-
-      {/* アクセス */}
+      {/* ----- アクセス (Google Map埋め込み) ----- */}
       <Container sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h4" gutterBottom>
@@ -359,7 +372,7 @@ function Home() {
         </Paper>
       </Container>
 
-      {/* SNSアイコン */}
+      {/* ----- SNSアイコン ----- */}
       <Container sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h5" gutterBottom>
           SNSをフォローしよう！
@@ -394,6 +407,70 @@ function Home() {
           </Grid>
         </Grid>
       </Container>
+
+      {/*
+        ▼ MUIのDialogを使った削除確認モーダル
+        1) showDeleteModal (boolean) で開閉
+        2) selectedEvent に選択中イベントを保持
+        3) handleDeleteEvent で実際に削除処理
+      */}
+      <Dialog
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+      >
+        <DialogTitle>イベントの削除確認</DialogTitle>
+        <DialogContent>
+          {selectedEvent && (
+            <Typography>
+              「{selectedEvent.title}」を削除しますか？
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setShowDeleteModal(false);
+              setSelectedEvent(null);
+            }}
+          >
+            キャンセル
+          </Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={async () => {
+              if (!selectedEvent) return;
+              const token = localStorage.getItem('token');
+              if (!token) {
+                alert("ログインが必要です (管理者のみ編集可能)");
+                return;
+              }
+              try {
+                const res = await fetch(`/api/events/${selectedEvent.id}`, {
+                  method: 'DELETE',
+                  headers: {
+                    'Authorization': `Bearer ${token}`
+                  }
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                  alert(data.error || '削除に失敗');
+                  return;
+                }
+                // 成功したら state から削除
+                setEvents(prev => prev.filter(e => e.id !== selectedEvent.id));
+              } catch (err) {
+                console.error(err);
+                alert('削除中にエラーが発生');
+              }
+              setShowDeleteModal(false);
+              setSelectedEvent(null);
+            }}
+          >
+            削除
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

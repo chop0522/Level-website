@@ -1,18 +1,23 @@
 /* src/styles/CalendarOverride.css */
 
-/* イベント文字を複数行表示し、折り返しを可能にする */
+/* デフォルト(PCなど)では複数行表示 */
 .rbc-event-content,
 .rbc-event-label {
-  white-space: normal !important;       /* 改行や複数行を許可 */
-  overflow-wrap: break-word !important; /* 単語を折り返す */
-  word-wrap: break-word !important;     /* 古いブラウザ対応 */
-  text-overflow: clip !important;       /* エリプシス(…省略)ではなく全文表示 */
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  text-overflow: clip !important;
 }
 
-/* 必要に応じて、フォントサイズや高さも微調整 */
-/*
-.rbc-event-content {
-  font-size: 0.85rem !important;
-  line-height: 1.2 !important;
+/* スマホ幅のときはフォントを小さく＆改行させない */
+@media (max-width: 768px) {
+  .rbc-event-content,
+  .rbc-event-label {
+    font-size: 0.75rem !important;    /* 文字を小さく */
+    white-space: nowrap !important;   /* 改行を抑制 */
+    overflow: hidden !important;
+    text-overflow: ellipsis !important; /* はみ出しを"..."にする */
+    width: 100%;  
+    /* 必要に応じて display: block; or inline-block; で適宜調整 */
+  }
 }
-*/
