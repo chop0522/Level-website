@@ -1,41 +1,55 @@
 /* src/retroTheme.css */
+
+/* 1) Google Fontsなどから「Press Start 2P」を読み込む 
+   - もし既に <link> で読み込んでいるなら @import は不要です 
+   - 確認して重複に注意してください 
+*/
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* 2) body に !important でフォント適用 
+   - MUI や他のCSSに上書きされないようにする 
+*/
 body {
-    margin: 0;
-    padding: 0;
-    background-color: #111; /* ダークな背景 */
-    color: #eee;           /* 文字色を薄めに */
-    font-family: 'Press Start 2P', monospace;
-  }
-  
-  a {
-    color: #53c3f0;
-    text-decoration: none;
-  }
-  
-  h1, h2, h3 {
-    text-shadow: 2px 2px 0px #555;
-  }
-  
-  .header, .footer {
-    background-color: #222;
-    padding: 10px;
-    text-align: center;
-  }
-  
-  .main-content {
-    padding: 20px;
-  }
-  
-  /* レトロボタン */
-  .button-retro {
-    display: inline-block;
-    color: #fff;
-    background-color: #333;
-    border: 4px double #fff;
-    padding: 8px 16px;
-    cursor: pointer;
-    text-decoration: none;
-  }
-  .button-retro:hover {
-    background-color: #666;
-  }
+  margin: 0;
+  padding: 0;
+  background-color: #111; /* ダークな背景 */
+  color: #eee;           /* 文字色を薄めに */
+  font-family: 'Press Start 2P', monospace !important;
+}
+
+/* リンク色 */
+a {
+  color: #53c3f0;
+  text-decoration: none;
+}
+
+/* レトロな見た目の見出し (お好みで) */
+h1, h2, h3 {
+  text-shadow: 2px 2px 0px #555;
+}
+
+/* ヘッダーとフッターの背景 */
+.header, .footer {
+  background-color: #222;
+  padding: 10px;
+  text-align: center;
+}
+
+/* メインコンテンツ */
+.main-content {
+  padding: 20px;
+}
+
+/* レトロボタン (例) */
+.button-retro {
+  display: inline-block;
+  color: #fff;
+  background-color: #333;
+  border: 4px double #fff;
+  padding: 8px 16px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.button-retro:hover {
+  background-color: #666;
+}
