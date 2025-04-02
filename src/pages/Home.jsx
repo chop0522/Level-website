@@ -418,11 +418,11 @@ function Home() {
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
       >
-        <DialogTitle>イベントの確認</DialogTitle>
+        <DialogTitle></DialogTitle>
         <DialogContent>
           {selectedEvent && (
             <Typography>
-              
+              「{selectedEvent.title}」
             </Typography>
           )}
         </DialogContent>

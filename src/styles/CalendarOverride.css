@@ -1,6 +1,6 @@
 /* src/styles/CalendarOverride.css */
 
-/* デフォルト(PCなど)では複数行表示 */
+/* PCなど広い画面ではデフォルト(white-space: normalでもOK) */
 .rbc-event-content,
 .rbc-event-label {
   white-space: normal !important;
@@ -9,15 +9,15 @@
   text-overflow: clip !important;
 }
 
-/* スマホ幅のときはフォントを小さく＆改行させない */
+/* スマホ幅 */
 @media (max-width: 768px) {
   .rbc-event-content,
   .rbc-event-label {
-    font-size: 0.75rem !important;    /* 文字を小さく */
-    white-space: nowrap !important;   /* 改行を抑制 */
-    overflow: hidden !important;
-    text-overflow: ellipsis !important; /* はみ出しを"..."にする */
-    width: 100%;  
-    /* 必要に応じて display: block; or inline-block; で適宜調整 */
+    font-size: 0.8rem !important;      /* 小さめの文字 */
+    line-height: 1.2 !important;       /* 詰まりすぎないよう行間調整 */
+    white-space: normal !important;    /* 改行を許可 */
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    text-overflow: clip !important;    /* 省略せず表示 */
   }
 }
