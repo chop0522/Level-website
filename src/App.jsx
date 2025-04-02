@@ -11,8 +11,13 @@ import Footer from './components/Footer';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 // import { AppBar, Toolbar, Button, Typography } from '@mui/material'; // コメントアウト
 
-// ▼ 店内色合い (茶,青,赤,白,黒) を反映したテーマ
+// ▼ 店内色合い + レトロフォントを反映したテーマ
 const theme = createTheme({
+  typography: {
+    // ここにレトロフォントのファミリー名を指定
+    // フォールバックとして sans-serif 等
+    fontFamily: '"RetroFont", "Helvetica", "Arial", sans-serif'
+  },
   palette: {
     primary: {
       main: '#3e2723' // 茶色
@@ -70,7 +75,7 @@ function App() {
           setUserRole('user');
         });
     } else {
-      // トークンが無い場合、ユーザーを「user」扱いに
+      // トークンが無い場合
       setUserRole('user');
     }
   }, []);
@@ -85,13 +90,11 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-
-      {/*
-        以前使っていた MUIのAppBarはコメントアウトのまま
-        ヘッダーとフッターを独立したコンポーネントで表示
+      {/* 
+        以前使っていた MUIのAppBarはコメントアウトのまま 
+        ヘッダーとフッターを独立したコンポーネントで表示 
       */}
 
-      {/* ヘッダーを表示 (token, userRole, handleLogout を渡す) */}
       <Header 
         token={token}
         userRole={userRole}
@@ -113,16 +116,13 @@ function App() {
           element={<MyPage token={token} />}
         />
 
-        {/* 
-          もし管理者専用ページを作るなら:
-          import AdminPage from './pages/AdminPage';
-          <Route path="/admin" element={<AdminPage />} />
+        {/* もし管理者専用ページを作る場合
+            import AdminPage from './pages/AdminPage';
+            <Route path="/admin" element={<AdminPage />} />
         */}
       </Routes>
 
-      {/* フッターを表示 */}
       <Footer />
-
     </ThemeProvider>
   );
 }
