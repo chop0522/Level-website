@@ -86,6 +86,14 @@
     padding: 10px;
     border: 1px solid #ccc;
     display: none; /* 初期は非表示 */
+
+    /* ▼ 追加 */
+    z-index: 9999; /* メニューが他要素の背面に隠れないように */
+  }
+
+  /* スマホ表示時にリンク文字を少し小さくする場合 */
+  .navLinks a {
+    font-size: 0.9rem;
   }
 
   /* メニュー展開 */

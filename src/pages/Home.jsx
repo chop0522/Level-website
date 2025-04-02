@@ -418,11 +418,11 @@ function Home() {
         open={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
       >
-        <DialogTitle>イベントの削除確認</DialogTitle>
+        <DialogTitle>イベントの確認</DialogTitle>
         <DialogContent>
           {selectedEvent && (
             <Typography>
-              「{selectedEvent.title}」を削除しますか？
+              
             </Typography>
           )}
         </DialogContent>
@@ -433,7 +433,7 @@ function Home() {
               setSelectedEvent(null);
             }}
           >
-            キャンセル
+            戻る
           </Button>
           <Button
             color="error"
