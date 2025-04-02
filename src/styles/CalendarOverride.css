@@ -17,7 +17,7 @@
   .rbc-event-content,
   .rbc-event-label {
     /* さらに小さい文字＆詰めた行間で改行数を抑え、かつ省略(...)は使わない */
-    font-size: 0.75rem !important;      /* 小さめの文字 */
+    font-size: 0.65rem !important;      /* 小さめの文字 */
     line-height: 1.1 !important;        /* 行間をより詰めて改行を減らす */
 
     white-space: normal !important;     /* 改行を許可 */
