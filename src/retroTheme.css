@@ -1,19 +1,24 @@
 /* src/retroTheme.css */
 
-/* 1) Google Fontsなどから「Press Start 2P」を読み込む 
-   - もし既に <link> で読み込んでいるなら @import は不要です 
-   - 確認して重複に注意してください 
+/* 
+  1) Google Fonts: Press Start 2P
+     既に link などで読み込んでいない場合、@import でOK
 */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-/* 2) body に !important でフォント適用 
-   - MUI や他のCSSに上書きされないようにする 
+/* 
+  2) body にフォント & レンガ壁背景 
+     背景画像は public/images/brick_wall.jpg に置く想定
 */
 body {
   margin: 0;
   padding: 0;
-  background-color: #111; /* ダークな背景 */
-  color: #eee;           /* 文字色を薄めに */
+  /* ▼ レンガ壁画像: もし /images/brick_wall.jpg があるなら: */
+  background: url("/src/assets/images/B544D501-A924-4D97-8095-5BD73811D47F.png") no-repeat center center;
+  background-size: cover;
+
+  /* ▼ 文字色・フォント */
+  color: #eee;
   font-family: 'Press Start 2P', monospace !important;
 }
 
@@ -23,13 +28,15 @@ a {
   text-decoration: none;
 }
 
-/* レトロな見た目の見出し (お好みで) */
+/* レトロな見た目の見出し */
 h1, h2, h3 {
   text-shadow: 2px 2px 0px #555;
 }
 
 /* ヘッダーとフッターの背景 */
 .header, .footer {
+  /* もしレンガ壁を全体にするなら bodyで設定済み→ここで別の色が要るか?
+     とりあえず #222 背景を残す  */
   background-color: #222;
   padding: 10px;
   text-align: center;
@@ -40,7 +47,7 @@ h1, h2, h3 {
   padding: 20px;
 }
 
-/* レトロボタン (例) */
+/* レトロボタン */
 .button-retro {
   display: inline-block;
   color: #fff;
@@ -50,6 +57,7 @@ h1, h2, h3 {
   cursor: pointer;
   text-decoration: none;
 }
+
 .button-retro:hover {
   background-color: #666;
 }
