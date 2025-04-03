@@ -13,9 +13,7 @@
 body {
   margin: 0;
   padding: 0;
-  /* ▼ レンガ壁画像: もし /images/brick_wall.jpg があるなら: */
-  background: url("/images/u7198941657_retro-style_seamless_brick_wall_texture_pixel_art_223a2fdf-34d5-4aa9-a443-1a5bf49149d2_2.png");
-  background-size: cover;
+
 
   /* ▼ 文字色・フォント */
   color: #eee;

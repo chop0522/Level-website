@@ -11,6 +11,9 @@ import Footer from './components/Footer';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 // import { AppBar, Toolbar, Button, Typography } from '@mui/material'; // コメントアウト
 
+// ▼ ここで画像をimport (※ brickWall.png は例)
+import brickWall from './src/assets/images/u7198941657_retro-style_seamless_brick_wall_texture_pixel_art_223a2fdf-34d5-4aa9-a443-1a5bf49149d2_2.png';
+
 // ▼ 店内色合い + レトロフォントを反映したテーマ
 const theme = createTheme({
   typography: {
@@ -88,41 +91,53 @@ function App() {
     navigate('/');
   };
 
+  // ▼ インラインスタイルで背景画像を設定
+  //    ここでimportしたbrickWallを使う
+  const appStyle = {
+    minHeight: '100vh',
+    backgroundImage: `url(${brickWall})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center'
+  };
+
   return (
     <ThemeProvider theme={theme}>
       {/* 
         以前使っていた MUIのAppBarはコメントアウトのまま 
         ヘッダーとフッターを独立したコンポーネントで表示 
       */}
+      {/* ▼ 背景画像を最上位のdivに適用 */}
+      <div style={appStyle}>
 
-      <Header 
-        token={token}
-        userRole={userRole}
-        handleLogout={handleLogout}
-      />
-
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route
-          path="/register"
-          element={<Register token={token} setToken={setToken} />}
-        />
-        <Route
-          path="/login"
-          element={<Login token={token} setToken={setToken} />}
-        />
-        <Route
-          path="/mypage"
-          element={<MyPage token={token} />}
+        <Header 
+          token={token}
+          userRole={userRole}
+          handleLogout={handleLogout}
         />
 
-        {/* もし管理者専用ページを作る場合
-            import AdminPage from './pages/AdminPage';
-            <Route path="/admin" element={<AdminPage />} />
-        */}
-      </Routes>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/register"
+            element={<Register token={token} setToken={setToken} />}
+          />
+          <Route
+            path="/login"
+            element={<Login token={token} setToken={setToken} />}
+          />
+          <Route
+            path="/mypage"
+            element={<MyPage token={token} />}
+          />
 
-      <Footer />
+          {/* もし管理者専用ページを作る場合
+              import AdminPage from './pages/AdminPage';
+              <Route path="/admin" element={<AdminPage />} />
+          */}
+        </Routes>
+
+        <Footer />
+      </div>
     </ThemeProvider>
   );
 }
