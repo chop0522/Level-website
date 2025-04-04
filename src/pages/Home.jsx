@@ -23,34 +23,35 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 import '../styles/CalendarOverride.css';
 
-// ▼ X(旧Twitter)アイコン (ダミーSVG)
+// ---- ここで画像をimport (Webpackでビルド)
+// 1) Heroセクションの犬画像
+import heroDog from '../assets/images/composite_taller_dog.jpg';
+// 2) Xアイコン (avif)
+import xIcon from '../assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif';
+// 3) LINEアイコン (png)
+import lineIcon from '../assets/images/icons8-line-48-2.png';
+
+// ▼ X(旧Twitter)アイコンを <img> で表示
 const XIcon = () => (
-  <svg 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="currentColor"
-    xmlns="assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif"
-  >
-    <path d="M4 4 L20 20 M20 4 L4 20" stroke="currentColor" strokeWidth="2"/>
-  </svg>
+  <img 
+    src={xIcon}
+    alt="X(旧Twitter)"
+    width="24"
+    height="24"
+  />
 );
 
-// ▼ LINEアイコン (ダミーSVG)
+// ▼ LINEアイコンを <img> で表示
 const LineIcon = () => (
-  <svg 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="currentColor"
-    xmlns="assets/images/icons8-line-48-2.png"
-  >
-    <circle cx="12" cy="12" r="10" fill="currentColor"/>
-    <text x="9" y="16" fill="#fff" fontSize="10" fontWeight="bold">LINE</text>
-  </svg>
+  <img 
+    src={lineIcon}
+    alt="LINE"
+    width="24"
+    height="24"
+  />
 );
 
-// ▼ Noteアイコン (ダミーSVG)
+// ▼ Noteアイコン (従来通りダミーSVG, そのままにする場合)
 const NoteIcon = () => (
   <svg 
     width="24" 
@@ -65,11 +66,11 @@ const NoteIcon = () => (
   </svg>
 );
 
-// ▼ Heroセクション (背景画像)
+// ▼ Heroセクション: styled(Box) で犬画像を背景に
 const HeroSection = styled(Box)(({ theme }) => ({
   width: '100%',
   height: '400px',
-  backgroundImage: 'url("https://via.placeholder.com/1200x400?text=Hero+Image")',
+  backgroundImage: `url(${heroDog})`,   // ここが変更点
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   display: 'flex',
@@ -249,7 +250,7 @@ function Home() {
             ゲームカフェ.Levelへようこそ！
           </Typography>
           <Typography variant="h6" sx={{ color: '#fff', mt: 1 }}>
-          1000種類以上のボードゲームを取り揃えております。お一人様での相席、グループでのご来店も大歓迎です！
+            1000種類以上のボードゲームを取り揃えております。お一人様での相席、グループでのご来店も大歓迎です！
           </Typography>
         </Box>
       </HeroSection>
@@ -407,15 +408,10 @@ function Home() {
         </Grid>
       </Container>
 
-      {/*
-        ▼ MUIのDialogを使った削除確認モーダル
-        1) showDeleteModal (boolean) で開閉
-        2) selectedEvent に選択中イベントを保持
-        3) handleDeleteEvent で実際に削除処理
-      */}
+      {/* モーダル (削除確認) */}
       <Dialog
         open={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+        onClose={handleCloseDeleteModal}
       >
         <DialogTitle></DialogTitle>
         <DialogContent>
