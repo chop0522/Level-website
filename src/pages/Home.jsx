@@ -61,11 +61,9 @@ const NoteIcon = () => (
     width="24" 
     height="24" 
     
-  >
-    {/* シンプルな四角 + N の例 */}
-    <rect x="3" y="3" width="18" height="18" fill="currentColor"/>
-    <text x="7" y="17" fill="#fff" fontSize="10" fontWeight="bold">Note</text>
-  </img>
+  />
+    
+  
 );
 
 // ▼ Heroセクション: styled(Box) で犬画像を背景に
