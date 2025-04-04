@@ -31,6 +31,8 @@ import xIcon from '../assets/images/x-line-icon-communication-chat-message-photo
 // 3) LINEアイコン (png)
 import lineIcon from '../assets/images/icons8-line-48-2.png';
 
+import noteIcon from '../assets/images/icon.png';
+
 // ▼ X(旧Twitter)アイコンを <img> で表示
 const XIcon = () => (
   <img 
@@ -53,17 +55,17 @@ const LineIcon = () => (
 
 // ▼ Noteアイコン (従来通りダミーSVG, そのままにする場合)
 const NoteIcon = () => (
-  <svg 
+  <img
+  src={noteIcon}
+    alt="Note" 
     width="24" 
     height="24" 
-    viewBox="0 0 24 24" 
-    fill="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
+    
   >
     {/* シンプルな四角 + N の例 */}
     <rect x="3" y="3" width="18" height="18" fill="currentColor"/>
     <text x="7" y="17" fill="#fff" fontSize="10" fontWeight="bold">Note</text>
-  </svg>
+  </img>
 );
 
 // ▼ Heroセクション: styled(Box) で犬画像を背景に
@@ -399,7 +401,7 @@ function Home() {
           {/* Note */}
           <Grid item>
             <IconButton
-              onClick={() => window.open('https://note.com/あなたのアカウント', '_blank')}
+              onClick={() => window.open('https://note.com/chop0058', '_blank')}
               color="primary"
             >
               <NoteIcon />
