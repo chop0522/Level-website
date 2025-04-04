@@ -30,7 +30,7 @@ const XIcon = () => (
     height="24" 
     viewBox="0 0 24 24" 
     fill="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
+    xmlns="/assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif"
   >
     <path d="M4 4 L20 20 M20 4 L4 20" stroke="currentColor" strokeWidth="2"/>
   </svg>
@@ -249,7 +249,7 @@ function Home() {
             ゲームカフェ.Levelへようこそ！
           </Typography>
           <Typography variant="h6" sx={{ color: '#fff', mt: 1 }}>
-            ここにキャッチコピーなどを表示できます
+          1000種類以上のボードゲームを取り揃えております。お一人様での相席、グループでのご来店も大歓迎です！
           </Typography>
         </Box>
       </HeroSection>
@@ -261,7 +261,7 @@ function Home() {
             当店のコンセプト
           </Typography>
           <Typography variant="body1">
-            1000種類以上のボードゲームを取り揃えております。お一人様での相席、グループでのご来店も大歓迎です！
+            ゲームカフェ.Levelは、ボードゲームを通じて人と人とのつながりを大切にする場所です。
           </Typography>
         </Paper>
       </Container>
@@ -344,8 +344,7 @@ function Home() {
           </div>
         </Paper>
         <Typography variant="body2" sx={{ mt: 1 }}>
-          クリック(タップ)でイベント詳細→削除確認 / ドラッグ移動 / リサイズが可能です。<br/>
-          サーバーAPI (/api/events) とDBを連携してイベントを保存/更新します。
+          
         </Typography>
       </Container>
 
