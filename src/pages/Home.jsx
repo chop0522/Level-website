@@ -30,7 +30,7 @@ const XIcon = () => (
     height="24" 
     viewBox="0 0 24 24" 
     fill="currentColor"
-    xmlns="/assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif"
+    xmlns="assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif"
   >
     <path d="M4 4 L20 20 M20 4 L4 20" stroke="currentColor" strokeWidth="2"/>
   </svg>
@@ -43,7 +43,7 @@ const LineIcon = () => (
     height="24" 
     viewBox="0 0 24 24" 
     fill="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
+    xmlns="assets/images/icons8-line-48-2.png"
   >
     <circle cx="12" cy="12" r="10" fill="currentColor"/>
     <text x="9" y="16" fill="#fff" fontSize="10" fontWeight="bold">LINE</text>
