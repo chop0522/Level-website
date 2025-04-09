@@ -1,19 +1,90 @@
 // src/pages/Menu.jsx
 import React from 'react';
+import { Container, Paper, Typography, Box } from '@mui/material';
 
 function Menu() {
   return (
-    <div className="main-content">
-      <h2>メニュー</h2>
-      <p>ドリンクや軽食、プレイ料金などを表示するページです。</p>
-      {/* 実際にはNotion DBからfetchして価格や在庫を自動更新すると便利 */}
-      <ul>
-        <li>コーヒー：¥400</li>
-        <li>紅茶：¥400</li>
-        <li>ビール：¥600</li>
-        <li>プレイ料金：1時間 ¥500 (パック料金あり)</li>
-      </ul>
-    </div>
+    <Container sx={{ mt: 4, mb: 4 }}>
+      <Paper sx={{ p: 3 }}>
+        <Typography variant="h4" gutterBottom>
+          メニュー
+        </Typography>
+        <Typography variant="body1" paragraph>
+          当店のフードメニュー・ドリンクメニュー・プレイ料金などを一覧にまとめています。
+        </Typography>
+      </Paper>
+
+      <Box sx={{ mt: 4 }}>
+        <Paper sx={{ p: 3 }}>
+          <Typography variant="h5" gutterBottom>
+            プレイ料金
+          </Typography>
+          <Typography variant="body1">
+            30分 300円 ／ 4時間パック 1,200円 ／ 1日パック 2,400円<br/>
+            ワンドリンク制 (ソフトドリンク 300円 / アルコール 500円)
+          </Typography>
+        </Paper>
+      </Box>
+
+      <Box sx={{ mt: 4 }}>
+        <Paper sx={{ p: 3 }}>
+          <Typography variant="h5" gutterBottom>
+            ドリンクメニュー
+          </Typography>
+
+          <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+            ALL 500円 (アルコール系)
+          </Typography>
+          <Typography variant="body1">
+            <strong>Highball</strong><br/>
+            ・角ハイボール<br/>
+            ・ビームハイボール
+            <br/><br/>
+
+            <strong>Cocktail</strong><br/>
+            ・カシスオレンジ / カシスソーダ / ジントニック /  
+            パライングレープフルーツ / チャイナブルー / ピーチウーロン / 
+            ピーチグレープフルーツ / カルーアミルク / カルーアオレンジ / 
+            マリブコーク / マリブオレンジ / マリブサーフ / スクリュードライバー / 
+            ブルドッグ / テキーラ(ショット) / イエガーマイスター(ショット) / 
+            
+            <br/><br/>
+
+            <strong>Whisky</strong><br/>
+            ・角 (ロック/ソーダ/水割り)<br/>
+            ・ジムビーム
+            <br/><br/>
+
+            
+
+            <strong>Wine</strong><br/>
+            ・グラスワイン (赤/白) 
+            <br/><br/>
+
+            <strong>Plum-Wine (梅酒)</strong><br/>
+            ・ロック / ソーダ
+          </Typography>
+
+          <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+            ALL 300円 (ソフトドリンク)
+          </Typography>
+          <Typography variant="body1">
+            ・オレンジジュース / ジンジャーエール / コーラ / メロンソーダ / トマトジュース /
+            アップルジュース / ウーロン茶 / 緑茶 /  コーヒー
+          </Typography>
+        </Paper>
+      </Box>
+
+      {/* 今後、軽食やフードメニューを追加する余地があれば... */}
+      <Box sx={{ mt: 4 }}>
+        <Paper sx={{ p: 3 }}>
+          
+          <Typography variant="body1">
+            現在フードメニューはございませんが、隣のインドカレー屋さんやUber Eats等をご利用ください。
+          </Typography>
+        </Paper>
+      </Box>
+    </Container>
   );
 }
 

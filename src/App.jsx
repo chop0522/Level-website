@@ -10,10 +10,12 @@ import Footer from './components/Footer';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-// 追加で2つインポート
+// ★ Menuページをimport
+import Menu from './pages/Menu';
+// FAQページ
 import FAQ from './pages/FAQ';
-// 旧Calendarを設備紹介に変更したファイル
-import Calendar from './pages/Calendar';  
+// Calendarページ(設備紹介に変更した内容)
+import Calendar from './pages/Calendar';
 
 import brickWall from './assets/images/u7198941657_retro-style_seamless_brick_wall_texture_pixel_art_223a2fdf-34d5-4aa9-a443-1a5bf49149d2_2.png';
 
@@ -84,12 +86,26 @@ function App() {
 
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/register" element={<Register token={token} setToken={setToken} />} />
-          <Route path="/login" element={<Login token={token} setToken={setToken} />} />
-          <Route path="/mypage" element={<MyPage token={token} />} />
+          <Route
+            path="/register"
+            element={<Register token={token} setToken={setToken} />}
+          />
+          <Route
+            path="/login"
+            element={<Login token={token} setToken={setToken} />}
+          />
+          <Route
+            path="/mypage"
+            element={<MyPage token={token} />}
+          />
 
-          {/* ★ 新設/変更したルート */}
+          {/* ★ 新設ルート => Menuページ */}
+          <Route path="/menu" element={<Menu />} />
+
+          {/* FAQページ */}
           <Route path="/faq" element={<FAQ />} />
+
+          {/* Calendarページ (設備紹介に変更済み) */}
           <Route path="/calendar" element={<Calendar />} />
         </Routes>
 
