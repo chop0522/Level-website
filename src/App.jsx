@@ -1,6 +1,6 @@
 // src/App.jsx
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
@@ -14,10 +14,12 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Menu from './pages/Menu';
 // FAQページ
 import FAQ from './pages/FAQ';
-// Calendarページ(設備紹介に変更した内容)
+// Calendarページ(設備紹介に変更)
 import Calendar from './pages/Calendar';
 // ★ Reservationページをimport
 import Reservation from './pages/Reservation';
+// ★ AdminDashboard (管理用)
+import AdminDashboard from './pages/AdminDashboard';
 
 import brickWall from './assets/images/u7198941657_retro-style_seamless_brick_wall_texture_pixel_art_223a2fdf-34d5-4aa9-a443-1a5bf49149d2_2.png';
 
@@ -38,6 +40,7 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // アプリ起動時 or token変化時にユーザー情報を取得
     const storedToken = localStorage.getItem('token') || '';
     setToken(storedToken);
 
@@ -51,6 +54,7 @@ function App() {
             console.error(data.error);
             handleLogout();
           } else {
+            // 管理者なら role='admin'
             setUserRole(data.role === 'admin' ? 'admin' : 'user');
           }
         })
@@ -70,6 +74,7 @@ function App() {
     navigate('/');
   };
 
+  // 背景スタイル
   const appStyle = {
     minHeight: '100vh',
     backgroundImage: `url(${brickWall})`,
@@ -87,7 +92,10 @@ function App() {
         />
 
         <Routes>
+          {/* --- メインページ --- */}
           <Route path="/" element={<Home />} />
+
+          {/* --- Register & Login --- */}
           <Route
             path="/register"
             element={<Register token={token} setToken={setToken} />}
@@ -96,24 +104,37 @@ function App() {
             path="/login"
             element={<Login token={token} setToken={setToken} />}
           />
+
+          {/* --- マイページ --- */}
           <Route
             path="/mypage"
             element={<MyPage token={token} />}
           />
 
-          {/* ★ 新設ルート => Menuページ */}
+          {/* --- メニュー --- */}
           <Route path="/menu" element={<Menu />} />
 
-          {/* FAQページ */}
+          {/* --- FAQ --- */}
           <Route path="/faq" element={<FAQ />} />
 
-          {/* Calendarページ (設備紹介に変更済み) */}
+          {/* --- 設備紹介 --- */}
           <Route path="/calendar" element={<Calendar />} />
 
-          {/* ★ Reservationページを追加 */}
+          {/* --- 予約フォーム --- */}
           <Route
             path="/reservation"
             element={<Reservation />}
+          />
+
+          {/* --- 管理者ダッシュボード --- */}
+          <Route
+            path="/admin"
+            element={
+              // ユーザーがadminなら表示、それ以外ならリダイレクト
+              userRole === 'admin'
+                ? <AdminDashboard />
+                : <Navigate to="/" replace />
+            }
           />
         </Routes>
 
