@@ -305,7 +305,7 @@ function Home() {
               component={RouterLink}
               to="/calendar"
             >
-              イベントカレンダー
+              設備紹介
             </Button>
           </Grid>
           <Grid item>

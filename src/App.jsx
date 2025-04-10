@@ -16,6 +16,8 @@ import Menu from './pages/Menu';
 import FAQ from './pages/FAQ';
 // Calendarページ(設備紹介に変更した内容)
 import Calendar from './pages/Calendar';
+// ★ Reservationページをimport
+import Reservation from './pages/Reservation';
 
 import brickWall from './assets/images/u7198941657_retro-style_seamless_brick_wall_texture_pixel_art_223a2fdf-34d5-4aa9-a443-1a5bf49149d2_2.png';
 
@@ -107,6 +109,12 @@ function App() {
 
           {/* Calendarページ (設備紹介に変更済み) */}
           <Route path="/calendar" element={<Calendar />} />
+
+          {/* ★ Reservationページを追加 */}
+          <Route
+            path="/reservation"
+            element={<Reservation />}
+          />
         </Routes>
 
         <Footer />
