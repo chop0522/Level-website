@@ -28,7 +28,11 @@ const pool = new Pool({
 // ヘルパー関数
 // -----------------------------
 
-// (A) findUserByEmail: emailからユーザーを検索
+/**
+ * ユーザーをメールアドレスで検索
+ * @param {string} email
+ * @returns {object|null} ユーザーRow or null
+ */
 async function findUserByEmail(email) {
   const sql = 'SELECT * FROM users WHERE email = $1';
   const res = await pool.query(sql, [email]);
@@ -39,7 +43,13 @@ async function findUserByEmail(email) {
   return null;
 }
 
-// (B) createUserInDB: 新規ユーザーをDBに作成 (role='user' デフォルト)
+/**
+ * 新規ユーザーをDBに作成 (role='user' デフォルト)
+ * @param {string} name 
+ * @param {string} email 
+ * @param {string} passwordHash 
+ * @returns {object} { id, name, email, role }
+ */
 async function createUserInDB(name, email, passwordHash) {
   const sql = `
     INSERT INTO users (name, email, password_hash, role)
@@ -48,10 +58,15 @@ async function createUserInDB(name, email, passwordHash) {
   `;
   const values = [name, email, passwordHash];
   const res = await pool.query(sql, values);
-  return res.rows[0]; // { id, name, email, role }
+  return res.rows[0];
 }
 
-// (C) daily_category: カテゴリXP獲得に関するヘルパー
+/**
+ * 当日同じカテゴリでXPを取得済みかチェック
+ * @param {number} userId 
+ * @param {string} category 
+ * @returns {boolean}
+ */
 async function checkDailyCategory(userId, category) {
   const sql = `
     SELECT * FROM daily_category
@@ -63,15 +78,26 @@ async function checkDailyCategory(userId, category) {
   return (res.rows.length > 0);
 }
 
+/**
+ * daily_categoryに「本日取得済み」記録を追加
+ * @param {number} userId 
+ * @param {string} category 
+ */
 async function insertDailyRecord(userId, category) {
   const sql = `
-    INSERT INTO daily_category(user_id, category)
+    INSERT INTO daily_category (user_id, category)
     VALUES ($1, $2)
   `;
   await pool.query(sql, [userId, category]);
 }
 
-// (D) gainCategoryXP => 6列(stealth, heavy, light, party, gamble, quiz)を+X
+/**
+ * カテゴリXPを加算
+ * @param {number} userId 
+ * @param {string} category 
+ * @param {number} xpGained 
+ * @returns {object} updated column e.g. { xp_stealth: 10 }
+ */
 async function gainCategoryXP(userId, category, xpGained) {
   let sql;
   if (category === 'stealth') {
@@ -93,10 +119,16 @@ async function gainCategoryXP(userId, category, xpGained) {
   return res.rows[0];
 }
 
-// (E) 予約をDBに保存するヘルパー
+/**
+ * reservationsテーブルに予約をINSERT
+ * @param {string} name 
+ * @param {string} phone 
+ * @param {string} dateTime 
+ * @param {number} people 
+ * @param {string} note 
+ * @returns {object} { id, name, phone, date_time, people, note }
+ */
 async function createReservationInDB(name, phone, dateTime, people, note) {
-  // reservationsテーブル:
-  // (id SERIAL, name TEXT, phone TEXT, date_time TIMESTAMP, people INTEGER, note TEXT, created_at TIMESTAMP DEFAULT NOW())
   const sql = `
     INSERT INTO reservations (name, phone, date_time, people, note)
     VALUES ($1, $2, $3, $4, $5)
@@ -104,12 +136,16 @@ async function createReservationInDB(name, phone, dateTime, people, note) {
   `;
   const values = [name, phone, dateTime, people, note];
   const res = await pool.query(sql, values);
-  return res.rows[0]; // { id, name, phone, date_time, people, note }
+  return res.rows[0];
 }
 
 // -----------------------------
 // JWTミドルウェア
 // -----------------------------
+
+/**
+ * トークンを検証
+ */
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   if (!authHeader) {
@@ -128,9 +164,9 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// -----------------------------
-// Adminチェックミドルウェア
-// -----------------------------
+/**
+ * 管理者チェック (role==='admin')
+ */
 async function authenticateAdmin(req, res, next) {
   try {
     const email = req.user.email;
@@ -141,6 +177,7 @@ async function authenticateAdmin(req, res, next) {
     if (userRow.role !== 'admin') {
       return res.status(403).json({ error: "Admin only" });
     }
+    // adminならOK
     next();
   } catch (err) {
     console.error(err);
@@ -159,16 +196,18 @@ app.post('/auth/register', async (req, res) => {
     if (!name || !email || !password) {
       return res.status(400).json({ error: "Missing fields" });
     }
-    // 既存ユーザー確認
+    // 既に同メールが登録されていないか
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
       return res.status(409).json({ error: "Email already registered" });
     }
+
     // パスワードをハッシュ化
     const saltRounds = 10;
     const hashed = await bcrypt.hash(password, saltRounds);
-    // DBに登録
+    // DBにユーザー作成
     const newUser = await createUserInDB(name, email, hashed);
+
     // JWT発行
     const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
     return res.json({ success: true, token, user: newUser });
@@ -193,6 +232,7 @@ app.post('/auth/login', async (req, res) => {
     if (!match) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
+
     const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
     const userData = {
       id: userRow.id,
@@ -215,6 +255,7 @@ app.get('/api/userinfo', authenticateToken, async (req, res) => {
     if (!userRow) {
       return res.status(404).json({ error: "User not found" });
     }
+    // 全列返す例 (roleやXP系を含む)
     const userData = {
       id: userRow.id,
       name: userRow.name,
@@ -248,12 +289,14 @@ app.post('/api/gameCategory', authenticateToken, async (req, res) => {
     if (!userRow) {
       return res.status(404).json({ error: "User not found" });
     }
+
     // 今日同じカテゴリを獲得済みかチェック
     const alreadyGot = await checkDailyCategory(userRow.id, category);
     if (alreadyGot) {
       return res.json({ success: false, msg: "You already got XP for this category today." });
     }
-    // +10XP
+
+    // XP加算 (例: +10)
     const xpGain = 10;
     const updatedVal = await gainCategoryXP(userRow.id, category, xpGain);
     await insertDailyRecord(userRow.id, category);
@@ -269,7 +312,7 @@ app.post('/api/gameCategory', authenticateToken, async (req, res) => {
 // イベント (Calendar usage)
 // -----------------------------
 
-// イベント一覧取得
+// 取得 (制限なし)
 app.get('/api/events', async (req, res) => {
   try {
     const sql = 'SELECT id, title, start, "end", all_day FROM events ORDER BY start ASC';
@@ -281,7 +324,7 @@ app.get('/api/events', async (req, res) => {
   }
 });
 
-// イベント作成 (要admin)
+// 作成 (要admin)
 app.post('/api/events', authenticateToken, authenticateAdmin, async (req, res) => {
   try {
     const { title, start, end, allDay } = req.body;
@@ -302,7 +345,7 @@ app.post('/api/events', authenticateToken, authenticateAdmin, async (req, res) =
   }
 });
 
-// イベント更新 (要admin)
+// 更新 (要admin)
 app.put('/api/events/:id', authenticateToken, authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params;
@@ -328,7 +371,7 @@ app.put('/api/events/:id', authenticateToken, authenticateAdmin, async (req, res
   }
 });
 
-// イベント削除 (要admin)
+// 削除 (要admin)
 app.delete('/api/events/:id', authenticateToken, authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params;
@@ -345,22 +388,10 @@ app.delete('/api/events/:id', authenticateToken, authenticateAdmin, async (req, 
 });
 
 // -----------------------------
-// 予約機能
+// 予約機能 (要: reservationsテーブル)
 // -----------------------------
 
-// reservationsテーブルにINSERT
-async function createReservationInDB(name, phone, dateTime, people, note) {
-  const sql = `
-    INSERT INTO reservations (name, phone, date_time, people, note)
-    VALUES ($1, $2, $3, $4, $5)
-    RETURNING id, name, phone, date_time, people, note
-  `;
-  const values = [name, phone, dateTime, people, note];
-  const result = await pool.query(sql, values);
-  return result.rows[0];
-}
-
-// POST /api/reservations
+// 作成 (ユーザー→DB保存)
 app.post('/api/reservations', async (req, res) => {
   try {
     const { name, phone, dateTime, people, note } = req.body;
@@ -375,25 +406,24 @@ app.post('/api/reservations', async (req, res) => {
   }
 });
 
-// 予約一覧 (管理用) - 要admin
+// 予約一覧 (管理者用)
 app.get('/api/reservations', authenticateToken, authenticateAdmin, async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM reservations ORDER BY date_time ASC');
-    res.json(result.rows);
+    const sql = 'SELECT * FROM reservations ORDER BY date_time ASC';
+    const result = await pool.query(sql);
+    res.json(result.rows); // [{ id, name, phone, date_time, people, note, ... }, ...]
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// 予約削除 (管理用) - 要admin
+// 予約削除 (管理者用)
 app.delete('/api/reservations/:id', authenticateToken, authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query(
-      'DELETE FROM reservations WHERE id=$1 RETURNING id',
-      [id]
-    );
+    const sql = 'DELETE FROM reservations WHERE id=$1 RETURNING id';
+    const result = await pool.query(sql, [id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Reservation not found' });
     }
