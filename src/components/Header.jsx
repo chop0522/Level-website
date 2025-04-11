@@ -12,7 +12,7 @@ function Header({
   const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleMenu = () => {
-    setMenuOpen(prev => !prev);
+    setMenuOpen((prev) => !prev);
   };
 
   return (
@@ -39,7 +39,7 @@ function Header({
             <Link to="/mypage">MyPage</Link>
           )}
 
-          {/* 管理者用リンク */}
+          {/* 管理者用リンク (tokenあり & role===admin) */}
           {token && userRole === 'admin' && (
             <Link to="/admin">Admin</Link>
           )}
@@ -48,6 +48,7 @@ function Header({
 
       {/* 右側: Logoutボタン & ハンバーガー */}
       <div className={styles.navRight}>
+        {/* Logoutボタン (tokenがある & handleLogoutが存在する時だけ表示) */}
         {token && handleLogout && (
           <button
             onClick={handleLogout}
