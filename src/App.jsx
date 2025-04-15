@@ -21,7 +21,7 @@ import Reservation from './pages/Reservation';
 // ★ AdminDashboard (管理用)
 import AdminDashboard from './pages/AdminDashboard';
 
-import brickWall from '';
+// import brickWall from '';
 
 const theme = createTheme({
   typography: { fontFamily: '"RetroFont", "Helvetica", "Arial", sans-serif' },
