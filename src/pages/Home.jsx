@@ -16,22 +16,18 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 
-// ▼ big-calendar関連 import
+// ▼ Big Calendar関連 import
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 import '../styles/CalendarOverride.css';
 
-// ---- ここで画像をimport (Webpackでビルド)
-// 1) Heroセクションの犬画像
-import heroDog from '../assets/images/composite_taller_dog.jpg';
-// 2) Xアイコン (avif)
-import xIcon from '../assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif';
-// 3) LINEアイコン (png)
-import lineIcon from '../assets/images/icons8-line-48-2.png';
-
-import noteIcon from '../assets/images/icon.png';
+// ---- 画像をimport (Webpackでビルド)
+import heroDog from '../assets/images/composite_taller_dog.jpg';  // Hero背景画像
+import xIcon from '../assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif'; // X(Twitter)
+import lineIcon from '../assets/images/icons8-line-48-2.png';    // LINE
+import noteIcon from '../assets/images/icon.png';               // Note
 
 // ▼ X(旧Twitter)アイコンを <img> で表示
 const XIcon = () => (
@@ -53,42 +49,44 @@ const LineIcon = () => (
   />
 );
 
-// ▼ Noteアイコン (従来通りダミーSVG, そのままにする場合)
+// ▼ Noteアイコン (画像版)
 const NoteIcon = () => (
   <img
-  src={noteIcon}
+    src={noteIcon}
     alt="Note" 
     width="24" 
-    height="24" 
-    
+    height="24"
   />
-    
-  
 );
 
 // ▼ Heroセクション: styled(Box) で犬画像を背景に
+//   高度なテーマ拡張の一例: breakpointsで画面幅に応じて高さを可変
 const HeroSection = styled(Box)(({ theme }) => ({
   width: '100%',
   height: '400px',
-  backgroundImage: `url(${heroDog})`,   // ここが変更点
+  position: 'relative',
+  backgroundImage: `url(${heroDog})`,
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+
+  // スマホ幅などで高さを下げる例
+  [theme.breakpoints.down('sm')]: {
+    height: '300px'
+  }
 }));
 
 // --- Big Calendar localizer (date-fns)
 import ja from 'date-fns/locale/ja';
-const locales = {
-  'ja': ja,
-};
+const locales = { 'ja': ja };
 const localizer = dateFnsLocalizer({
   format,
   parse,
   startOfWeek,
   getDay,
-  locales,
+  locales
 });
 
 function Home() {
@@ -208,6 +206,7 @@ function Home() {
       alert("ログインが必要です (管理者のみ編集可能)");
       return;
     }
+
     const updated = {
       title: event.title,
       start: start.toISOString(),
@@ -245,11 +244,27 @@ function Home() {
     <>
       {/* ----- Hero Section ----- */}
       <HeroSection>
-        <Box textAlign="center" sx={{ backgroundColor: 'rgba(0,0,0,0.4)', p: 2 }}>
-          <Typography variant="h3" component="h1" sx={{ color: '#fff' }}>
+        {/* 半透明オーバーレイを加えて、より視認性を高める例 */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.4)'
+          }}
+        />
+        <Box
+          sx={{
+            position: 'relative',
+            zIndex: 1,
+            textAlign: 'center',
+            color: '#fff',
+            p: 2
+          }}
+        >
+          <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold' }}>
             ゲームカフェ.Levelへようこそ！
           </Typography>
-          <Typography variant="h6" sx={{ color: '#fff', mt: 1 }}>
+          <Typography variant="h6" sx={{ mt: 1 }}>
             1000種類以上のボードゲームを取り揃えております。お一人様での相席、グループでのご来店も大歓迎です！
           </Typography>
         </Box>
@@ -345,7 +360,7 @@ function Home() {
           </div>
         </Paper>
         <Typography variant="body2" sx={{ mt: 1 }}>
-          
+          {/* 必要に応じて補足説明を追加 */}
         </Typography>
       </Container>
 
@@ -356,7 +371,7 @@ function Home() {
             アクセス
           </Typography>
           <Typography variant="body1">
-          　千葉県市川市湊新田2−1−１８ビアメゾンロジェール１０１
+            千葉県市川市湊新田2−1−１８ビアメゾンロジェール１０１
           </Typography>
           <Box sx={{ mt: 2 }}>
             <iframe
@@ -378,7 +393,7 @@ function Home() {
           SNSをフォローしよう！
         </Typography>
         <Grid container spacing={2}>
-          {/* X (旧Twitter) */}
+          {/* X(旧Twitter) */}
           <Grid item>
             <IconButton 
               onClick={() => window.open('https://x.com/GamecafeLevel', '_blank')}
@@ -413,11 +428,11 @@ function Home() {
         open={showDeleteModal}
         onClose={handleCloseDeleteModal}
       >
-        <DialogTitle></DialogTitle>
+        <DialogTitle>イベント削除確認</DialogTitle>
         <DialogContent>
           {selectedEvent && (
             <Typography>
-              「{selectedEvent.title}」
+              「{selectedEvent.title}」を削除しますか？
             </Typography>
           )}
         </DialogContent>

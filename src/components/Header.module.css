@@ -7,6 +7,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  /* ▼ PC時にヘッダーを固定する場合（任意）
+     position: sticky;
+     top: 0;
+     background-color: #fff;
+     z-index: 10000; 
+  */
 }
 
 /* 左側ブロック (ロゴ + リンク集) */
@@ -39,6 +45,7 @@
 .navLinks a {
   text-decoration: none;
   color: #333;
+  font-weight: 500; /* 若干太字にして視認性向上（任意） */
 }
 
 /* Logoutボタンの見た目 */
@@ -50,6 +57,7 @@
   cursor: pointer;
   font-size: 0.9rem;
   border-radius: 4px;
+  transition: background-color 0.2s ease; /* hover時のアニメーション */
 }
 
 .logoutButton:hover {
@@ -70,6 +78,7 @@
   height: 3px;
   background-color: #333;
   margin: 4px 0;
+  transition: background-color 0.2s ease; /* hoverなどで変化させたい場合 */
 }
 
 /* メディアクエリ: スマホ幅(768px以下) */
@@ -86,12 +95,11 @@
     padding: 10px;
     border: 1px solid #ccc;
     display: none; /* 初期は非表示 */
-
-    /* ▼ 追加 */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2); /* ▼ ドロップダウンに影を追加 */
     z-index: 9999; /* メニューが他要素の背面に隠れないように */
   }
 
-  /* スマホ表示時にリンク文字を少し小さくする場合 */
+  /* スマホ表示時にリンク文字を少し小さく */
   .navLinks a {
     font-size: 0.9rem;
   }
@@ -109,5 +117,19 @@
   /* ハンバーガーボタンはスマホ時に表示 */
   .hamburgerBtn {
     display: flex;
+  }
+}
+
+/* メディアクエリ: さらに狭い幅 (400px以下) での文字サイズ例 */
+@media (max-width: 400px) {
+  .navLinks a {
+    font-size: 0.85rem;
+  }
+  .logo {
+    font-size: 1.3rem;
+  }
+  .logoutButton {
+    font-size: 0.8rem;
+    padding: 5px 10px;
   }
 }
