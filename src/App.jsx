@@ -22,7 +22,7 @@ import Reservation from './pages/Reservation';
 import AdminDashboard from './pages/AdminDashboard';
 
 // ▼ 背景画像をimport (パスは例です。実際のファイル構成に合わせてください)
-import brickWall from './assets/images/brick_wall.jpg';
+// import brickWall from './assets/images/brick_wall.jpg';
 
 // ▼ 高度なテーマ拡張例
 //  - カスタムbreakpoints
@@ -155,7 +155,8 @@ function App() {
   // 背景スタイル: 画像をurl()で参照
   const appStyle = {
     minHeight: '100vh',
-    backgroundImage: `url(${brickWall})`,
+    backgroundColor: '#ffffff',
+    // backgroundImage: `url(${brickWall})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center'
   };
