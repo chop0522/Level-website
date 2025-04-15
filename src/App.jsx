@@ -82,7 +82,7 @@ let theme = createTheme({
       dark: '#002171'
     },
     error: { main: '#b71c1c' },
-    background: { default: '#f5f5dc' }, // ←ここを変更
+    background: { default: '#ececec' }, // ←グレー系に変更
     text: { primary: '#000000' }
   },
   shape: {
@@ -155,8 +155,7 @@ function App() {
   // 背景スタイル: 画像をurl()で参照
   const appStyle = {
     minHeight: '100vh',
-    backgroundColor: '#f5f5dc', // ←ここも変更
-    // 背景画像は設定しない
+    backgroundColor: '#ececec', // ←グレー系に変更
     backgroundSize: 'cover',
     backgroundPosition: 'center'
   };
