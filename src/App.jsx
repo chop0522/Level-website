@@ -156,7 +156,7 @@ function App() {
   const appStyle = {
     minHeight: '100vh',
     backgroundColor: '#ffffff',
-    // backgroundImage: `url(${brickWall})`,
+    // 背景画像は設定しない
     backgroundSize: 'cover',
     backgroundPosition: 'center'
   };
