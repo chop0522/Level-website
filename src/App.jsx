@@ -8,143 +8,109 @@ import MyPage from './pages/MyPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
-import { createTheme, ThemeProvider, responsiveFontSizes } from '@mui/material/styles';
+import {
+  createTheme,
+  ThemeProvider,
+  responsiveFontSizes
+} from '@mui/material/styles';
 
-// ★ Menuページをimport
-import Menu from './pages/Menu';
-// FAQページ
-import FAQ from './pages/FAQ';
-// Calendarページ(設備紹介)
-import Calendar from './pages/Calendar';
-// ★ Reservationページをimport
-import Reservation from './pages/Reservation';
-// ★ AdminDashboard (管理用)
+// ▼ Helmet
+import { Helmet, HelmetProvider } from 'react-helmet-async';
+
+/* ---------- ルーティング用ページ ---------- */
+import Menu           from './pages/Menu';
+import FAQ            from './pages/FAQ';
+import Calendar       from './pages/Calendar';      /* 設備紹介ページ */
+import Reservation    from './pages/Reservation';
 import AdminDashboard from './pages/AdminDashboard';
 
-// ▼ 背景画像をimport (パスは例です。実際のファイル構成に合わせてください)
-// import brickWall from './assets/images/brick_wall.jpg';
-
-// ▼ 高度なテーマ拡張例
-//  - カスタムbreakpoints
-//  - 画面幅ごとのTypography
-//  - shape, spacing, shadows なども調整可
+/* =================================================
+   1) 高度なテーマ拡張
+   ================================================= */
 let theme = createTheme({
   breakpoints: {
-    values: {
-      xs: 0,
-      sm: 600,
-      md: 900,
-      lg: 1200,
-      xl: 1536
-    }
+    values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 }
   },
   typography: {
     fontFamily: '"RetroFont", "Helvetica", "Arial", sans-serif',
-    // h1, h2, h3...を詳細に設定
     h1: {
       fontSize: '3rem',
       fontWeight: 700,
-      // スマホ向けにさらに小さくする例
-      '@media (max-width:600px)': {
-        fontSize: '2.2rem'
-      }
+      '@media (max-width:600px)': { fontSize: '2.2rem' }
     },
     h2: {
       fontSize: '2.4rem',
       fontWeight: 600,
-      '@media (max-width:600px)': {
-        fontSize: '2rem'
-      }
+      '@media (max-width:600px)': { fontSize: '2rem' }
     },
     h3: {
       fontSize: '2rem',
-      '@media (max-width:600px)': {
-        fontSize: '1.6rem'
-      }
+      '@media (max-width:600px)': { fontSize: '1.6rem' }
     },
     h6: {
       fontSize: '1rem',
-      '@media (max-width:600px)': {
-        fontSize: '0.9rem'
-      }
+      '@media (max-width:600px)': { fontSize: '0.9rem' }
     }
-    // ほかにもbody1, body2など設定可能
   },
   palette: {
-    primary: {
-      main: '#3e2723',   // 茶色っぽい
-      light: '#6a4f4b',  // 参考: 調整用
-      dark: '#1b0000'
-    },
-    secondary: {
-      main: '#0d47a1',
-      light: '#5472d3',
-      dark: '#002171'
-    },
-    error: { main: '#b71c1c' },
-    background: { default: '#ececec' }, // ←グレー系に変更
-    text: { primary: '#000000' }
+    primary:   { main: '#3e2723', light: '#6a4f4b', dark: '#1b0000' },
+    secondary: { main: '#0d47a1', light: '#5472d3', dark: '#002171' },
+    error:     { main: '#b71c1c' },
+    background:{ default: '#ececec' },
+    text:      { primary: '#000000' }
   },
-  shape: {
-    // 角丸などを一括で調整
-    borderRadius: 6
-  },
-  spacing: 8, // spacing(1)=8px, spacing(2)=16pxなど
+  shape:   { borderRadius: 6 },
+  spacing: 8,
   shadows: [
     'none',
-    '0px 1px 3px rgba(0,0,0,0.2)', // 例: Elevation 1
-    '0px 1px 5px rgba(0,0,0,0.2)', // 例: Elevation 2
-    // 省略: 必要に応じて
+    '0px 1px 3px rgba(0,0,0,0.2)',
+    '0px 1px 5px rgba(0,0,0,0.2)',
+    // 必要に応じて以降を追加
   ],
   components: {
-    // MUIコンポーネントのstyle override例
     MuiButton: {
       styleOverrides: {
-        containedPrimary: {
-          color: '#fff',
-          // 背景色はpalette.primary.mainが優先される
-          // 必要に応じて上書き可能
-        }
+        containedPrimary: { color: '#fff' }
       }
     }
   }
 });
 
-// ▼ フォントサイズをbreakpointsに合わせて自動調整する (可選)
+// フォントサイズの自動レスポンシブ調整
 theme = responsiveFontSizes(theme);
 
+/* =================================================
+   2) App コンポーネント
+   ================================================= */
 function App() {
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
+  const [token,    setToken]    = useState(localStorage.getItem('token') || '');
   const [userRole, setUserRole] = useState('user');
   const navigate = useNavigate();
 
+  /* -------- ユーザー情報取得 -------- */
   useEffect(() => {
-    const storedToken = localStorage.getItem('token') || '';
-    setToken(storedToken);
+    const stored = localStorage.getItem('token') || '';
+    setToken(stored);
 
-    if (storedToken) {
-      fetch('/api/userinfo', {
-        headers: { Authorization: `Bearer ${storedToken}` }
+    if (!stored) { setUserRole('user'); return; }
+
+    fetch('/api/userinfo', { headers: { Authorization: `Bearer ${stored}` } })
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) {
+          console.error(data.error);
+          handleLogout();
+        } else {
+          setUserRole(data.role === 'admin' ? 'admin' : 'user');
+        }
       })
-        .then(res => res.json())
-        .then(data => {
-          if (data.error) {
-            console.error(data.error);
-            handleLogout();
-          } else {
-            // ユーザーroleが 'admin' なら管理者扱い
-            setUserRole(data.role === 'admin' ? 'admin' : 'user');
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          setUserRole('user');
-        });
-    } else {
-      setUserRole('user');
-    }
+      .catch(err => {
+        console.error(err);
+        setUserRole('user');
+      });
   }, []);
 
+  /* -------- ログアウト -------- */
   const handleLogout = () => {
     localStorage.removeItem('token');
     setToken('');
@@ -152,72 +118,67 @@ function App() {
     navigate('/');
   };
 
-  // 背景スタイル: 画像をurl()で参照
+  /* -------- 背景スタイル -------- */
   const appStyle = {
     minHeight: '100vh',
-    backgroundColor: '#ececec', // ←グレー系に変更
-    backgroundSize: 'cover',
-    backgroundPosition: 'center'
+    backgroundColor: theme.palette.background.default
   };
 
+  /* =================================================
+       Render
+  ================================================= */
   return (
-    <ThemeProvider theme={theme}>
-      <div style={appStyle}>
-        <Header
-          token={token}
-          userRole={userRole}
-          handleLogout={handleLogout}
-        />
-
-        <Routes>
-          {/* メインページ */}
-          <Route path="/" element={<Home />} />
-
-          {/* 登録 & ログイン */}
-          <Route
-            path="/register"
-            element={<Register token={token} setToken={setToken} />}
+    <HelmetProvider>
+      <ThemeProvider theme={theme}>
+        {/* --- グローバル meta (各ページで Helmet 上書き可) --- */}
+        <Helmet>
+          <title>ゲームカフェ.Level | 行徳のボードゲームカフェ</title>
+          <meta
+            name="description"
+            content="千葉県行徳駅徒歩5分、1000種類以上のボードゲームが遊べる『ゲームカフェ.Level』公式サイト。営業時間・設備・料金はこちら。"
           />
-          <Route
-            path="/login"
-            element={<Login token={token} setToken={setToken} />}
+          {/* Open Graph */}
+          <meta property="og:type" content="website" />
+          <meta property="og:title" content="ゲームカフェ.Level" />
+          <meta
+            property="og:description"
+            content="行徳駅徒歩5分、1000種類以上のボードゲーム！ ボドゲ・麻雀・ポーカーまで遊べるカフェ"
           />
+          {/* og:image や twitter:card を追加してもOK */}
+        </Helmet>
 
-          {/* マイページ */}
-          <Route
-            path="/mypage"
-            element={<MyPage token={token} />}
-          />
+        <div style={appStyle}>
+          {/* ヘッダー */}
+          <Header token={token} userRole={userRole} handleLogout={handleLogout} />
 
-          {/* メニュー */}
-          <Route path="/menu" element={<Menu />} />
+          {/* ルーティング */}
+          <Routes>
+            <Route path="/"           element={<Home />} />
+            <Route path="/register"   element={<Register token={token} setToken={setToken} />} />
+            <Route path="/login"      element={<Login    token={token} setToken={setToken} />} />
+            <Route path="/mypage"     element={<MyPage   token={token} />} />
 
-          {/* FAQ */}
-          <Route path="/faq" element={<FAQ />} />
+            <Route path="/menu"       element={<Menu />} />
+            <Route path="/faq"        element={<FAQ />} />
+            <Route path="/calendar"   element={<Calendar />} />
+            <Route path="/reservation"element={<Reservation />} />
 
-          {/* 設備紹介 */}
-          <Route path="/calendar" element={<Calendar />} />
+            {/* 管理者専用 */}
+            <Route
+              path="/admin"
+              element={
+                userRole === 'admin'
+                  ? <AdminDashboard />
+                  : <Navigate to="/" replace />
+              }
+            />
+          </Routes>
 
-          {/* 予約フォーム */}
-          <Route
-            path="/reservation"
-            element={<Reservation />}
-          />
-
-          {/* 管理者ダッシュボード */}
-          <Route
-            path="/admin"
-            element={
-              userRole === 'admin'
-                ? <AdminDashboard />
-                : <Navigate to="/" replace />
-            }
-          />
-        </Routes>
-
-        <Footer />
-      </div>
-    </ThemeProvider>
+          {/* フッター */}
+          <Footer />
+        </div>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 

@@ -1,12 +1,12 @@
 // src/pages/Home.jsx
 import React, { useState, useEffect } from 'react';
-import { 
-  Container, 
-  Box, 
-  Typography, 
-  Button, 
-  Grid, 
-  Paper, 
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  Grid,
+  Paper,
   IconButton,
   Dialog,
   DialogTitle,
@@ -16,92 +16,66 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 
-// ▼ Big Calendar関連 import
+// ▼ Big‑Calendar 関連
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
+// カスタム CSS（行送り・文字サイズなど）
 import '../styles/CalendarOverride.css';
 
-// ---- 画像をimport (Webpackでビルド)
-import heroDog from '../assets/images/composite_taller_dog.jpg';  // Hero背景画像
-import xIcon from '../assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif'; // X(Twitter)
-import lineIcon from '../assets/images/icons8-line-48-2.png';    // LINE
-import noteIcon from '../assets/images/icon.png';               // Note
+// ---- 画像を import（JPG / PNG / AVIF のみ。WebP は使わない） ----
+import heroDogJpg from '../assets/images/composite_taller_dog.jpg';               // Hero 背景
+import xIcon    from '../assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif';
+import lineIcon from '../assets/images/icons8-line-48-2.png';
+import noteIcon from '../assets/images/icon.png';
 
-// ▼ X(旧Twitter)アイコンを <img> で表示
+// ▼ X アイコン
 const XIcon = () => (
-  <img 
-    src={xIcon}
-    alt="X(旧Twitter)"
-    width="24"
-    height="24"
-  />
+  <img src={xIcon} alt="X(旧Twitter)" width="24" height="24" />
 );
 
-// ▼ LINEアイコンを <img> で表示
+// ▼ LINE アイコン
 const LineIcon = () => (
-  <img 
-    src={lineIcon}
-    alt="LINE"
-    width="24"
-    height="24"
-  />
+  <img src={lineIcon} alt="LINE" width="24" height="24" />
 );
 
-// ▼ Noteアイコン (画像版)
+// ▼ Note アイコン
 const NoteIcon = () => (
-  <img
-    src={noteIcon}
-    alt="Note" 
-    width="24" 
-    height="24"
-  />
+  <img src={noteIcon} alt="Note" width="24" height="24" />
 );
 
-// ▼ Heroセクション: styled(Box) で犬画像を背景に
-//   高度なテーマ拡張の一例: breakpointsで画面幅に応じて高さを可変
+// ▼ Hero セクション ─ 背景に JPG を使用
 const HeroSection = styled(Box)(({ theme }) => ({
   width: '100%',
   height: '400px',
   position: 'relative',
-  backgroundImage: `url(${heroDog})`,
+  backgroundImage: `url(${heroDogJpg})`,
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-
-  // スマホ幅などで高さを下げる例
-  [theme.breakpoints.down('sm')]: {
-    height: '300px'
-  }
+  [theme.breakpoints.down('sm')]: { height: '300px' }
 }));
 
-// --- Big Calendar localizer (date-fns)
+// --- Big‑Calendar ローカライザ
 import ja from 'date-fns/locale/ja';
-const locales = { 'ja': ja };
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales
-});
+const locales = { ja };
+const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
 
 function Home() {
   const [events, setEvents] = useState([]);
 
-  // ▼ 削除用モーダルの開閉状態と、選択されたイベントを管理
+  // 削除モーダル・選択イベント
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  // ▼ 1) 起動時: DBからイベント一覧を取得 (GETは認証不要でもOK想定)
+  // ① 起動時：イベント取得
   useEffect(() => {
     fetch('/api/events')
       .then(res => res.json())
       .then(data => {
-        // DBから返った start/end は string → JS Date に変換
         const mapped = data.map(evt => ({
           ...evt,
           start: new Date(evt.start),
@@ -109,17 +83,17 @@ function Home() {
         }));
         setEvents(mapped);
       })
-      .catch(err => console.error(err));
+      .catch(console.error);
   }, []);
 
-  // ▼ 2) 新規イベント追加
+  // ② 新規イベント追加
   const handleSelectSlot = async (slotInfo) => {
     const token = localStorage.getItem('token');
     if (!token) {
-      alert("ログインが必要です (管理者のみ編集可能)");
+      alert('ログインが必要です (管理者のみ編集可能)');
       return;
     }
-    const title = window.prompt("新しいイベントのタイトルは？");
+    const title = window.prompt('新しいイベントのタイトルは？');
     if (!title) return;
 
     const newEvent = {
@@ -134,7 +108,7 @@ function Home() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(newEvent)
       });
@@ -145,11 +119,7 @@ function Home() {
       }
       setEvents(prev => [
         ...prev,
-        {
-          ...created,
-          start: new Date(created.start),
-          end: new Date(created.end)
-        }
+        { ...created, start: new Date(created.start), end: new Date(created.end) }
       ]);
     } catch (err) {
       console.error(err);
@@ -157,40 +127,36 @@ function Home() {
     }
   };
 
-  // ▼ 3) イベントをクリック → 削除用モーダルを表示
+  // ③ クリック→削除モーダル
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
     setShowDeleteModal(true);
   };
 
-  // ▼ モーダルを閉じる
+  // モーダル閉じ
   const handleCloseDeleteModal = () => {
     setShowDeleteModal(false);
     setSelectedEvent(null);
   };
 
-  // ▼ 選択中のイベントを削除
+  // ④ イベント削除
   const handleDeleteEvent = async () => {
     if (!selectedEvent) return;
-
     const token = localStorage.getItem('token');
     if (!token) {
-      alert("ログインが必要です (管理者のみ編集可能)");
+      alert('ログインが必要です (管理者のみ編集可能)');
       return;
     }
     try {
       const res = await fetch(`/api/events/${selectedEvent.id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
       if (!res.ok) {
         alert(data.error || '削除に失敗');
         return;
       }
-      // イベント一覧から削除
       setEvents(prev => prev.filter(e => e.id !== selectedEvent.id));
     } catch (err) {
       console.error(err);
@@ -199,14 +165,13 @@ function Home() {
     handleCloseDeleteModal();
   };
 
-  // ▼ 4) ドラッグ移動/リサイズ
+  // ⑤ ドラッグ移動／リサイズ
   const handleEventDropOrResize = async ({ event, start, end, allDay }) => {
     const token = localStorage.getItem('token');
     if (!token) {
-      alert("ログインが必要です (管理者のみ編集可能)");
+      alert('ログインが必要です (管理者のみ編集可能)');
       return;
     }
-
     const updated = {
       title: event.title,
       start: start.toISOString(),
@@ -218,33 +183,39 @@ function Home() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(updated)
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || '移動/リサイズ中に失敗');
+        alert(data.error || '移動/リサイズに失敗');
         return;
       }
-      setEvents(prev => prev.map(e => e.id === data.id ? {
-        ...e,
-        title: data.title,
-        start: new Date(data.start),
-        end: new Date(data.end),
-        allDay: data.all_day
-      } : e));
+      setEvents(prev =>
+        prev.map(e =>
+          e.id === data.id
+            ? {
+                ...e,
+                title: data.title,
+                start: new Date(data.start),
+                end: new Date(data.end),
+                allDay: data.all_day
+              }
+            : e
+        )
+      );
     } catch (err) {
       console.error(err);
       alert('移動/リサイズ中にエラー');
     }
   };
 
+  /* ========================= JSX ========================= */
   return (
     <>
-      {/* ----- Hero Section ----- */}
+      {/* ---------- Hero ---------- */}
       <HeroSection>
-        {/* 半透明オーバーレイを加えて、より視認性を高める例 */}
         <Box
           sx={{
             position: 'absolute',
@@ -252,15 +223,7 @@ function Home() {
             backgroundColor: 'rgba(0,0,0,0.4)'
           }}
         />
-        <Box
-          sx={{
-            position: 'relative',
-            zIndex: 1,
-            textAlign: 'center',
-            color: '#fff',
-            p: 2
-          }}
-        >
+        <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center', color: '#fff', p: 2 }}>
           <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold' }}>
             ゲームカフェ.Levelへようこそ！
           </Typography>
@@ -270,24 +233,20 @@ function Home() {
         </Box>
       </HeroSection>
 
-      {/* ----- 店舗概要・コンセプト ----- */}
+      {/* ---------- コンセプト ---------- */}
       <Container sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>
-            当店のコンセプト
-          </Typography>
+          <Typography variant="h4" gutterBottom>当店のコンセプト</Typography>
           <Typography variant="body1">
             ゲームカフェ.Levelは、ボードゲームを通じて人と人とのつながりを大切にする場所です。
           </Typography>
         </Paper>
       </Container>
 
-      {/* ----- 営業情報 ----- */}
+      {/* ---------- 営業情報 ---------- */}
       <Container sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>
-            営業情報
-          </Typography>
+          <Typography variant="h4" gutterBottom>営業情報</Typography>
           <Typography variant="body2">
             平日 15:00 - 24:00 / 土日祝 13:00 - 24:00 / 定休日：月曜
           </Typography>
@@ -299,47 +258,25 @@ function Home() {
         </Paper>
       </Container>
 
-      {/* ----- リンクボタン集 (メニュー, カレンダー, 予約など) ----- */}
+      {/* ---------- リンクボタン集 ---------- */}
       <Container sx={{ mt: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          各種ページリンク
-        </Typography>
+        <Typography variant="h5" gutterBottom>各種ページリンク</Typography>
         <Grid container spacing={2}>
           <Grid item>
-            <Button 
-              variant="contained" 
-              component={RouterLink} 
-              to="/menu"
-            >
-              メニューを見る
-            </Button>
+            <Button variant="contained" component={RouterLink} to="/menu">メニューを見る</Button>
           </Grid>
           <Grid item>
-            <Button
-              variant="contained"
-              component={RouterLink}
-              to="/calendar"
-            >
-              設備紹介
-            </Button>
+            <Button variant="contained" component={RouterLink} to="/calendar">設備紹介</Button>
           </Grid>
           <Grid item>
-            <Button
-              variant="contained"
-              component={RouterLink}
-              to="/reservation"
-            >
-              予約フォーム
-            </Button>
+            <Button variant="contained" component={RouterLink} to="/reservation">予約フォーム</Button>
           </Grid>
         </Grid>
       </Container>
 
-      {/* ----- React-Big-Calendarを使った大型カレンダー (編集対応) ----- */}
+      {/* ---------- カレンダー ---------- */}
       <Container sx={{ mt: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          大きなカレンダー
-        </Typography>
+        <Typography variant="h5" gutterBottom>大きなカレンダー</Typography>
         <Paper sx={{ p: 2 }}>
           <div style={{ height: '500px' }}>
             <Calendar
@@ -348,8 +285,6 @@ function Home() {
               startAccessor="start"
               endAccessor="end"
               style={{ height: '100%' }}
-
-              // イベント編集用 (新規, 削除, ドラッグ移動, リサイズ)
               selectable
               onSelectSlot={handleSelectSlot}
               onSelectEvent={handleSelectEvent}
@@ -359,20 +294,13 @@ function Home() {
             />
           </div>
         </Paper>
-        <Typography variant="body2" sx={{ mt: 1 }}>
-          {/* 必要に応じて補足説明を追加 */}
-        </Typography>
       </Container>
 
-      {/* ----- アクセス (Google Map埋め込み) ----- */}
+      {/* ---------- アクセス ---------- */}
       <Container sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>
-            アクセス
-          </Typography>
-          <Typography variant="body1">
-            千葉県市川市湊新田2−1−１８ビアメゾンロジェール１０１
-          </Typography>
+          <Typography variant="h4" gutterBottom>アクセス</Typography>
+          <Typography variant="body1">千葉県市川市湊新田2−1−１８ビアメゾンロジェール１０１</Typography>
           <Box sx={{ mt: 2 }}>
             <iframe
               title="GoogleMap"
@@ -387,96 +315,37 @@ function Home() {
         </Paper>
       </Container>
 
-      {/* ----- SNSアイコン ----- */}
+      {/* ---------- SNS アイコン ---------- */}
       <Container sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          SNSをフォローしよう！
-        </Typography>
+        <Typography variant="h5" gutterBottom>SNSをフォローしよう！</Typography>
         <Grid container spacing={2}>
-          {/* X(旧Twitter) */}
           <Grid item>
-            <IconButton 
-              onClick={() => window.open('https://x.com/GamecafeLevel', '_blank')}
-              color="primary"
-            >
+            <IconButton onClick={() => window.open('https://x.com/GamecafeLevel', '_blank')} color="primary">
               <XIcon />
             </IconButton>
           </Grid>
-          {/* LINE */}
           <Grid item>
-            <IconButton
-              onClick={() => window.open('https://lin.ee/pyc6UjM', '_blank')}
-              color="primary"
-            >
+            <IconButton onClick={() => window.open('https://lin.ee/pyc6UjM', '_blank')} color="primary">
               <LineIcon />
             </IconButton>
           </Grid>
-          {/* Note */}
           <Grid item>
-            <IconButton
-              onClick={() => window.open('https://note.com/chop0058', '_blank')}
-              color="primary"
-            >
+            <IconButton onClick={() => window.open('https://note.com/chop0058', '_blank')} color="primary">
               <NoteIcon />
             </IconButton>
           </Grid>
         </Grid>
       </Container>
 
-      {/* モーダル (削除確認) */}
-      <Dialog
-        open={showDeleteModal}
-        onClose={handleCloseDeleteModal}
-      >
+      {/* ---------- 削除モーダル ---------- */}
+      <Dialog open={showDeleteModal} onClose={handleCloseDeleteModal}>
         <DialogTitle>イベント削除確認</DialogTitle>
         <DialogContent>
-          {selectedEvent && (
-            <Typography>
-              「{selectedEvent.title}」を削除しますか？
-            </Typography>
-          )}
+          {selectedEvent && <Typography>「{selectedEvent.title}」を削除しますか？</Typography>}
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => {
-              setShowDeleteModal(false);
-              setSelectedEvent(null);
-            }}
-          >
-            戻る
-          </Button>
-          <Button
-            color="error"
-            variant="contained"
-            onClick={async () => {
-              if (!selectedEvent) return;
-              const token = localStorage.getItem('token');
-              if (!token) {
-                alert("ログインが必要です (管理者のみ編集可能)");
-                return;
-              }
-              try {
-                const res = await fetch(`/api/events/${selectedEvent.id}`, {
-                  method: 'DELETE',
-                  headers: {
-                    'Authorization': `Bearer ${token}`
-                  }
-                });
-                const data = await res.json();
-                if (!res.ok) {
-                  alert(data.error || '削除に失敗');
-                  return;
-                }
-                // 成功したら state から削除
-                setEvents(prev => prev.filter(e => e.id !== selectedEvent.id));
-              } catch (err) {
-                console.error(err);
-                alert('削除中にエラーが発生');
-              }
-              setShowDeleteModal(false);
-              setSelectedEvent(null);
-            }}
-          >
+          <Button onClick={handleCloseDeleteModal}>戻る</Button>
+          <Button color="error" variant="contained" onClick={handleDeleteEvent}>
             削除
           </Button>
         </DialogActions>
