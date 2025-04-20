@@ -1,10 +1,6 @@
 // src/App.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import Home from './pages/Home';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import MyPage from './pages/MyPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
@@ -13,77 +9,83 @@ import {
   ThemeProvider,
   responsiveFontSizes
 } from '@mui/material/styles';
+import { Box, CircularProgress } from '@mui/material';
 
-// Helmet
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 
-/* ---------- ルーティング用ページ ---------- */
-import Menu           from './pages/Menu';
-import FAQ            from './pages/FAQ';
-import Calendar       from './pages/Calendar';
-import Reservation    from './pages/Reservation';
-import AdminDashboard from './pages/AdminDashboard';
-import NotFound       from './pages/NotFound';      // ★ 追加 404 ページ
+/* =========================================
+   1) lazy‑import するページ群
+   ========================================= */
+const Home            = lazy(() => import('./pages/Home'));
+const Register        = lazy(() => import('./pages/Register'));
+const Login           = lazy(() => import('./pages/Login'));
+const MyPage          = lazy(() => import('./pages/MyPage'));
+const Menu            = lazy(() => import('./pages/Menu'));
+const FAQ             = lazy(() => import('./pages/FAQ'));
+const Calendar        = lazy(() => import('./pages/Calendar'));
+const Reservation     = lazy(() => import('./pages/Reservation'));
+const AdminDashboard  = lazy(() => import('./pages/AdminDashboard'));
+const NotFound        = lazy(() => import('./pages/NotFound'));    // “最後の砦”
 
-/* =================================================
-   1) 高度なテーマ拡張
-   ================================================= */
+/* =========================================
+   2) 高度な MUI テーマ
+   ========================================= */
 let theme = createTheme({
-  breakpoints: { values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 } },
+  breakpoints: { values: { xs:0, sm:600, md:900, lg:1200, xl:1536 } },
   typography: {
-    fontFamily: '"RetroFont", "Helvetica", "Arial", sans-serif',
-    h1: { fontSize: '3rem', fontWeight: 700, '@media (max-width:600px)': { fontSize: '2.2rem' }},
-    h2: { fontSize: '2.4rem', fontWeight: 600, '@media (max-width:600px)': { fontSize: '2rem' }},
-    h3: { fontSize: '2rem', '@media (max-width:600px)': { fontSize: '1.6rem' }},
-    h6: { fontSize: '1rem', '@media (max-width:600px)': { fontSize: '0.9rem' }}
+    fontFamily: '"RetroFont","Helvetica","Arial",sans-serif',
+    h1:{ fontSize:'3rem', fontWeight:700, '@media (max-width:600px)':{ fontSize:'2.2rem' }},
+    h2:{ fontSize:'2.4rem', fontWeight:600, '@media (max-width:600px)':{ fontSize:'2rem' }},
+    h3:{ fontSize:'2rem', '@media (max-width:600px)':{ fontSize:'1.6rem' }},
+    h6:{ fontSize:'1rem', '@media (max-width:600px)':{ fontSize:'0.9rem' }}
   },
-  palette: {
-    primary:   { main: '#3e2723', light: '#6a4f4b', dark: '#1b0000' },
-    secondary: { main: '#0d47a1', light: '#5472d3', dark: '#002171' },
-    error:     { main: '#b71c1c' },
-    background:{ default: '#ececec' },
-    text:      { primary: '#000000' }
+  palette:{
+    primary:   { main:'#3e2723', light:'#6a4f4b', dark:'#1b0000' },
+    secondary: { main:'#0d47a1', light:'#5472d3', dark:'#002171' },
+    error:     { main:'#b71c1c' },
+    background:{ default:'#ececec' },
+    text:      { primary:'#000' }
   },
-  shape:   { borderRadius: 6 },
-  spacing: 8,
-  components: {
-    MuiButton: { styleOverrides: { containedPrimary: { color: '#fff' } } }
+  shape:{ borderRadius:6 },
+  spacing:8,
+  components:{
+    MuiButton:{ styleOverrides:{ containedPrimary:{ color:'#fff' } } }
   }
 });
 theme = responsiveFontSizes(theme);
 
-/* =================================================
-   2) App コンポーネント
-   ================================================= */
+/* --- Suspense フォールバック用ローダー --- */
+const CenterLoader = () => (
+  <Box sx={{display:'flex',justifyContent:'center',alignItems:'center',py:10}}>
+    <CircularProgress />
+  </Box>
+);
+
+/* =========================================
+   3) App コンポーネント
+   ========================================= */
 function App() {
   const [token,    setToken]    = useState(localStorage.getItem('token') || '');
   const [userRole, setUserRole] = useState('user');
   const navigate = useNavigate();
 
-  /* -------- ユーザー情報取得 -------- */
+  /* ---- ユーザー情報取得 ---- */
   useEffect(() => {
     const stored = localStorage.getItem('token') || '';
     setToken(stored);
 
     if (!stored) { setUserRole('user'); return; }
 
-    fetch('/api/userinfo', { headers: { Authorization: `Bearer ${stored}` } })
+    fetch('/api/userinfo', { headers:{ Authorization:`Bearer ${stored}` } })
       .then(r => r.json())
-      .then(data => {
-        if (data.error) {
-          console.error(data.error);
-          handleLogout();
-        } else {
-          setUserRole(data.role === 'admin' ? 'admin' : 'user');
-        }
+      .then(d => {
+        if (d.error) { handleLogout(); }
+        else { setUserRole(d.role === 'admin' ? 'admin' : 'user'); }
       })
-      .catch(err => {
-        console.error(err);
-        setUserRole('user');
-      });
+      .catch(() => setUserRole('user'));
   }, []);
 
-  /* -------- ログアウト -------- */
+  /* ---- ログアウト ---- */
   const handleLogout = () => {
     localStorage.removeItem('token');
     setToken('');
@@ -91,42 +93,52 @@ function App() {
     navigate('/');
   };
 
-  /* -------- 背景スタイル -------- */
-  const appStyle = { minHeight: '100vh', backgroundColor: theme.palette.background.default };
+  /* ---- 背景スタイル ---- */
+  const appStyle = { minHeight:'100vh', backgroundColor:theme.palette.background.default };
 
   return (
     <HelmetProvider>
       <ThemeProvider theme={theme}>
+        {/* ---------- 共通メタ ---------- */}
         <Helmet>
           <title>ゲームカフェ.Level | 行徳のボードゲームカフェ</title>
-          <meta name="description" content="千葉県行徳駅徒歩5分、1000種類以上のボードゲームが遊べる『ゲームカフェ.Level』公式サイト。営業時間・設備・料金はこちら。" />
-          <meta property="og:type" content="website" />
-          <meta property="og:title" content="ゲームカフェ.Level" />
+          <meta name="description"
+                content="千葉県行徳駅徒歩5分、1000種類以上のボードゲームが遊べる『ゲームカフェ.Level』公式サイト。営業時間・設備・料金はこちら。" />
+          <meta property="og:type"        content="website" />
+          <meta property="og:title"       content="ゲームカフェ.Level" />
           <meta property="og:description" content="行徳駅徒歩5分、1000種類以上のボードゲーム！ ボドゲ・麻雀・ポーカーまで遊べるカフェ" />
         </Helmet>
 
         <div style={appStyle}>
           <Header token={token} userRole={userRole} handleLogout={handleLogout} />
 
-          <Routes>
-            {/* --- 通常ページ --- */}
-            <Route path="/"           element={<Home />} />
-            <Route path="/register"   element={<Register token={token} setToken={setToken} />} />
-            <Route path="/login"      element={<Login    token={token} setToken={setToken} />} />
-            <Route path="/mypage"     element={<MyPage   token={token} />} />
-            <Route path="/menu"       element={<Menu />} />
-            <Route path="/faq"        element={<FAQ />} />
-            <Route path="/calendar"   element={<Calendar />} />
-            <Route path="/reservation"element={<Reservation />} />
+          {/* ---------- ルーティング ---------- */}
+          <Suspense fallback={<CenterLoader />}>
+            <Routes>
+              {/* Public */}
+              <Route path="/"           element={<Home />} />
+              <Route path="/menu"       element={<Menu />} />
+              <Route path="/faq"        element={<FAQ />} />
+              <Route path="/calendar"   element={<Calendar />} />
+              <Route path="/reservation"element={<Reservation />} />
 
-            {/* --- 管理者専用ページ --- */}
-            <Route path="/admin"
-              element={ userRole === 'admin' ? <AdminDashboard /> : <Navigate to="/" replace /> }
-            />
+              {/* Auth */}
+              <Route path="/register" element={<Register token={token} setToken={setToken} />} />
+              <Route path="/login"    element={<Login    token={token} setToken={setToken} />} />
+              <Route path="/mypage"   element={<MyPage   token={token} />} />
 
-            {/* --- 最後の砦（存在しないパスは 404 へ） --- */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              {/* Admin */}
+              <Route path="/admin"
+                element={ userRole === 'admin'
+                  ? <AdminDashboard />
+                  : <Navigate to="/" replace />
+                }
+              />
+
+              {/* 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
 
           <Footer />
         </div>

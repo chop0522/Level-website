@@ -19,7 +19,7 @@ function Reservation() {
             variant="contained"
             color="success"
             sx={{ mb: 2 }}
-            onClick={() => window.open('https://lin.ee/あなたのURL', '_blank')}
+            onClick={() => window.open('https://lin.ee/pyc6UjM', '_blank')}
           >
             LINEで予約する
           </Button>
