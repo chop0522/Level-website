@@ -15,80 +15,80 @@ import {
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
-// SEO / OGP 用
 import { Helmet } from 'react-helmet-async';
 
-// ▼ Big‑Calendar 関連
+/* ▼ Big‑Calendar */
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
-// カスタム CSS（行送り・文字サイズなど）
+/* ▼ カスタム CSS */
 import '../styles/CalendarOverride.css';
 
-// ---- 画像を import（JPG / PNG / AVIF のみ。WebP は使わない） ----
-import heroDogJpg from '../assets/images/composite_taller_dog.jpg';               // Hero 背景
+/* ▼ 画像遅延読み込み */
+import { LazyLoadImage } from 'react-lazy-load-image-component';
+import 'react-lazy-load-image-component/src/effects/blur.css';
+
+/* ▼ 画像アセット */
+import heroDogJpg from '../assets/images/composite_taller_dog.jpg';
 import xIcon    from '../assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif';
 import lineIcon from '../assets/images/icons8-line-48-2.png';
 import noteIcon from '../assets/images/icon.png';
 
-// ▼ X アイコン
-const XIcon = () => (
-  <img src={xIcon} alt="X(旧Twitter)" width="24" height="24" />
+/* ▼ SNSアイコン（遅延読み込み） */
+const XIcon   = () => (
+  <LazyLoadImage src={xIcon}   alt="X(旧Twitter)" width="24" height="24" effect="opacity" />
 );
-
-// ▼ LINE アイコン
 const LineIcon = () => (
-  <img src={lineIcon} alt="LINE" width="24" height="24" />
+  <LazyLoadImage src={lineIcon} alt="LINE"         width="24" height="24" effect="opacity" />
 );
-
-// ▼ Note アイコン
 const NoteIcon = () => (
-  <img src={noteIcon} alt="Note" width="24" height="24" />
+  <LazyLoadImage src={noteIcon} alt="Note"         width="24" height="24" effect="opacity" />
 );
 
-// ▼ Hero セクション ─ 背景に JPG を使用
-const HeroSection = styled(Box)(({ theme }) => ({
+/* ▼ Hero 用ラッパー */
+const HeroWrapper = styled(Box)({
   width: '100%',
-  height: '400px',
+  height: 400,
   position: 'relative',
-  backgroundImage: `url(${heroDogJpg})`,
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
+  overflow: 'hidden'
+});
+const HeroOverlay = styled(Box)({
+  position: 'absolute',
+  inset: 0,
+  backgroundColor: 'rgba(0,0,0,0.4)',
   display: 'flex',
-  alignItems: 'center',
+  flexDirection: 'column',
   justifyContent: 'center',
-  [theme.breakpoints.down('sm')]: { height: '300px' }
-}));
+  alignItems: 'center',
+  color: '#fff',
+  textAlign: 'center',
+  padding: '0 1rem'
+});
 
-// --- Big‑Calendar ローカライザ
+/* ▼ Big‑Calendar ローカライザ */
 import ja from 'date-fns/locale/ja';
 const locales = { ja };
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
 
 function Home() {
   const [events, setEvents] = useState([]);
-
-  // 削除モーダル・選択イベント
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  // ① 起動時：イベント取得
+  /* ① 起動時：イベント取得 */
   useEffect(() => {
     fetch('/api/events')
       .then(res => res.json())
-      .then(data => {
-        const mapped = data.map(evt => ({
-          ...evt,
-          start: new Date(evt.start),
-          end: new Date(evt.end)
-        }));
-        setEvents(mapped);
-      })
+      .then(data =>
+        setEvents(
+          data.map(evt => ({ ...evt, start: new Date(evt.start), end: new Date(evt.end) }))
+        )
+      )
       .catch(console.error);
   }, []);
 
-  // ② 新規イベント追加
+  /* ② 新規イベント追加 */
   const handleSelectSlot = async (slotInfo) => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -129,19 +129,13 @@ function Home() {
     }
   };
 
-  // ③ クリック→削除モーダル
+  /* ③ クリック → 削除モーダル */
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
     setShowDeleteModal(true);
   };
 
-  // モーダル閉じ
-  const handleCloseDeleteModal = () => {
-    setShowDeleteModal(false);
-    setSelectedEvent(null);
-  };
-
-  // ④ イベント削除
+  /* ④ 削除実行 */
   const handleDeleteEvent = async () => {
     if (!selectedEvent) return;
     const token = localStorage.getItem('token');
@@ -164,10 +158,11 @@ function Home() {
       console.error(err);
       alert('削除中にエラーが発生');
     }
-    handleCloseDeleteModal();
+    setShowDeleteModal(false);
+    setSelectedEvent(null);
   };
 
-  // ⑤ ドラッグ移動／リサイズ
+  /* ⑤ ドラッグ移動／リサイズ */
   const handleEventDropOrResize = async ({ event, start, end, allDay }) => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -213,7 +208,7 @@ function Home() {
     }
   };
 
-  /* ========================= JSX ========================= */
+  /* ---------------------------- JSX ---------------------------- */
   return (
     <>
       <Helmet>
@@ -226,27 +221,28 @@ function Home() {
         <meta property="og:title"       content="ゲームカフェ.Level" />
         <meta property="og:description" content="行徳駅のボードゲームカフェ。相席歓迎・貸切可！" />
         <meta property="og:url"         content="https://your-future-domain.jp/" />
-        {/* 画像が用意出来たら下記を差し替え */}
         <meta property="og:image"       content="https://your-future-domain.jp/ogp/home.jpg" />
       </Helmet>
+
       {/* ---------- Hero ---------- */}
-      <HeroSection>
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.4)'
-          }}
+      <HeroWrapper>
+        <LazyLoadImage
+          src={heroDogJpg}
+          alt="店内イメージ"
+          effect="blur"
+          width="100%"
+          height="100%"
+          style={{ objectFit: 'cover' }}
         />
-        <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center', color: '#fff', p: 2 }}>
+        <HeroOverlay>
           <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold' }}>
             ゲームカフェ.Levelへようこそ！
           </Typography>
           <Typography variant="h6" sx={{ mt: 1 }}>
             1000種類以上のボードゲームを取り揃えております。お一人様での相席、グループでのご来店も大歓迎です！
           </Typography>
-        </Box>
-      </HeroSection>
+        </HeroOverlay>
+      </HeroWrapper>
 
       {/* ---------- コンセプト ---------- */}
       <Container sx={{ mt: 4 }}>
@@ -330,7 +326,7 @@ function Home() {
         </Paper>
       </Container>
 
-      {/* ---------- SNS アイコン ---------- */}
+      {/* ---------- SNS ---------- */}
       <Container sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h5" gutterBottom>SNSをフォローしよう！</Typography>
         <Grid container spacing={2}>
@@ -353,16 +349,14 @@ function Home() {
       </Container>
 
       {/* ---------- 削除モーダル ---------- */}
-      <Dialog open={showDeleteModal} onClose={handleCloseDeleteModal}>
+      <Dialog open={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
         <DialogTitle>イベント削除確認</DialogTitle>
         <DialogContent>
           {selectedEvent && <Typography>「{selectedEvent.title}」を削除しますか？</Typography>}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteModal}>戻る</Button>
-          <Button color="error" variant="contained" onClick={handleDeleteEvent}>
-            削除
-          </Button>
+          <Button onClick={() => setShowDeleteModal(false)}>戻る</Button>
+          <Button color="error" variant="contained" onClick={handleDeleteEvent}>削除</Button>
         </DialogActions>
       </Dialog>
     </>

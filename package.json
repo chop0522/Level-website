@@ -27,6 +27,7 @@
         "react-chartjs-2": "^5.3.0",
         "react-dom": "^18.2.0",
         "react-helmet-async": "^2.0.5",
+        "react-lazy-load-image-component": "^1.6.3",
         "react-router-dom": "^6.12.1",
         "react-scripts": "5.0.1"
     },
