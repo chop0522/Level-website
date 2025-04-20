@@ -14,43 +14,28 @@ import {
   responsiveFontSizes
 } from '@mui/material/styles';
 
-// ▼ Helmet
+// Helmet
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 
 /* ---------- ルーティング用ページ ---------- */
 import Menu           from './pages/Menu';
 import FAQ            from './pages/FAQ';
-import Calendar       from './pages/Calendar';      /* 設備紹介ページ */
+import Calendar       from './pages/Calendar';
 import Reservation    from './pages/Reservation';
 import AdminDashboard from './pages/AdminDashboard';
+import NotFound       from './pages/NotFound';      // ★ 追加 404 ページ
 
 /* =================================================
    1) 高度なテーマ拡張
    ================================================= */
 let theme = createTheme({
-  breakpoints: {
-    values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 }
-  },
+  breakpoints: { values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 } },
   typography: {
     fontFamily: '"RetroFont", "Helvetica", "Arial", sans-serif',
-    h1: {
-      fontSize: '3rem',
-      fontWeight: 700,
-      '@media (max-width:600px)': { fontSize: '2.2rem' }
-    },
-    h2: {
-      fontSize: '2.4rem',
-      fontWeight: 600,
-      '@media (max-width:600px)': { fontSize: '2rem' }
-    },
-    h3: {
-      fontSize: '2rem',
-      '@media (max-width:600px)': { fontSize: '1.6rem' }
-    },
-    h6: {
-      fontSize: '1rem',
-      '@media (max-width:600px)': { fontSize: '0.9rem' }
-    }
+    h1: { fontSize: '3rem', fontWeight: 700, '@media (max-width:600px)': { fontSize: '2.2rem' }},
+    h2: { fontSize: '2.4rem', fontWeight: 600, '@media (max-width:600px)': { fontSize: '2rem' }},
+    h3: { fontSize: '2rem', '@media (max-width:600px)': { fontSize: '1.6rem' }},
+    h6: { fontSize: '1rem', '@media (max-width:600px)': { fontSize: '0.9rem' }}
   },
   palette: {
     primary:   { main: '#3e2723', light: '#6a4f4b', dark: '#1b0000' },
@@ -61,22 +46,10 @@ let theme = createTheme({
   },
   shape:   { borderRadius: 6 },
   spacing: 8,
-  shadows: [
-    'none',
-    '0px 1px 3px rgba(0,0,0,0.2)',
-    '0px 1px 5px rgba(0,0,0,0.2)',
-    // 必要に応じて以降を追加
-  ],
   components: {
-    MuiButton: {
-      styleOverrides: {
-        containedPrimary: { color: '#fff' }
-      }
-    }
+    MuiButton: { styleOverrides: { containedPrimary: { color: '#fff' } } }
   }
 });
-
-// フォントサイズの自動レスポンシブ調整
 theme = responsiveFontSizes(theme);
 
 /* =================================================
@@ -119,62 +92,42 @@ function App() {
   };
 
   /* -------- 背景スタイル -------- */
-  const appStyle = {
-    minHeight: '100vh',
-    backgroundColor: theme.palette.background.default
-  };
+  const appStyle = { minHeight: '100vh', backgroundColor: theme.palette.background.default };
 
-  /* =================================================
-       Render
-  ================================================= */
   return (
     <HelmetProvider>
       <ThemeProvider theme={theme}>
-        {/* --- グローバル meta (各ページで Helmet 上書き可) --- */}
         <Helmet>
           <title>ゲームカフェ.Level | 行徳のボードゲームカフェ</title>
-          <meta
-            name="description"
-            content="千葉県行徳駅徒歩5分、1000種類以上のボードゲームが遊べる『ゲームカフェ.Level』公式サイト。営業時間・設備・料金はこちら。"
-          />
-          {/* Open Graph */}
+          <meta name="description" content="千葉県行徳駅徒歩5分、1000種類以上のボードゲームが遊べる『ゲームカフェ.Level』公式サイト。営業時間・設備・料金はこちら。" />
           <meta property="og:type" content="website" />
           <meta property="og:title" content="ゲームカフェ.Level" />
-          <meta
-            property="og:description"
-            content="行徳駅徒歩5分、1000種類以上のボードゲーム！ ボドゲ・麻雀・ポーカーまで遊べるカフェ"
-          />
-          {/* og:image や twitter:card を追加してもOK */}
+          <meta property="og:description" content="行徳駅徒歩5分、1000種類以上のボードゲーム！ ボドゲ・麻雀・ポーカーまで遊べるカフェ" />
         </Helmet>
 
         <div style={appStyle}>
-          {/* ヘッダー */}
           <Header token={token} userRole={userRole} handleLogout={handleLogout} />
 
-          {/* ルーティング */}
           <Routes>
+            {/* --- 通常ページ --- */}
             <Route path="/"           element={<Home />} />
             <Route path="/register"   element={<Register token={token} setToken={setToken} />} />
             <Route path="/login"      element={<Login    token={token} setToken={setToken} />} />
             <Route path="/mypage"     element={<MyPage   token={token} />} />
-
             <Route path="/menu"       element={<Menu />} />
             <Route path="/faq"        element={<FAQ />} />
             <Route path="/calendar"   element={<Calendar />} />
             <Route path="/reservation"element={<Reservation />} />
 
-            {/* 管理者専用 */}
-            <Route
-              path="/admin"
-              element={
-                userRole === 'admin'
-                  ? <AdminDashboard />
-                  : <Navigate to="/" replace />
-              }
+            {/* --- 管理者専用ページ --- */}
+            <Route path="/admin"
+              element={ userRole === 'admin' ? <AdminDashboard /> : <Navigate to="/" replace /> }
             />
+
+            {/* --- 最後の砦（存在しないパスは 404 へ） --- */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
 
-          {/* フッター */}
           <Footer />
         </div>
       </ThemeProvider>
