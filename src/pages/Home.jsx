@@ -15,6 +15,8 @@ import {
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
+// SEO / OGP 用
+import { Helmet } from 'react-helmet-async';
 
 // ▼ Big‑Calendar 関連
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
@@ -214,6 +216,19 @@ function Home() {
   /* ========================= JSX ========================= */
   return (
     <>
+      <Helmet>
+        <title>ゲームカフェ.Level | 行徳のボードゲーム＆麻雀スペース</title>
+        <meta
+          name="description"
+          content="千葉県市川市・行徳駅すぐ。1000種類以上のボードゲームと最新全自動雀卓を楽しめるコミュニティカフェです。"
+        />
+        <meta property="og:type"        content="website" />
+        <meta property="og:title"       content="ゲームカフェ.Level" />
+        <meta property="og:description" content="行徳駅のボードゲームカフェ。相席歓迎・貸切可！" />
+        <meta property="og:url"         content="https://your-future-domain.jp/" />
+        {/* 画像が用意出来たら下記を差し替え */}
+        <meta property="og:image"       content="https://your-future-domain.jp/ogp/home.jpg" />
+      </Helmet>
       {/* ---------- Hero ---------- */}
       <HeroSection>
         <Box
