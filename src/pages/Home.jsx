@@ -30,7 +30,8 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 
 /* ▼ 画像アセット */
-import heroDogJpg from '../assets/images/composite_taller_dog.jpg';
+import heroDogWebp from '../assets/images/heroDog.webp';
+import heroDogJpg  from '../assets/images/heroDog.jpg';
 import xIcon    from '../assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif';
 import lineIcon from '../assets/images/icons8-line-48-2.png';
 import noteIcon from '../assets/images/icon.png';
@@ -226,14 +227,17 @@ function Home() {
 
       {/* ---------- Hero ---------- */}
       <HeroWrapper>
-        <LazyLoadImage
-          src={heroDogJpg}
-          alt="店内イメージ"
-          effect="blur"
-          width="100%"
-          height="100%"
-          style={{ objectFit: 'cover' }}
-        />
+        <picture>
+          <source srcSet={heroDogWebp} type="image/webp" />
+          <LazyLoadImage
+            src={heroDogJpg}
+            alt="店内イメージ"
+            effect="blur"
+            width="100%"
+            height="100%"
+            style={{ objectFit: 'cover' }}
+          />
+        </picture>
         <HeroOverlay>
           <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold' }}>
             ゲームカフェ.Levelへようこそ！
