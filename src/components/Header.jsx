@@ -15,8 +15,8 @@ function Header({
     setMenuOpen((prev) => !prev);
   };
 
-  return (
-    <header className={styles.header}>
+    return (
+    <header className={styles.header} role="banner">
       {/* 左側: ロゴ + ナビ */}
       <div className={styles.navLeft}>
         <h1 className={styles.logo}>Board Game Cafe</h1>
@@ -24,7 +24,8 @@ function Header({
         {/* PC時に横並び表示、スマホ時は隠れてハンバーガーボタンで開閉 */}
         <nav
           className={`${styles.navLinks} ${menuOpen ? styles.showMenu : ''}`}
-          onClick={() => setMenuOpen(false)} 
+          aria-label="主要ナビゲーション"
+          onClick={() => setMenuOpen(false)}
           // ↑ メニュー内のリンククリック後に自動でメニューを閉じる
         >
           <Link to="/">Home</Link>
@@ -60,9 +61,10 @@ function Header({
         )}
 
         {/* ハンバーガーボタン (スマホで表示) */}
-        <button 
+        <button
           className={styles.hamburgerBtn}
           onClick={toggleMenu}
+          aria-label={menuOpen ? 'メニューを閉じる' : 'メニューを開く'}
         >
           <span className={styles.hamburgerLine}></span>
           <span className={styles.hamburgerLine}></span>
