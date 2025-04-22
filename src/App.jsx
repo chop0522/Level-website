@@ -40,8 +40,8 @@ let theme = createTheme({
     h6:{ fontSize:'1rem', '@media (max-width:600px)':{ fontSize:'0.9rem' }}
   },
   palette:{
-    primary:   { main:'#3e2723', light:'#6a4f4b', dark:'#1b0000' },
-    secondary: { main:'#0d47a1', light:'#5472d3', dark:'#002171' },
+    primary:   { main:'#00b7ff', light:'#40c7ff', dark:'#0081b2' },
+    secondary: { main:'#3e2723', light:'#6a4f4b', dark:'#1b0000' },
     error:     { main:'#b71c1c' },
     background:{ default:'#ececec' },
     text:      { primary:'#000' }
