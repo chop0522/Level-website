@@ -1,0 +1,21 @@
+{
+    "name": "ゲームカフェ.Level",
+    "short_name": "Level",
+    "description": "千葉県市川市・行徳のボードゲームカフェ.Level公式サイト",
+    "icons": [
+      {
+        "src": "/icons/icon-192.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "/icons/icon-512.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#f5f5f5",
+    "theme_color": "#0097a7"
+  }

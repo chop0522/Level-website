@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './retroTheme.css'; // レトロ風CSS
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
@@ -13,3 +14,6 @@ root.render(
     <App />
   </BrowserRouter>
 );
+
+// オフラインキャッシュ用 Service Worker を有効化
+serviceWorkerRegistration.register();
