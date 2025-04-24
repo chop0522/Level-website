@@ -32,7 +32,6 @@ import 'react-lazy-load-image-component/src/effects/blur.css';
 /* ▼ Hero 画像（犬＋棚） */
 import heroDogWebp from '../assets/images/heroDog.webp';
 import heroDogJpg  from '../assets/images/heroDog.jpg';
-import heroDogJpg2x from '../assets/images/heroDog@2x.jpg'; // 2×解像度
 
 /* ▼ SNSアイコン画像 */
 import xIcon    from '../assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif';
@@ -238,7 +237,7 @@ function Home() {
           <source type="image/webp" srcSet={heroDogWebp} />
           <img
             src={heroDogJpg}
-            srcSet={`${heroDogJpg} 1x, ${heroDogJpg2x} 2x`}
+            srcSet={`${heroDogJpg} 1x`}
             sizes="100vw"
             alt="店内ボードゲーム棚"
             loading="eager"
