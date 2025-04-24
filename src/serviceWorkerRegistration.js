@@ -17,7 +17,13 @@ const isLocalhost = Boolean(
       return;
     }
   
-    const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`;
+    /**
+     * CRA では %PUBLIC_URL% がビルド済み HTML 内で展開されますが、
+     * Render などのホスティング環境ではパスが `/` で固定になるため
+     * 明示的にルートを指す方が 404 → HTML レスポンス (text/html) 問題を回避できます。
+     */
+    // ビルド後ルートに配置した Service Worker ファイルを指す
+    const swUrl = `/service-worker.js`;
   
     if (isLocalhost) {
       // localhost では Service Worker の更新確認を行う
