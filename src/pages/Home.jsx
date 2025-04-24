@@ -266,9 +266,9 @@ function Home() {
             平日 15:00 - 24:00 / 土日祝 13:00 - 24:00 / 定休日：月曜
           </Typography>
           <Typography variant="body2" sx={{ mt: 1 }}>
-            30分300円　4時間パック1,200円　1日パック2,400円　ワンドリンク制<br/>
-            貸切プラン　平日2時間20,000円　4時間30,000円<br/>
-            　　　　　　土日祝日　9時から12時30分　30,000円　※お時間はご相談ください
+            月曜祝日の場合も営業しております。
+            団体様でご来店をご予定される場合は一度お問い合わせください。
+            また貸切予約に関しましては、FAQをご覧の上お問い合わせください。
           </Typography>
         </Paper>
       </Container>
@@ -284,7 +284,7 @@ function Home() {
             <Button variant="contained" component={RouterLink} to="/calendar">設備紹介</Button>
           </Grid>
           <Grid item>
-            <Button variant="contained" component={RouterLink} to="/reservation">予約フォーム</Button>
+            <Button variant="contained" component={RouterLink} to="/reservation">予約</Button>
           </Grid>
         </Grid>
       </Container>
