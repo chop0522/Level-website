@@ -17,7 +17,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Helmet } from 'react-helmet-async';
 
-/* ▼ Big‑Calendar */
+/* ▼ Big-Calendar */
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -29,26 +29,28 @@ import '../styles/CalendarOverride.css';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 
-/* ▼ 画像アセット */
+/* ▼ Hero 画像（犬＋棚） */
 import heroDogWebp from '../assets/images/heroDog.webp';
 import heroDogJpg  from '../assets/images/heroDog.jpg';
 import heroDogJpg2x from '../assets/images/heroDog@2x.jpg'; // 2×解像度
+
+/* ▼ SNSアイコン画像 */
 import xIcon    from '../assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif';
 import lineIcon from '../assets/images/icons8-line-48-2.png';
 import noteIcon from '../assets/images/icon.png';
 
-/* ▼ SNSアイコン（遅延読み込み） */
-const XIcon   = () => (
-  <LazyLoadImage src={xIcon}   alt="X(旧Twitter)" width="24" height="24" effect="opacity" />
+/* ▼ SNSアイコン（遅延表示） */
+const XIcon = () => (
+  <LazyLoadImage src={xIcon} alt="X" width="24" height="24" effect="opacity" />
 );
 const LineIcon = () => (
-  <LazyLoadImage src={lineIcon} alt="LINE"         width="24" height="24" effect="opacity" />
+  <LazyLoadImage src={lineIcon} alt="LINE" width="24" height="24" effect="opacity" />
 );
 const NoteIcon = () => (
-  <LazyLoadImage src={noteIcon} alt="Note"         width="24" height="24" effect="opacity" />
+  <LazyLoadImage src={noteIcon} alt="Note" width="24" height="24" effect="opacity" />
 );
 
-/* ▼ Hero 用ラッパー */
+/* ▼ Hero ラッパー */
 const HeroWrapper = styled(Box)({
   width: '100%',
   height: 400,
@@ -68,7 +70,7 @@ const HeroOverlay = styled(Box)({
   padding: '0 1rem'
 });
 
-/* ▼ Big‑Calendar ローカライザ */
+/* ▼ Big-Calendar ローカライザ */
 import ja from 'date-fns/locale/ja';
 const locales = { ja };
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
@@ -84,7 +86,11 @@ function Home() {
       .then(res => res.json())
       .then(data =>
         setEvents(
-          data.map(evt => ({ ...evt, start: new Date(evt.start), end: new Date(evt.end) }))
+          data.map(evt => ({
+            ...evt,
+            start: new Date(evt.start),
+            end: new Date(evt.end)
+          }))
         )
       )
       .catch(console.error);
@@ -235,7 +241,7 @@ function Home() {
             srcSet={`${heroDogJpg} 1x, ${heroDogJpg2x} 2x`}
             sizes="100vw"
             alt="店内ボードゲーム棚"
-            loading="eager"          // 最重要画像は遅延させず先に読む
+            loading="eager"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </picture>
@@ -249,10 +255,12 @@ function Home() {
         </HeroOverlay>
       </HeroWrapper>
 
-      {/* ---------- コンセプト ---------- */}
+      {/* ---------- 当店のコンセプト ---------- */}
       <Container sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>当店のコンセプト</Typography>
+          <Typography variant="h4" gutterBottom>
+            当店のコンセプト
+          </Typography>
           <Typography variant="body1">
             ゲームカフェ.Levelは、ボードゲームを通じて人と人とのつながりを大切にする場所です。
           </Typography>
@@ -262,37 +270,51 @@ function Home() {
       {/* ---------- 営業情報 ---------- */}
       <Container sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>営業情報</Typography>
+          <Typography variant="h4" gutterBottom>
+            営業情報
+          </Typography>
           <Typography variant="body2">
             平日 15:00 - 24:00 / 土日祝 13:00 - 24:00 / 定休日：月曜
           </Typography>
           <Typography variant="body2" sx={{ mt: 1 }}>
-            月曜祝日の場合も営業しております。
-            団体様でご来店をご予定される場合は一度お問い合わせください。
-            また貸切予約に関しましては、FAQをご覧の上お問い合わせください。
+            30分300円　4時間パック1,200円　1日パック2,400円　ワンドリンク制
+            <br />
+            貸切プラン　平日2時間20,000円　4時間30,000円
+            <br />
+            土日祝日　9時から12時30分　30,000円　※お時間はご相談ください
           </Typography>
         </Paper>
       </Container>
 
       {/* ---------- リンクボタン集 ---------- */}
       <Container sx={{ mt: 4 }}>
-        <Typography variant="h5" gutterBottom>各種ページリンク</Typography>
+        <Typography variant="h5" gutterBottom>
+          各種ページリンク
+        </Typography>
         <Grid container spacing={2}>
           <Grid item>
-            <Button variant="contained" component={RouterLink} to="/menu">メニューを見る</Button>
+            <Button variant="contained" component={RouterLink} to="/menu">
+              メニューを見る
+            </Button>
           </Grid>
           <Grid item>
-            <Button variant="contained" component={RouterLink} to="/calendar">設備紹介</Button>
+            <Button variant="contained" component={RouterLink} to="/calendar">
+              設備紹介
+            </Button>
           </Grid>
           <Grid item>
-            <Button variant="contained" component={RouterLink} to="/reservation">予約</Button>
+            <Button variant="contained" component={RouterLink} to="/reservation">
+              予約
+            </Button>
           </Grid>
         </Grid>
       </Container>
 
       {/* ---------- カレンダー ---------- */}
       <Container sx={{ mt: 4 }}>
-        <Typography variant="h5" gutterBottom>大きなカレンダー</Typography>
+        <Typography variant="h5" gutterBottom>
+          大きなカレンダー
+        </Typography>
         <Paper sx={{ p: 2 }}>
           <div style={{ height: '500px' }}>
             <Calendar
@@ -315,8 +337,12 @@ function Home() {
       {/* ---------- アクセス ---------- */}
       <Container sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>アクセス</Typography>
-          <Typography variant="body1">千葉県市川市湊新田2−1−１８ビアメゾンロジェール１０１</Typography>
+          <Typography variant="h4" gutterBottom>
+            アクセス
+          </Typography>
+          <Typography variant="body1">
+            千葉県市川市湊新田2−1−18 ビアメゾンロジェール101
+          </Typography>
           <Box sx={{ mt: 2 }}>
             <iframe
               title="GoogleMap"
@@ -333,20 +359,31 @@ function Home() {
 
       {/* ---------- SNS ---------- */}
       <Container sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h5" gutterBottom>SNSをフォローしよう！</Typography>
+        <Typography variant="h5" gutterBottom>
+          SNSをフォローしよう！
+        </Typography>
         <Grid container spacing={2}>
           <Grid item>
-            <IconButton onClick={() => window.open('https://x.com/GamecafeLevel', '_blank')} color="primary">
+            <IconButton
+              onClick={() => window.open('https://x.com/GamecafeLevel', '_blank')}
+              color="primary"
+            >
               <XIcon />
             </IconButton>
           </Grid>
           <Grid item>
-            <IconButton onClick={() => window.open('https://lin.ee/pyc6UjM', '_blank')} color="primary">
+            <IconButton
+              onClick={() => window.open('https://lin.ee/pyc6UjM', '_blank')}
+              color="primary"
+            >
               <LineIcon />
             </IconButton>
           </Grid>
           <Grid item>
-            <IconButton onClick={() => window.open('https://note.com/chop0058', '_blank')} color="primary">
+            <IconButton
+              onClick={() => window.open('https://note.com/chop0058', '_blank')}
+              color="primary"
+            >
               <NoteIcon />
             </IconButton>
           </Grid>
@@ -361,7 +398,9 @@ function Home() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowDeleteModal(false)}>戻る</Button>
-          <Button color="error" variant="contained" onClick={handleDeleteEvent}>削除</Button>
+          <Button color="error" variant="contained" onClick={handleDeleteEvent}>
+            削除
+          </Button>
         </DialogActions>
       </Dialog>
     </>
