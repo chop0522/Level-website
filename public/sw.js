@@ -1,9 +1,9 @@
 /* public/sw.js */
 
-/* --- キャッシュ名 --- */
-const STATIC_CACHE = 'static-v1';
-const IMAGE_CACHE  = 'images-v1';
-const API_CACHE    = 'api-v1';
+/* --- キャッシュ名（バージョンアップ時はここを変更） --- */
+const STATIC_CACHE = 'static-v2';
+const IMAGE_CACHE  = 'images-v2';
+const API_CACHE    = 'api-v2';
 
 /* --- install：ビルド成果物をプリキャッシュ --- */
 self.addEventListener('install', event => {
@@ -15,10 +15,13 @@ self.addEventListener('install', event => {
         '/manifest.json',
         '/logo192.png',
         '/logo512.png',
+        '/offline.html',
+        '/assets/images/heroDog.jpg',
         // ← ここに build 後も URL が変わらないファイルを列挙
       ])
     )
   );
+  // 新しいバージョンをリリースする際はキャッシュ名のバージョンを必ず更新してください
   self.skipWaiting();          // 即時 activate
 });
 
@@ -38,6 +41,14 @@ self.addEventListener('activate', event => {
 /* --- fetch：リクエスト毎に戦略を切替 --- */
 self.addEventListener('fetch', event => {
   const { request } = event;
+
+  /* 0) ナビゲーションリクエストは Network First + オフラインフォールバック */
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      networkFirst(request, STATIC_CACHE).catch(() => caches.match('/offline.html'))
+    );
+    return;
+  }
 
   /* 1) API（/api/ で始まるもの）は Network First */
   if (request.url.includes('/api/')) {
@@ -66,8 +77,10 @@ async function cacheFirst(request, cacheName) {
 async function networkFirst(request, cacheName) {
   try {
     const response = await fetch(request);
-    const cache = await caches.open(cacheName);
-    cache.put(request, response.clone());
+    if (response && response.status === 200) {
+      const cache = await caches.open(cacheName);
+      cache.put(request, response.clone());
+    }
     return response;
   } catch {
     return caches.match(request);
