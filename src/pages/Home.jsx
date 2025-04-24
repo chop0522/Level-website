@@ -32,6 +32,7 @@ import 'react-lazy-load-image-component/src/effects/blur.css';
 /* ▼ 画像アセット */
 import heroDogWebp from '../assets/images/heroDog.webp';
 import heroDogJpg  from '../assets/images/heroDog.jpg';
+import heroDogJpg2x from '../assets/images/heroDog@2x.jpg'; // 2×解像度
 import xIcon    from '../assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif';
 import lineIcon from '../assets/images/icons8-line-48-2.png';
 import noteIcon from '../assets/images/icon.png';
@@ -228,14 +229,14 @@ function Home() {
       {/* ---------- Hero ---------- */}
       <HeroWrapper>
         <picture>
-          <source srcSet={heroDogWebp} type="image/webp" />
-          <LazyLoadImage
+          <source type="image/webp" srcSet={heroDogWebp} />
+          <img
             src={heroDogJpg}
-            alt="店内イメージ"
-            effect="blur"
-            width="100%"
-            height="100%"
-            style={{ objectFit: 'cover' }}
+            srcSet={`${heroDogJpg} 1x, ${heroDogJpg2x} 2x`}
+            sizes="100vw"
+            alt="店内ボードゲーム棚"
+            loading="eager"          // 最重要画像は遅延させず先に読む
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </picture>
         <HeroOverlay>

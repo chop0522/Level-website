@@ -1,45 +1,43 @@
 /* src/retroTheme.css */
 
-/* 
-  1) Google Fonts: Press Start 2P
-     既に link などで読み込んでいない場合、@import でOK
-*/
+/* Google Font – keep retro look */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 body {
   margin: 0;
   padding: 0;
 
-  background-color: #0d1321; /* 深いネイビー */
+  background-color: #f5f5f5; /* 深いネイビー */
 
   /* ▼ 文字色・フォント */
-  color: #eee;
+  color: #333;
   font-family: 'Press Start 2P', monospace !important;
 }
 
 /* リンク色 */
 a {
-  color: #00b7ff;
+  color: #1976d2;
   text-decoration: none;
 }
 
 /* レトロな見た目の見出し */
 h1, h2, h3 {
-  text-shadow: 2px 2px 0px #555;
+  text-shadow: 2px 2px 0px #999;
 }
 
 /* ヘッダーとフッターの背景 */
 .header, .footer {
   /* もしレンガ壁を全体にするなら bodyで設定済み→ここで別の色が要るか?
      とりあえず #222 背景を残す  */
-  background-color: #111;
+  background-color: #ffffff;
+  border-bottom: 2px solid #e0e0e0;
   padding: 10px;
   text-align: center;
 }
 
 /* ロゴの水色アクセント */
 .logo {
-  color: #00b7ff;
+  color: #03a9f4;
 }
 
 /* メインコンテンツ */
@@ -51,14 +49,14 @@ h1, h2, h3 {
 .button-retro {
   display: inline-block;
   color: #fff;
-  background-color: #333;
-  border: 4px double #fff;
+  background-color: #424242;
+  border: 2px solid #fff;
   padding: 8px 16px;
   cursor: pointer;
   text-decoration: none;
 }
 
 .button-retro:hover {
-  background-color: #00b7ff;
-  color: #111;
+  background-color: #03a9f4;
+  color: #ffffff;
 }

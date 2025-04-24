@@ -3,6 +3,8 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
+  <!-- 高速化: Google Fonts へ先行接続 -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <title>ボードゲームカフェ .Level | 千葉県市川市行徳のゲームカフェ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -26,16 +28,22 @@
   <meta property="og:url" content="https://level-website-0m7e.onrender.com/">
   <meta property="og:title" content="ボードゲームカフェ .Level | 千葉県市川市行徳のゲームカフェ">
   <meta property="og:description" content="行徳駅徒歩3分。1000種類以上のボードゲームが遊べる『ボードゲームカフェ .Level』の公式サイト。料金・設備・イベント情報を掲載しています。">
-  <meta property="og:image" content="/heroDog.jpg">
+  <meta property="og:image" content="/assets/images/heroDog.jpg">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="ボードゲームカフェ .Level | 千葉県市川市行徳のゲームカフェ">
   <meta name="twitter:description" content="行徳駅徒歩3分。1000種類以上のボードゲームが遊べる『ボードゲームカフェ .Level』公式サイト。">
-  <meta name="twitter:image" content="/heroDog.jpg">
+  <meta name="twitter:image" content="/assets/images/heroDog.jpg">
 
   <!-- レトロフォント例：Press Start 2P -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- LCP 改善: Hero 画像を先読み -->
+  <link rel="preload" as="image"
+        href="/assets/images/heroDog.webp"
+        imagesrcset="/assets/images/heroDog.webp 1x,
+                     /assets/images/heroDog.jpg 2x"
+        imagesizes="100vw">
 
   <!-- ▼ Google Analytics 4 用スニペット (最小限) -->
   <!-- 下記の測定ID G-ABCDE12345 をあなたの実際のGA4測定IDに置き換えてください -->
