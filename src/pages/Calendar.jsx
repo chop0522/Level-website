@@ -2,10 +2,19 @@
 import React from 'react';
 import { Container, Paper, Typography, Box } from '@mui/material';
 
-// 例: 将来的に画像をimportする場合は下記のように
-// import tablePhoto from '../assets/images/table_photo.jpg';
-// import monitorPhoto from '../assets/images/monitor.jpg';
-// ...など
+// 店内写真（jpg ＋ webp）
+import mahjongJpg      from '../assets/images/mahjong_table.jpg';
+import mahjongWebp     from '../assets/images/mahjong_table.webp';
+import shelfJpg        from '../assets/images/boardgame_shelves.jpg';
+import shelfWebp       from '../assets/images/boardgame_shelves.webp';
+
+// WebP + JPG フォールバック表示用
+const Picture = ({ webp, jpg, alt }) => (
+  <picture>
+    {webp && <source type="image/webp" srcSet={webp} />}
+    <img src={jpg} alt={alt} loading="lazy" style={{ width: '100%', height: 'auto', borderRadius: 8 }} />
+  </picture>
+);
 
 function Features() {
   return (
@@ -28,20 +37,11 @@ function Features() {
             {/* 写真の説明をここに入れる */}
             テーブル・椅子のイメージ
           </Typography>
-          {/* 例: <img src={tablePhoto} alt="テーブル・椅子" style={{ maxWidth: '100%' }} /> */}
-          <Paper
-            variant="outlined"
-            sx={{
-              height: 180,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#999',
-            }}
-          >
-            {/* プレースホルダー */}
-            写真(テーブル・椅子)のプレースホルダー
-          </Paper>
+          <Picture
+            webp={mahjongWebp}
+            jpg={mahjongJpg}
+            alt="最新全自動雀卓 AMOS REX3"
+          />
         </Box>
 
         {/* 大型モニターや雀卓の写真を追加するなら下記を複製 */}
@@ -83,19 +83,11 @@ function Features() {
             <Typography variant="body2" sx={{ mb: 1 }}>
               内装イメージ / ボードゲーム棚など
             </Typography>
-            <Paper
-              variant="outlined"
-              sx={{
-                height: 180,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#999',
-              }}
-            >
-              {/* プレースホルダー */}
-              写真(内装・ゲーム棚)のプレースホルダー
-            </Paper>
+            <Picture
+              webp={shelfWebp}
+              jpg={shelfJpg}
+              alt="店内ボードゲーム棚"
+            />
           </Box>
         </Paper>
       </Box>
