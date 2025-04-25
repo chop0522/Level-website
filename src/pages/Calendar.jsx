@@ -7,6 +7,14 @@ import mahjongJpg      from '../assets/images/mahjong_table.jpg';
 import mahjongWebp     from '../assets/images/mahjong_table.webp';
 import shelfJpg        from '../assets/images/boardgame_shelves.jpg';
 import shelfWebp       from '../assets/images/boardgame_shelves.webp';
+import shelfCloseJpg   from '../assets/images/boardgame_shelves_close.jpg';
+import shelfCloseWebp  from '../assets/images/boardgame_shelves_close.webp';
+import shelfAngleJpg   from '../assets/images/boardgame_shelves_angle.jpg';
+import shelfAngleWebp  from '../assets/images/boardgame_shelves_angle.webp';
+import cafeInteriorJpg from '../assets/images/cafe_interior.jpg';
+import cafeInteriorWebp from '../assets/images/cafe_interior.webp';
+import cafeExteriorJpg from '../assets/images/cafe_exterior.jpg';
+import cafeExteriorWebp from '../assets/images/cafe_exterior.webp';
 
 // WebP + JPG フォールバック表示用
 const Picture = ({ webp, jpg, alt }) => (
@@ -50,19 +58,11 @@ function Features() {
             大型モニター / 全自動雀卓イメージ
           </Typography>
           {/* 例: <img src={monitorPhoto} alt="大型モニター" style={{ maxWidth: '100%' }} /> */}
-          <Paper
-            variant="outlined"
-            sx={{
-              height: 180,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#999',
-            }}
-          >
-            {/* プレースホルダー */}
-            写真(モニター・雀卓)のプレースホルダー
-          </Paper>
+          <Picture
+            webp={shelfCloseWebp}
+            jpg={shelfCloseJpg}
+            alt="テーブル・椅子とゲーム棚"
+          />
         </Box>
       </Paper>
 
@@ -70,12 +70,11 @@ function Features() {
       <Box sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h4" gutterBottom>
-            特徴・ウリ
+            特徴
           </Typography>
           <Typography variant="body1" paragraph>
             ・ボードゲームは1000種類以上！<br/>
             ・ボードゲーム以外にも、麻雀、ポーカー、クイズ、謎解き、マーダーミステリーなど多彩に遊べる<br/>
-            ・店内写真や内装イメージなども今後アップ予定
           </Typography>
 
           {/* 特徴や内装写真を追加 */}
@@ -87,6 +86,18 @@ function Features() {
               webp={shelfWebp}
               jpg={shelfJpg}
               alt="店内ボードゲーム棚"
+            />
+          </Box>
+
+          {/* 角度違いのボードゲーム棚写真 */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              ボードゲーム棚（別アングル）
+            </Typography>
+            <Picture
+              webp={shelfAngleWebp}
+              jpg={shelfAngleJpg}
+              alt="店内ボードゲーム棚 別アングル"
             />
           </Box>
         </Paper>
@@ -108,19 +119,11 @@ function Features() {
             <Typography variant="body2" sx={{ mb: 1 }}>
               店舗外観 / 看板イメージ
             </Typography>
-            <Paper
-              variant="outlined"
-              sx={{
-                height: 180,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#999',
-              }}
-            >
-              {/* プレースホルダー */}
-              写真(外観)のプレースホルダー
-            </Paper>
+            <Picture
+              webp={cafeExteriorWebp}
+              jpg={cafeExteriorJpg}
+              alt="店舗外観"
+            />
           </Box>
         </Paper>
       </Box>
@@ -141,19 +144,11 @@ function Features() {
             <Typography variant="body2" sx={{ mb: 1 }}>
               貸切時の様子 / 大人数写真など
             </Typography>
-            <Paper
-              variant="outlined"
-              sx={{
-                height: 180,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#999',
-              }}
-            >
-              {/* プレースホルダー */}
-              写真(貸切イメージ)のプレースホルダー
-            </Paper>
+            <Picture
+              webp={cafeInteriorWebp}
+              jpg={cafeInteriorJpg}
+              alt="貸切時の店内レイアウト"
+            />
           </Box>
         </Paper>
       </Box>
