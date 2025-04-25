@@ -5,8 +5,6 @@ import { Container, Paper, Typography, Box } from '@mui/material';
 // 店内写真（jpg ＋ webp）
 import mahjongJpg      from '../assets/images/mahjong_table.jpg';
 import mahjongWebp     from '../assets/images/mahjong_table.webp';
-import shelfJpg        from '../assets/images/boardgame_shelves.jpg';
-import shelfWebp       from '../assets/images/boardgame_shelves.webp';
 import shelfCloseJpg   from '../assets/images/boardgame_shelves_close.jpg';
 import shelfCloseWebp  from '../assets/images/boardgame_shelves_close.webp';
 import shelfAngleJpg   from '../assets/images/boardgame_shelves_angle.jpg';
@@ -59,9 +57,9 @@ function Features() {
           </Typography>
           {/* 例: <img src={monitorPhoto} alt="大型モニター" style={{ maxWidth: '100%' }} /> */}
           <Picture
-            webp={shelfCloseWebp}
-            jpg={shelfCloseJpg}
-            alt="テーブル・椅子とゲーム棚"
+            webp={cafeInteriorWebp}
+            jpg={cafeInteriorJpg}
+            alt="店内レイアウトと大型モニター"
           />
         </Box>
       </Paper>
@@ -83,8 +81,8 @@ function Features() {
               内装イメージ / ボードゲーム棚など
             </Typography>
             <Picture
-              webp={shelfWebp}
-              jpg={shelfJpg}
+              webp={shelfCloseWebp}
+              jpg={shelfCloseJpg}
               alt="店内ボードゲーム棚"
             />
           </Box>
@@ -138,18 +136,6 @@ function Features() {
             ・広いスペースを全面的に使え、大人数でのボードゲームやイベントが可能<br/>
             ・大型モニターや最新全自動雀卓（AMOS REX3）も利用可
           </Typography>
-
-          {/* 貸切利用時のイメージ写真 */}
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>
-              貸切時の様子 / 大人数写真など
-            </Typography>
-            <Picture
-              webp={cafeInteriorWebp}
-              jpg={cafeInteriorJpg}
-              alt="貸切時の店内レイアウト"
-            />
-          </Box>
         </Paper>
       </Box>
     </Container>
