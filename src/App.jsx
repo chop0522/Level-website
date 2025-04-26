@@ -2,6 +2,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import Header from './components/Header';
+import Loader from './components/Loader';
 import Footer from './components/Footer';
 
 import {
@@ -9,7 +10,6 @@ import {
   ThemeProvider,
   responsiveFontSizes
 } from '@mui/material/styles';
-import { Box, CircularProgress } from '@mui/material';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 
@@ -54,12 +54,6 @@ let theme = createTheme({
 });
 theme = responsiveFontSizes(theme);
 
-/* --- Suspense フォールバック用ローダー --- */
-const CenterLoader = () => (
-  <Box sx={{display:'flex',justifyContent:'center',alignItems:'center',py:10}}>
-    <CircularProgress />
-  </Box>
-);
 
 /* =========================================
    3) App コンポーネント
@@ -113,7 +107,7 @@ function App() {
           <Header token={token} userRole={userRole} handleLogout={handleLogout} />
 
           {/* ---------- ルーティング ---------- */}
-          <Suspense fallback={<CenterLoader />}>
+          <Suspense fallback={<Loader />}>
             <Routes>
               {/* Public */}
               <Route path="/"           element={<Home />} />
