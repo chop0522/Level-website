@@ -241,6 +241,7 @@ function Home() {
             sizes="100vw"
             alt="店内ボードゲーム棚"
             loading="eager"
+            fetchpriority="high"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </picture>
