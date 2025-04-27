@@ -34,7 +34,7 @@ function Header({
         >
           <Link to="/">Home</Link>
           <Link to="/menu">Menu</Link>
-          <Link to="/equipment">Equipment</Link>
+          <Link to="/calender">Equipment</Link>
           <Link to="/reservation">Reservation</Link>
           <Link to="/faq">FAQ</Link>
 
