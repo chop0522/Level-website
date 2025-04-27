@@ -28,6 +28,7 @@ import '../styles/CalendarOverride.css';
 /* ▼ 画像遅延読み込み */
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
+import { useInView } from 'react-intersection-observer';
 
 /* ▼ Hero 画像（犬＋棚） */
 import heroDogWebp from '../assets/images/heroDog.webp';
@@ -78,6 +79,12 @@ function Home() {
   const [events, setEvents] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+
+  // IntersectionObserver for lazy‑loading the Google Map iframe
+  const { ref: mapRef, inView: mapInView } = useInView({
+    triggerOnce: true,
+    rootMargin: '200px'
+  });
 
   /* ① 起動時：イベント取得 */
   useEffect(() => {
@@ -340,16 +347,18 @@ function Home() {
           <Typography variant="body1">
             千葉県市川市湊新田2−1−18 ビアメゾンロジェール101
           </Typography>
-          <Box sx={{ mt: 2 }}>
-            <iframe
-              title="GoogleMap"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3240.867767207533!2d139.90914127620368!3d35.6802578300267!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188768af217c7b%3A0x42dc8c85cafabf51!2z44Ky44O844Og44Kr44OV44KnLkxldmVs!5e0!3m2!1sja!2sjp!4v1741783603258!5m2!1sja!2sjp"
-              width="100%"
-              height="300"
-              style={{ border: 0 }}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
+          <Box sx={{ mt: 2 }} ref={mapRef}>
+            {mapInView && (
+              <iframe
+                title="GoogleMap"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3240.867767207533!2d139.90914127620368!3d35.6802578300267!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188768af217c7b%3A0x42dc8c85cafabf51!2z44Ky44O844Og44Kr44OV44KnLkxldmVs!5e0!3m2!1sja!2sjp!4v1741783603258!5m2!1sja!2sjp"
+                width="100%"
+                height="300"
+                style={{ border: 0 }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            )}
           </Box>
         </Paper>
       </Container>
