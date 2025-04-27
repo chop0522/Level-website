@@ -1,6 +1,10 @@
 // src/components/Header.jsx
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Link } from 'react-router-dom';
+import { IconButton } from '@mui/material';
+// ---- MUI Icons (lazy loaded to keep the main bundle small) ----
+const MenuIcon  = React.lazy(() => import('@mui/icons-material/Menu'));
+const CloseIcon = React.lazy(() => import('@mui/icons-material/Close'));
 import styles from './Header.module.css';
 
 function Header({
@@ -61,15 +65,16 @@ function Header({
         )}
 
         {/* ハンバーガーボタン (スマホで表示) */}
-        <button
+        <IconButton
           className={styles.hamburgerBtn}
           onClick={toggleMenu}
           aria-label={menuOpen ? 'メニューを閉じる' : 'メニューを開く'}
+          size="large"
         >
-          <span className={styles.hamburgerLine}></span>
-          <span className={styles.hamburgerLine}></span>
-          <span className={styles.hamburgerLine}></span>
-        </button>
+          <Suspense fallback={null}>
+            {menuOpen ? <CloseIcon /> : <MenuIcon />}
+          </Suspense>
+        </IconButton>
       </div>
     </header>
   );
