@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <title>ボードゲームカフェ .Level | 千葉県市川市行徳のゲームカフェ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -40,7 +41,9 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-V4N7RYQ4WQ');
+    requestIdleCallback(() => {
+      gtag('config', 'G-V4N7RYQ4WQ');
+    });
   </script>
 
 </head>
