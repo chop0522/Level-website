@@ -233,9 +233,9 @@ function Home() {
         />
         <meta property="og:type"        content="website" />
         <meta property="og:title"       content="ゲームカフェ.Level" />
-        <meta property="og:description" content="行徳駅のボードゲームカフェ。相席歓迎・貸切可！" />
-        <meta property="og:url"         content="https://your-future-domain.jp/" />
-        <meta property="og:image"       content="https://your-future-domain.jp/ogp/home.jpg" />
+        <meta property="og:description" content="行徳駅のボードゲームカフェ.Level。相席歓迎・貸切可！" />
+        <meta property="og:url"         content="https://gamecafe-level.com/" />
+        <meta property="og:image"       content="https://gamecafe-level.com/ogp/home.jpg" />
       </Helmet>
 
       {/* ---------- Hero ---------- */}
