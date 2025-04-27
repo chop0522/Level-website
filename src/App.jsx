@@ -22,7 +22,7 @@ const Login           = lazy(() => import('./pages/Login'));
 const MyPage          = lazy(() => import('./pages/MyPage'));
 const Menu            = lazy(() => import('./pages/Menu'));
 const FAQ             = lazy(() => import('./pages/FAQ'));
-const Calendar        = lazy(() => import('./pages/Equipment'));
+const Equipment       = lazy(() => import('./pages/Equipment'));
 const Reservation     = lazy(() => import('./pages/Reservation'));
 const AdminDashboard  = lazy(() => import('./pages/AdminDashboard'));
 const NotFound        = lazy(() => import('./pages/NotFound'));    // “最後の砦”
@@ -113,7 +113,7 @@ function App() {
               <Route path="/"           element={<Home />} />
               <Route path="/menu"       element={<Menu />} />
               <Route path="/faq"        element={<FAQ />} />
-              <Route path="/calendar"   element={<Calendar />} />
+              <Route path="/equipment"  element={<Equipment />} />
               <Route path="/reservation"element={<Reservation />} />
 
               {/* Auth */}
