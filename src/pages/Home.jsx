@@ -317,7 +317,7 @@ function Home() {
       {/* ---------- カレンダー ---------- */}
       <Container sx={{ mt: 4 }}>
         <Typography variant="h5" gutterBottom>
-          大きなカレンダー
+          イベント&営業予定
         </Typography>
         <Paper sx={{ p: 2 }}>
           <div style={{ height: '500px' }}>
