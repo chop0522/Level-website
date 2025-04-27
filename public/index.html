@@ -8,6 +8,16 @@
 
   <!-- Preload site-wide webfont -->
   <link rel="preload" href="/assets/fonts/press-start-2p-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- Inline critical @font-face so the browser knows the font is used immediately -->
+  <style>
+    @font-face {
+      font-family: "Press Start 2P";
+      src: url("/assets/fonts/press-start-2p-latin-400.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+  </style>
   <title>ボードゲームカフェ .Level | 千葉県市川市行徳のゲームカフェ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
