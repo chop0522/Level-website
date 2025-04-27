@@ -2,8 +2,16 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <!-- Preload critical hero image -->
-  <link rel="preload" href="/assets/images/heroDog.webp" as="image" type="image/webp" fetchpriority="high">
+  <!-- Preload hero image (declare srcset so the browser knows it will be used immediately) -->
+  <link
+    rel="preload"
+    as="image"
+    href="/assets/images/heroDog.webp"
+    imagesrcset="/assets/images/heroDog.webp 1x"
+    imagesizes="100vw"
+    type="image/webp"
+    fetchpriority="high"
+  >
 
   <!-- Preload site-wide webfont -->
   <link rel="preload" href="/assets/fonts/press-start-2p-latin-400.woff2" as="font" type="font/woff2" crossorigin>
