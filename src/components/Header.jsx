@@ -1,5 +1,5 @@
 // src/components/Header.jsx
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { IconButton } from '@mui/material';
 // ---- MUI Icons (lazy loaded to keep the main bundle small) ----
@@ -7,11 +7,10 @@ const MenuIcon  = React.lazy(() => import('@mui/icons-material/Menu'));
 const CloseIcon = React.lazy(() => import('@mui/icons-material/Close'));
 import styles from './Header.module.css';
 
-function Header({
-  token = '',
-  userRole = 'user',
-  handleLogout
-}) {
+import { AuthContext } from '../App';
+
+function Header() {
+  const { token = '', userRole = 'user', handleLogout } = useContext(AuthContext);
   // ▼ メニュー開閉用のState
   const [menuOpen, setMenuOpen] = useState(false);
 

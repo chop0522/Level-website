@@ -1,5 +1,6 @@
 // src/App.jsx
 import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { AuthContext } from './contexts/TokenContext';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Loader from './components/Loader';
@@ -93,49 +94,51 @@ function App() {
   return (
     <HelmetProvider>
       <ThemeProvider theme={theme}>
-        {/* ---------- 共通メタ ---------- */}
-        <Helmet>
-          <title>ゲームカフェ.Level | 行徳のボードゲームカフェ</title>
-          <meta name="description"
-                content="千葉県行徳駅徒歩5分、1000種類以上のボードゲームが遊べる『ゲームカフェ.Level』公式サイト。営業時間・設備・料金はこちら。" />
-          <meta property="og:type"        content="website" />
-          <meta property="og:title"       content="ゲームカフェ.Level" />
-          <meta property="og:description" content="行徳駅徒歩5分、1000種類以上のボードゲーム！ ボドゲ・麻雀・ポーカーまで遊べるカフェ" />
-        </Helmet>
+        <AuthContext.Provider value={{ token, setToken, userRole, handleLogout }}>
+          {/* ---------- 共通メタ ---------- */}
+          <Helmet>
+            <title>ゲームカフェ.Level | 行徳のボードゲームカフェ</title>
+            <meta name="description"
+                  content="千葉県行徳駅徒歩5分、1000種類以上のボードゲームが遊べる『ゲームカフェ.Level』公式サイト。営業時間・設備・料金はこちら。" />
+            <meta property="og:type"        content="website" />
+            <meta property="og:title"       content="ゲームカフェ.Level" />
+            <meta property="og:description" content="行徳駅徒歩5分、1000種類以上のボードゲーム！ ボドゲ・麻雀・ポーカーまで遊べるカフェ" />
+          </Helmet>
 
-        <div style={appStyle}>
-          <Header token={token} userRole={userRole} handleLogout={handleLogout} />
+          <div style={appStyle}>
+            <Header />
 
-          {/* ---------- ルーティング ---------- */}
-          <Suspense fallback={<Loader />}>
-            <Routes>
-              {/* Public */}
-              <Route path="/"           element={<Home />} />
-              <Route path="/menu"       element={<Menu />} />
-              <Route path="/faq"        element={<FAQ />} />
-              <Route path="/equipment"  element={<Equipment />} />
-              <Route path="/reservation"element={<Reservation />} />
+            {/* ---------- ルーティング ---------- */}
+            <Suspense fallback={<Loader />}>
+              <Routes>
+                {/* Public */}
+                <Route path="/"           element={<Home />} />
+                <Route path="/menu"       element={<Menu />} />
+                <Route path="/faq"        element={<FAQ />} />
+                <Route path="/equipment"  element={<Equipment />} />
+                <Route path="/reservation"element={<Reservation />} />
 
-              {/* Auth */}
-              <Route path="/register" element={<Register token={token} setToken={setToken} />} />
-              <Route path="/login"    element={<Login    token={token} setToken={setToken} />} />
-              <Route path="/mypage"   element={<MyPage   token={token} />} />
+                {/* Auth */}
+                <Route path="/register" element={<Register setToken={setToken} />} />
+                <Route path="/login"    element={<Login    setToken={setToken} />} />
+                <Route path="/mypage"   element={<MyPage />} />
 
-              {/* Admin */}
-              <Route path="/admin"
-                element={ userRole === 'admin'
-                  ? <AdminDashboard />
-                  : <Navigate to="/" replace />
-                }
-              />
+                {/* Admin */}
+                <Route path="/admin"
+                  element={ userRole === 'admin'
+                    ? <AdminDashboard />
+                    : <Navigate to="/" replace />
+                  }
+                />
 
-              {/* 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
+                {/* 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
 
-          <Footer />
-        </div>
+            <Footer />
+          </div>
+        </AuthContext.Provider>
       </ThemeProvider>
     </HelmetProvider>
   );
