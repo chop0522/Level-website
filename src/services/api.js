@@ -6,19 +6,21 @@ const SERVER_URL = '';
 
 /**
  * 新規ユーザー登録
- * @param {string} name 
- * @param {string} email 
- * @param {string} password 
+ * @param {object} param0 { name, email, password }
  * @returns {object} { success: boolean, token?: string, user?: object, error?: string }
  */
-export async function registerUser(name, email, password) {
+export async function registerUser({ name, email, password }) {
   try {
     const res = await fetch(`${SERVER_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password })
     });
-    return await res.json();
+    const data = await res.json();
+    if (!res.ok) {
+      return { success: false, error: data.error || '登録に失敗しました' };
+    }
+    return data; // { success: true, token, user }
   } catch (err) {
     console.error("Error in registerUser:", err);
     return { success: false, error: err.message };
