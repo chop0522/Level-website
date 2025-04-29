@@ -1,8 +1,10 @@
 // src/pages/MyPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Container, Typography, Button } from '@mui/material';
 import { getUserInfo } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+
+import { AuthContext } from '../contexts/TokenContext';
 
 // Radar chart related imports
 import {
@@ -26,7 +28,8 @@ ChartJS.register(
   Legend
 );
 
-function MyPage({ token }) {
+function MyPage() {
+  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState(null);
   const [error, setError] = useState('');
