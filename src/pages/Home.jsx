@@ -302,7 +302,7 @@ function Home() {
             </Button>
           </Grid>
           <Grid item>
-            <Button variant="contained" component={RouterLink} to="/calendar">
+            <Button variant="contained" component={RouterLink} to="/equipment">
               設備紹介
             </Button>
           </Grid>
