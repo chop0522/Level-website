@@ -18,7 +18,7 @@ import { Helmet, HelmetProvider } from 'react-helmet-async';
    1) lazy‑import するページ群
    ========================================= */
 const Home            = lazy(() => import('./pages/Home'));
-const Register        = lazy(() => import('./pages/Register'));
+const Signup          = lazy(() => import('./pages/Signup'));
 const Login           = lazy(() => import('./pages/Login'));
 const MyPage          = lazy(() => import('./pages/MyPage'));
 const Menu            = lazy(() => import('./pages/Menu'));
@@ -119,7 +119,7 @@ function App() {
                 <Route path="/reservation"element={<Reservation />} />
 
                 {/* Auth */}
-                <Route path="/register" element={<Register setToken={setToken} />} />
+                <Route path="/signup"  element={<Signup setToken={setToken} />} />
                 <Route path="/login"    element={<Login    setToken={setToken} />} />
                 <Route path="/mypage"   element={<MyPage />} />
 

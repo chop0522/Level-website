@@ -37,9 +37,12 @@ function Header() {
           <Link to="/reservation">Reservation</Link>
           <Link to="/faq">FAQ</Link>
 
-          {/* トークンが無い => Login, ある => MyPage */}
+          {/* 未ログイン時は Sign Up & Login、ログイン後は MyPage */}
           {!token ? (
-            <Link to="/login">Login</Link>
+            <>
+              <Link to="/signup">Sign&nbsp;Up</Link>
+              <Link to="/login">Login</Link>
+            </>
           ) : (
             <Link to="/mypage">MyPage</Link>
           )}
