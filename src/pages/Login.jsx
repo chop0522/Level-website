@@ -14,28 +14,32 @@ import { loginUser } from '../services/api';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-function Login({ token, setToken }) {
+function Login({ setToken }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      return setError('メールとパスワードを入力してください');
+    }
     try {
+      setLoading(true);
       const res = await loginUser(email, password);
       if (res.success) {
-        // ログイン成功 → トークンを保存＆App.jsxに反映
         localStorage.setItem('token', res.token);
         setToken(res.token);
-        alert('ログインに成功しました！');
-        // ログイン後にマイページへ
         navigate('/mypage');
       } else {
-        // ログイン失敗時
-        alert(res.error || 'ログインに失敗しました');
+        setError(res.error || 'ログインに失敗しました');
       }
     } catch (err) {
       console.error(err);
-      alert('ログイン時にエラーが発生しました');
+      setError('サーバーエラーが発生しました');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,8 +93,14 @@ function Login({ token, setToken }) {
           }}
         />
 
+        {error && (
+          <Typography color="error" sx={{ mt: 1 }}>
+            {error}
+          </Typography>
+        )}
+
         <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
-          <Button variant="contained" onClick={handleLogin}>
+          <Button variant="contained" onClick={handleLogin} disabled={loading}>
             Login
           </Button>
 
