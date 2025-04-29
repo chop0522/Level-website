@@ -208,8 +208,12 @@ app.post('/auth/register', async (req, res) => {
     // DBにユーザー作成
     const newUser = await createUserInDB(name, email, hashed);
 
-    // JWT発行
-    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
+    // JWTには id と role も入れる
+    const token = jwt.sign(
+      { id: newUser.id, email, role: newUser.role },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
     return res.json({ success: true, token, user: newUser });
   } catch (err) {
     console.error(err);
@@ -233,7 +237,11 @@ app.post('/auth/login', async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(
+      { id: userRow.id, email, role: userRow.role },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
     const userData = {
       id: userRow.id,
       name: userRow.name,
