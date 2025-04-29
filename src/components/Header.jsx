@@ -7,7 +7,7 @@ const MenuIcon  = React.lazy(() => import('@mui/icons-material/Menu'));
 const CloseIcon = React.lazy(() => import('@mui/icons-material/Close'));
 import styles from './Header.module.css';
 
-import { AuthContext } from '../App';
+import { AuthContext } from '../contexts/TokenContext';
 
 function Header() {
   const { token = '', userRole = 'user', handleLogout } = useContext(AuthContext);
