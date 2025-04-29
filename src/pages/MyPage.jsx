@@ -29,12 +29,12 @@ ChartJS.register(
 function MyPage({ token }) {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     // 未ログインならログインページへ
     if (!token) {
-      alert('ログインしてください');
-      navigate('/login');
+      navigate('/login', { replace: true });
       return;
     }
     // ログイン済みならユーザー情報を取得
@@ -44,14 +44,16 @@ function MyPage({ token }) {
   const fetchUserInfo = async () => {
     try {
       const data = await getUserInfo(token);
-      if (data.error) {
-        alert('ユーザー情報の取得に失敗しました');
+      if (data.error || !data.id) {
+        // トークン失効 → ログイン画面へリダイレクト
+        localStorage.removeItem('token');
+        navigate('/login', { replace: true });
       } else {
         setUserInfo(data);
       }
     } catch (err) {
       console.error(err);
-      alert('エラーが発生しました');
+      setError('ユーザー情報の取得に失敗しました');
     }
   };
 
@@ -115,6 +117,12 @@ function MyPage({ token }) {
       <Typography variant="h5" gutterBottom>
         My Page
       </Typography>
+
+      {error && (
+        <Typography color="error" sx={{ mb: 2 }}>
+          {error}
+        </Typography>
+      )}
 
       {/* ユーザー情報がまだ取得できていない場合 */}
       {!userInfo && (
