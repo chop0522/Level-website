@@ -120,6 +120,25 @@ async function gainCategoryXP(userId, category, xpGained) {
 }
 
 /**
+ * XP から現在のランク情報を取得
+ * @param {string} category
+ * @param {number} currentXP
+ * @returns {object|null} { rank, label, badge_url }
+ */
+async function getRankInfo(category, currentXP) {
+  const sql = `
+    SELECT rank, label, badge_url
+      FROM xp_ranks
+     WHERE category = $1
+       AND required_xp <= $2
+  ORDER BY rank DESC
+     LIMIT 1
+  `;
+  const res = await pool.query(sql, [category, currentXP]);
+  return res.rows[0] || null;
+}
+
+/**
  * reservationsテーブルに予約をINSERT
  * @param {string} name 
  * @param {string} phone 
@@ -309,7 +328,66 @@ app.post('/api/gameCategory', authenticateToken, async (req, res) => {
     const updatedVal = await gainCategoryXP(userRow.id, category, xpGain);
     await insertDailyRecord(userRow.id, category);
 
-    res.json({ success: true, xpGain, updatedVal });
+    const currentXP = Object.values(updatedVal)[0];      // 例: 60
+    const newRank   = await getRankInfo(category, currentXP);
+    const prevRank  = await getRankInfo(category, currentXP - xpGain);
+    const rankUp = !prevRank || newRank.rank > prevRank.rank;
+
+    res.json({
+      success: true,
+      xpGain,
+      currentXP,
+      rank: newRank.rank,
+      label: newRank.label,
+      badge_url: newRank.badge_url,
+      rankUp
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// -----------------------------
+// プロフィール取得・更新
+// -----------------------------
+
+// GET /api/profile  (JWT 必須)
+app.get('/api/profile', authenticateToken, async (req, res) => {
+  try {
+    const email = req.user.email;
+    const userRow = await findUserByEmail(email);
+    if (!userRow) return res.status(404).json({ error: 'User not found' });
+    res.json({
+      id: userRow.id,
+      name: userRow.name,
+      avatar_url: userRow.avatar_url,
+      bio: userRow.bio
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /api/profile  (avatar_url, bio の任意更新)
+app.patch('/api/profile', authenticateToken, async (req, res) => {
+  try {
+    const { avatar_url, bio } = req.body;
+    if (!avatar_url && bio === undefined) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+    const email = req.user.email;
+    const fields = [];
+    const values = [];
+    if (avatar_url !== undefined) { fields.push('avatar_url'); values.push(avatar_url); }
+    if (bio !== undefined)        { fields.push('bio');        values.push(bio); }
+
+    const setClause = fields.map((f, i) => `${f} = $${i+1}`).join(', ');
+    const sql = `UPDATE users SET ${setClause} WHERE email = $${fields.length+1} RETURNING avatar_url, bio`;
+    values.push(email);
+    const result = await pool.query(sql, values);
+    res.json({ success: true, ...result.rows[0] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
