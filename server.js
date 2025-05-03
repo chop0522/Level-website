@@ -5,7 +5,25 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
+
 const { Pool } = require('pg'); // PostgreSQL
+
+const multer  = require('multer');
+const fs      = require('fs');
+
+// アップロード先ディレクトリを確保 (./uploads)
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+
+// ファイル名: avatar_<userId>_timestamp.ext
+const storage = multer.diskStorage({
+  destination: (_, __, cb) => cb(null, uploadDir),
+  filename   : (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `avatar_${req.user.id}_${Date.now()}${ext}`);
+  }
+});
+const upload = multer({ storage });
 
 // 1) Expressアプリ初期化
 const app = express();
@@ -395,6 +413,31 @@ app.patch('/api/profile', authenticateToken, async (req, res) => {
 });
 
 // -----------------------------
+// アバター画像アップロード (multipart/form-data)
+// -----------------------------
+app.post('/api/upload-avatar',
+  authenticateToken,
+  upload.single('avatar'),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+      // 保存先 URL を作成 (例: /uploads/filename.png)
+      const publicUrl = `/uploads/${req.file.filename}`;
+
+      // DB の avatar_url を更新
+      const sql = `UPDATE users SET avatar_url = $1 WHERE id = $2 RETURNING avatar_url`;
+      const result = await pool.query(sql, [publicUrl, req.user.id]);
+
+      res.json({ success: true, avatar_url: result.rows[0].avatar_url });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: err.message });
+    }
+});
+
+// -----------------------------
 // イベント (Calendar usage)
 // -----------------------------
 
@@ -523,6 +566,7 @@ app.delete('/api/reservations/:id', authenticateToken, authenticateAdmin, async 
 // -----------------------------
 // フロントエンドのビルド成果物 (本番用)
 // -----------------------------
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'build')));
 
 app.get('*', (req, res) => {

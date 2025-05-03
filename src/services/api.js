@@ -128,3 +128,69 @@ export async function deleteReservation(reservationId, token) {
     return { success: false, error: err.message };
   }
 }
+// -----------------------------
+// Profile (avatar & bio)
+// -----------------------------
+
+/**
+ * プロフィールを取得 (avatar_url, bio)
+ * @param {string} token JWT
+ * @returns {object} { id, name, avatar_url, bio } or { error }
+ */
+export async function getProfile(token) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/profile`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in getProfile:', err);
+    return { error: err.message };
+  }
+}
+
+/**
+ * プロフィールを更新 (avatar_url と/または bio)
+ * @param {string} token JWT
+ * @param {object} body  { avatar_url?, bio? }
+ * @returns {object} { success: true, avatar_url?, bio? } or { error }
+ */
+export async function updateProfile(token, body) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/profile`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in updateProfile:', err);
+    return { error: err.message };
+  }
+}
+
+/**
+ * アバター画像をアップロード
+ * @param {string} token JWT
+ * @param {File}   file  画像ファイル
+ * @returns {object} { success: true, avatar_url } or { error }
+ */
+export async function uploadAvatar(token, file) {
+  try {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const res = await fetch(`${SERVER_URL}/api/upload-avatar`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in uploadAvatar:', err);
+    return { error: err.message };
+  }
+}

@@ -1,6 +1,9 @@
 // src/pages/MyPage.jsx
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Typography, Button } from '@mui/material';
+import { Avatar, Stack, Box, Card, Snackbar, Alert } from '@mui/material';
+import ProfileEditDialog from '../components/profile/ProfileEditDialog';
+import { getProfile } from '../services/api';
 import { getUserInfo } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
@@ -33,6 +36,9 @@ function MyPage() {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState(null);
   const [error, setError] = useState('');
+  const [profile, setProfile] = useState(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [toast, setToast] = useState('');
 
   useEffect(() => {
     // 未ログインならログインページへ
@@ -42,6 +48,7 @@ function MyPage() {
     }
     // ログイン済みならユーザー情報を取得
     fetchUserInfo();
+    fetchProfile();
   }, [token]);
 
   const fetchUserInfo = async () => {
@@ -57,6 +64,15 @@ function MyPage() {
     } catch (err) {
       console.error(err);
       setError('ユーザー情報の取得に失敗しました');
+    }
+  };
+
+  const fetchProfile = async () => {
+    try {
+      const p = await getProfile(token);
+      if (!p.error) setProfile(p);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -145,6 +161,29 @@ function MyPage() {
             </Typography>
           )}
 
+          {/* プロフィールカード */}
+          {profile && (
+            <Card sx={{ p: 2, mt: 3, maxWidth: 480 }}>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Avatar
+                  src={profile.avatar_url || undefined}
+                  sx={{ width: 64, height: 64 }}
+                />
+                <Box flexGrow={1}>
+                  <Typography>{userInfo.name}</Typography>
+                  {profile.bio && (
+                    <Typography variant="body2" color="text.secondary">
+                      {profile.bio}
+                    </Typography>
+                  )}
+                </Box>
+                <Button size="small" onClick={() => setEditOpen(true)}>
+                  編集
+                </Button>
+              </Stack>
+            </Card>
+          )}
+
           {/* 麻雀の役リストやスコアを表示する機能はここに実装可能 */}
 
           {/* レーダーチャート: カテゴリ別XP */}
@@ -162,6 +201,31 @@ function MyPage() {
           </div>
         </>
       )}
+
+      {/* プロフィール編集ダイアログ */}
+      {profile && (
+        <ProfileEditDialog
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          profile={profile}
+          onSaved={(p) => {
+            setProfile((prev) => ({ ...prev, ...p }));
+            setToast('プロフィールを更新しました');
+          }}
+        />
+      )}
+
+      {/* 更新トースト */}
+      <Snackbar
+        open={Boolean(toast)}
+        autoHideDuration={3000}
+        onClose={() => setToast('')}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setToast('')}>
+          {toast}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
