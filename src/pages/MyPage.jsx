@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Typography, Button } from '@mui/material';
 import { Avatar, Stack, Box, Card, Snackbar, Alert } from '@mui/material';
+import { Grid } from '@mui/material';
+import XPCard from '../components/xp/XPCard';
 import ProfileEditDialog from '../components/profile/ProfileEditDialog';
 import { getProfile } from '../services/api';
 import { getUserInfo } from '../services/api';
@@ -39,6 +41,24 @@ function MyPage() {
   const [profile, setProfile] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
   const [toast, setToast] = useState('');
+
+  // カテゴリ定義とランクテーブル
+  const categories = [
+    { key: 'stealth', ja: '正体隠匿' },
+    { key: 'heavy',   ja: '重量級' },
+    { key: 'light',   ja: '軽量級' },
+    { key: 'party',   ja: 'パーティ' },
+    { key: 'gamble',  ja: 'ギャンブル' },
+    { key: 'quiz',    ja: 'クイズ' }
+  ];
+
+  const rankTable = [
+    { label: 'Rookie', xp: 0 },
+    { label: 'Bronze', xp: 50 },
+    { label: 'Silver', xp: 150 },
+    { label: 'Gold',   xp: 400 },
+    { label: 'Master', xp: 800 }
+  ];
 
   useEffect(() => {
     // 未ログインならログインページへ
@@ -184,7 +204,27 @@ function MyPage() {
             </Card>
           )}
 
-          {/* 麻雀の役リストやスコアを表示する機能はここに実装可能 */}
+          {/* カテゴリ別 XP カード */}
+          <Grid container spacing={2} sx={{ mt: 4 }}>
+            {categories.map((cat) => {
+              const xp = userInfo[`xp_${cat.key}`] ?? 0;
+              const currentRank = [...rankTable].reverse().find(r => xp >= r.xp) || rankTable[0];
+              const nextRank = rankTable.find(r => r.xp > xp);
+              const badgeUrl = `/badges/${cat.key}_${currentRank.label.toLowerCase()}.svg`;
+
+              return (
+                <Grid item xs={12} sm={6} key={cat.key}>
+                  <XPCard
+                    category={cat.ja}
+                    currentXP={xp}
+                    rankLabel={currentRank.label}
+                    badgeUrl={badgeUrl}
+                    nextXP={nextRank ? nextRank.xp : null}
+                  />
+                </Grid>
+              );
+            })}
+          </Grid>
 
           {/* レーダーチャート: カテゴリ別XP */}
           <div style={{ marginTop: '30px', maxWidth: '600px' }}>
