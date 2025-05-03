@@ -157,6 +157,25 @@ async function getRankInfo(category, currentXP) {
 }
 
 /**
+ * 現XPから次ランクの required_xp を取得
+ * @param {string} category
+ * @param {number} currentXP
+ * @returns {object|null} { rank, required_xp }
+ */
+async function getNextRankInfo(category, currentXP) {
+  const sql = `
+    SELECT rank, required_xp
+      FROM xp_ranks
+     WHERE category = $1
+       AND required_xp > $2
+  ORDER BY required_xp ASC
+     LIMIT 1
+  `;
+  const res = await pool.query(sql, [category, currentXP]);
+  return res.rows[0] || null;
+}
+
+/**
  * reservationsテーブルに予約をINSERT
  * @param {string} name 
  * @param {string} phone 
@@ -351,6 +370,8 @@ app.post('/api/gameCategory', authenticateToken, async (req, res) => {
     const prevRank  = await getRankInfo(category, currentXP - xpGain);
     const rankUp = !prevRank || newRank.rank > prevRank.rank;
 
+    const nextRank = await getNextRankInfo(category, currentXP);
+
     res.json({
       success: true,
       xpGain,
@@ -358,7 +379,8 @@ app.post('/api/gameCategory', authenticateToken, async (req, res) => {
       rank: newRank.rank,
       label: newRank.label,
       badge_url: newRank.badge_url,
-      rankUp
+      rankUp,
+      next_required_xp: nextRank ? nextRank.required_xp : null
     });
   } catch (err) {
     console.error(err);
