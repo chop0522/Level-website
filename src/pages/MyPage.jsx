@@ -7,6 +7,7 @@ import XPCard from '../components/xp/XPCard';
 import ProfileEditDialog from '../components/profile/ProfileEditDialog';
 import { getProfile } from '../services/api';
 import { getUserInfo } from '../services/api';
+import { gainXP } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '../contexts/TokenContext';
@@ -93,6 +94,28 @@ function MyPage() {
       if (!p.error) setProfile(p);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  // XP加算 & ランクアップ処理
+  const handleGainXP = async (catKey) => {
+    const res = await gainXP(token, catKey);
+    if (!res.success) {
+      console.error(res.error);
+      setToast('XP加算に失敗しました');
+      return;
+    }
+    // userInfo ステートを更新
+    setUserInfo(prev => ({
+      ...prev,
+      [`xp_${catKey}`]: res.currentXP
+    }));
+    // rankUp Toast
+    if (res.rankUp) {
+      const ja = categories.find(c => c.key === catKey)?.ja || catKey;
+      setToast(`${ja} が ${res.label} にランクアップ！`);
+    } else {
+      setToast(`+${res.xpGain} XP`);
     }
   };
 
@@ -221,6 +244,17 @@ function MyPage() {
                     badgeUrl={badgeUrl}
                     nextXP={nextRank ? nextRank.xp : null}
                   />
+                  {/* 開発用: XP 加算ボタン (admin のみ表示) */}
+                  {userInfo.role === 'admin' && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      sx={{ mt: 1 }}
+                      onClick={() => handleGainXP(cat.key)}
+                    >
+                      +10 XP
+                    </Button>
+                  )}
                 </Grid>
               );
             })}
@@ -258,7 +292,7 @@ function MyPage() {
       {/* 更新トースト */}
       <Snackbar
         open={Boolean(toast)}
-        autoHideDuration={3000}
+        autoHideDuration={4000}
         onClose={() => setToast('')}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >

@@ -194,3 +194,36 @@ export async function uploadAvatar(token, file) {
     return { error: err.message };
   }
 }
+
+/**
+ * カテゴリXPを加算し、ランク/バッジ情報を取得
+ * @param {string} token JWT
+ * @param {string} category ('stealth'|'heavy'|'light'|'party'|'gamble'|'quiz')
+ * @returns {object} {
+ *   success:boolean,
+ *   xpGain:number,
+ *   currentXP:number,
+ *   rank:number,
+ *   label:string,
+ *   badge_url:string,
+ *   rankUp:boolean,
+ *   next_required_xp:number|null,
+ *   error?:string
+ * }
+ */
+export async function gainXP(token, category) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/gameCategory`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ category })
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in gainXP:', err);
+    return { success: false, error: err.message };
+  }
+}
