@@ -12,6 +12,11 @@ import { useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '../contexts/TokenContext';
 
+// 環境判定（Vite でも Node でも安全に動く）
+const isDev =
+  (typeof import !== 'undefined' && import.meta && import.meta.env && import.meta.env.DEV) ||
+  process.env.NODE_ENV === 'development';
+
 // Radar chart related imports
 import {
   Chart as ChartJS,
@@ -245,7 +250,7 @@ function MyPage() {
                     nextXP={nextRank ? nextRank.xp : null}
                   />
                   {/* 開発用: XP 加算ボタン (admin かつ開発モードのみ表示) */}
-                  {import.meta.env.DEV && userInfo.role === 'admin' && (
+                  {isDev && userInfo.role === 'admin' && (
                     <Button
                       size="small"
                       variant="outlined"
