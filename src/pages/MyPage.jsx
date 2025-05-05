@@ -12,9 +12,9 @@ import { useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '../contexts/TokenContext';
 
-// 環境判定（Vite でも Node でも安全に動く）
+// 開発判定（Vite でも Node でも安全に動く）
 const isDev =
-  (typeof import !== 'undefined' && import.meta && import.meta.env && import.meta.env.DEV) ||
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV) ||
   process.env.NODE_ENV === 'development';
 
 // Radar chart related imports
