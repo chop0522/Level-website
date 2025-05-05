@@ -389,6 +389,45 @@ app.post('/api/gameCategory', authenticateToken, async (req, res) => {
 });
 
 // -----------------------------
+// XP付与 (管理者操作)  /api/giveXP
+// -----------------------------
+app.post('/api/giveXP', authenticateToken, authenticateAdmin, async (req, res) => {
+  try {
+    const { email, category, amount = 10 } = req.body;
+    if (!email || !category) {
+      return res.status(400).json({ success: false, error: 'Missing email or category' });
+    }
+    if (!['stealth','heavy','light','party','gamble','quiz'].includes(category)) {
+      return res.status(400).json({ success: false, error: 'Invalid category' });
+    }
+    const targetUser = await findUserByEmail(email);
+    if (!targetUser) {
+      return res.status(404).json({ success: false, error: 'Target user not found' });
+    }
+
+    // XP 加算
+    const updated = await gainCategoryXP(targetUser.id, category, amount);
+    const currentXP = Object.values(updated)[0];
+    const rankInfo  = await getRankInfo(category, currentXP);
+    const nextRank  = await getNextRankInfo(category, currentXP);
+
+    res.json({
+      success: true,
+      email,
+      category,
+      amount,
+      currentXP,
+      rank: rankInfo.rank,
+      label: rankInfo.label,
+      next_required_xp: nextRank ? nextRank.required_xp : null
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// -----------------------------
 // プロフィール取得・更新
 // -----------------------------
 

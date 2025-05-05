@@ -244,8 +244,8 @@ function MyPage() {
                     badgeUrl={badgeUrl}
                     nextXP={nextRank ? nextRank.xp : null}
                   />
-                  {/* 開発用: XP 加算ボタン (admin のみ表示) */}
-                  {userInfo.role === 'admin' && (
+                  {/* 開発用: XP 加算ボタン (admin かつ開発モードのみ表示) */}
+                  {import.meta.env.DEV && userInfo.role === 'admin' && (
                     <Button
                       size="small"
                       variant="outlined"

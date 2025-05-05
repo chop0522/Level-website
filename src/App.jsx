@@ -26,6 +26,7 @@ const FAQ             = lazy(() => import('./pages/FAQ'));
 const Equipment       = lazy(() => import('./pages/Equipment'));
 const Reservation     = lazy(() => import('./pages/Reservation'));
 const AdminDashboard  = lazy(() => import('./pages/AdminDashboard'));
+const AdminXP         = lazy(() => import('./pages/AdminXP'));
 const NotFound        = lazy(() => import('./pages/NotFound'));    // “最後の砦”
 
 /* =========================================
@@ -127,6 +128,12 @@ function App() {
                 <Route path="/admin"
                   element={ userRole === 'admin'
                     ? <AdminDashboard />
+                    : <Navigate to="/" replace />
+                  }
+                />
+                <Route path="/admin/xp"
+                  element={ userRole === 'admin'
+                    ? <AdminXP />
                     : <Navigate to="/" replace />
                   }
                 />
