@@ -27,6 +27,7 @@ const Equipment       = lazy(() => import('./pages/Equipment'));
 const Reservation     = lazy(() => import('./pages/Reservation'));
 const AdminDashboard  = lazy(() => import('./pages/AdminDashboard'));
 const AdminXP         = lazy(() => import('./pages/AdminXP'));
+const QRPage          = lazy(() => import('./pages/QRPage'));
 const NotFound        = lazy(() => import('./pages/NotFound'));    // “最後の砦”
 
 /* =========================================
@@ -118,6 +119,7 @@ function App() {
                 <Route path="/faq"        element={<FAQ />} />
                 <Route path="/equipment"  element={<Equipment />} />
                 <Route path="/reservation"element={<Reservation />} />
+                <Route path="/qr"         element={<QRPage />} />
 
                 {/* Auth */}
                 <Route path="/signup"  element={<Signup setToken={setToken} />} />
