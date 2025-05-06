@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Container, Card, Typography, Button, Alert } from '@mui/material';
 import { gainXP } from '../services/api';
 import { AuthContext } from '../contexts/TokenContext';
+import Confetti from 'react-confetti';
 
 export default function QRPage() {
   const [params] = useSearchParams();
@@ -35,6 +36,10 @@ export default function QRPage() {
     })();
   }, []);
 
+  // 画面サイズを取得（SSR 安全ガード）
+  const width  = typeof window !== 'undefined' ? window.innerWidth  : 0;
+  const height = typeof window !== 'undefined' ? window.innerHeight : 0;
+
   const goHome = () => navigate('/mypage');
 
   return (
@@ -50,6 +55,7 @@ export default function QRPage() {
         )}
         {state.status === 'rankup' && (
           <>
+            <Confetti width={width} height={height} recycle={false} />
             <Typography variant="h4" color="secondary">🎉 ランクアップ！</Typography>
             <Typography sx={{ mt:1 }}>{state.msg}</Typography>
             <Button onClick={goHome} sx={{ mt:2 }}>MyPage へ戻る</Button>
