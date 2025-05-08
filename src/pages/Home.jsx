@@ -387,7 +387,7 @@ function Home() {
           </Grid>
           <Grid item>
             <IconButton
-              onClick={() => window.open('https://note.com/chop0058', '_blank')}
+              onClick={() => window.open('https://note.com/gamecafe_level', '_blank')}
               color="primary"
             >
               <NoteIcon />
