@@ -19,8 +19,8 @@ const QR_SECRET = process.env.QR_SECRET || 'qr_secret_change_me';
 const fs     = require('fs');
 const path   = require('path');
 
-// BASE_URL にはクエリ文字列 `t=` が自動で付与されます
-const BASE_URL = process.env.QR_BASE_URL || 'https://gamecafe-level.com/qr?cat=';
+// BASE_URL の末尾は「?」で終わらせ、後続で t=<JWT> を付与
+const BASE_URL = process.env.QR_BASE_URL || 'https://gamecafe-level.com/qr?';
 const OUT_DIR  = path.join(__dirname, '..', 'qr');  // プロジェクト直下 ./qr
 const CATS = ['stealth', 'heavy', 'light', 'party', 'gamble', 'quiz'];
 const SIZE = 300; // png width(px)
