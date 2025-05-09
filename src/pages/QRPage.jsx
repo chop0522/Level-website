@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Container, Card, Typography, Button, Alert } from '@mui/material';
-import { gainXP } from '../services/api';
+import { claimQR } from '../services/api';
 import { AuthContext } from '../contexts/TokenContext';
 import Confetti from 'react-confetti';
 
@@ -12,17 +12,17 @@ export default function QRPage() {
   const [state, setState] = useState({ status:'loading', msg:'' });
 
   useEffect(() => {
-    const cat = params.get('cat');
+    const qrToken = params.get('t');            // 署名付きトークン
     if (!token) {
       setState({ status:'error', msg:'ログインしてください' });
       return;
     }
-    if (!cat) {
-      setState({ status:'error', msg:'カテゴリが指定されていません' });
+    if (!qrToken) {
+      setState({ status:'error', msg:'QRが無効です' });
       return;
     }
     (async () => {
-      const res = await gainXP(token, cat);
+      const res = await claimQR(token, qrToken);
       if (res.success) {
         setState({
           status: res.rankUp ? 'rankup' : 'success',

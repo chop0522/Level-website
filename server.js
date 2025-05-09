@@ -34,6 +34,7 @@ app.use(cors());
 const {
   DATABASE_URL,
   JWT_SECRET,
+  QR_SECRET = 'qr_secret_change_me',
   PORT = 3001
 } = process.env;
 
@@ -385,6 +386,61 @@ app.post('/api/gameCategory', authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// -----------------------------
+// QRコード用 XP クレーム
+// -----------------------------
+app.post('/api/qr/claim', authenticateToken, async (req, res) => {
+  try {
+    const { token } = req.body;               // JWT from QR
+    if (!token) {
+      return res.status(400).json({ success: false, error: 'Missing QR token' });
+    }
+
+    // Verify QR JWT
+    let decoded;
+    try {
+      decoded = jwt.verify(token, QR_SECRET); // { cat }
+    } catch (err) {
+      return res.status(401).json({ success: false, error: 'Invalid or expired QR token' });
+    }
+    const category = decoded.cat;
+    if (!['stealth','heavy','light','party','gamble','quiz'].includes(category)) {
+      return res.status(400).json({ success: false, error: 'Invalid category' });
+    }
+
+    // Same daily check
+    const userRow = await findUserByEmail(req.user.email);
+    const already = await checkDailyCategory(userRow.id, category);
+    if (already) {
+      return res.json({ success: false, error: 'Already claimed today' });
+    }
+
+    const xpGain = 10;
+    const updatedVal = await gainCategoryXP(userRow.id, category, xpGain);
+    await insertDailyRecord(userRow.id, category);
+
+    const currentXP = Object.values(updatedVal)[0];
+    const newRank   = await getRankInfo(category, currentXP);
+    const prevRank  = await getRankInfo(category, currentXP - xpGain);
+    const rankUp    = !prevRank || newRank.rank > prevRank.rank;
+    const nextRank  = await getNextRankInfo(category, currentXP);
+
+    res.json({
+      success: true,
+      xpGain,
+      currentXP,
+      rank: newRank.rank,
+      label: newRank.label,
+      badge_url: newRank.badge_url,
+      rankUp,
+      next_required_xp: nextRank ? nextRank.required_xp : null
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

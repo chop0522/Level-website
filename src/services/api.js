@@ -227,3 +227,27 @@ export async function gainXP(token, category) {
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * 署名付きQRトークンをサーバーで検証してXPを付与
+ * @param {string} token   JWT (ログインユーザー)
+ * @param {string} qrToken QRに埋め込まれた署名JWT (t= の値)
+ * @returns {object} サーバーレスポンス
+ *   { success, xpGain, currentXP, rank, label, badge_url, rankUp, next_required_xp, error? }
+ */
+export async function claimQR(token, qrToken) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/qr/claim`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ token: qrToken })
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in claimQR:', err);
+    return { success: false, error: err.message };
+  }
+}

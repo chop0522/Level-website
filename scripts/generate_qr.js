@@ -14,10 +14,12 @@
  */
 
 const QRCode = require('qrcode');
+const jwt    = require('jsonwebtoken');
+const QR_SECRET = process.env.QR_SECRET || 'qr_secret_change_me';
 const fs     = require('fs');
 const path   = require('path');
 
-// ===== 設定 =====
+// BASE_URL にはクエリ文字列 `t=` が自動で付与されます
 const BASE_URL = process.env.QR_BASE_URL || 'https://gamecafe-level.com/qr?cat=';
 const OUT_DIR  = path.join(__dirname, '..', 'qr');  // プロジェクト直下 ./qr
 const CATS = ['stealth', 'heavy', 'light', 'party', 'gamble', 'quiz'];
@@ -29,8 +31,10 @@ if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });
 // ===== 生成 =====
 (async () => {
   for (const cat of CATS) {
-    const url  = `${BASE_URL}${cat}`;
-    const file = path.join(OUT_DIR, `${cat}.png`);
+    const payload = { cat };                         // 署名対象: カテゴリ
+    const token   = jwt.sign(payload, QR_SECRET);    // exp を付けない固定トークン
+    const url     = `${BASE_URL}t=${token}`;
+    const file    = path.join(OUT_DIR, `${cat}.png`);
     try {
       await QRCode.toFile(file, url, { width: SIZE, margin: 2 });
       console.log(`✅  generated: ${file}`);
