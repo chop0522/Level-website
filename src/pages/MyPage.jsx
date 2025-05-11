@@ -50,12 +50,12 @@ function MyPage() {
 
   // カテゴリ定義とランクテーブル
   const categories = [
-    { key: 'stealth', ja: '正体隠匿' },
-    { key: 'heavy',   ja: '重量級' },
-    { key: 'light',   ja: '軽量級' },
-    { key: 'party',   ja: 'パーティ' },
-    { key: 'gamble',  ja: 'ギャンブル' },
-    { key: 'quiz',    ja: 'クイズ' }
+    { key: 'stealth', ja: '正体隠匿', color: '#3f51b5' },
+    { key: 'heavy',   ja: '重量級',   color: '#795548' },
+    { key: 'light',   ja: '軽量級',   color: '#009688' },
+    { key: 'party',   ja: 'パーティ', color: '#ff9800' },
+    { key: 'gamble',  ja: 'ギャンブル', color: '#9c27b0' },
+    { key: 'quiz',    ja: 'クイズ',   color: '#e91e63' }
   ];
 
   const rankTable = [
@@ -248,6 +248,7 @@ function MyPage() {
                     rankLabel={currentRank.label}
                     badgeUrl={badgeUrl}
                     nextXP={nextRank ? nextRank.xp : null}
+                    color={cat.color}
                   />
                   {/* 開発用: XP 加算ボタン (admin かつ開発モードのみ表示) */}
                   {isDev && userInfo.role === 'admin' && (
