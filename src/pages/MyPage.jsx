@@ -238,7 +238,9 @@ function MyPage() {
               const xp = userInfo[`xp_${cat.key}`] ?? 0;
               const currentRank = [...rankTable].reverse().find(r => xp >= r.xp) || rankTable[0];
               const nextRank = rankTable.find(r => r.xp > xp);
-              const badgeUrl = `/badges/${cat.key}_${currentRank.label.toLowerCase()}.svg`;
+              // stealth バッジのみ PNG、それ以外は SVG
+              const ext = cat.key === 'stealth' ? 'png' : 'svg';
+              const badgeUrl = `/badges/${cat.key}_${currentRank.label.toLowerCase()}.${ext}`;
 
               return (
                 <Grid item xs={12} sm={6} key={cat.key}>
