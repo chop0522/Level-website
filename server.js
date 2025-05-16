@@ -493,6 +493,13 @@ app.post('/api/giveXP', authenticateToken, authenticateAdmin, async (req, res) =
       label: rankInfo.label,
       next_required_xp: nextRank ? nextRank.required_xp : null
     });
+    return; // giveXP 正常終了
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // -----------------------------
 // Achievements (総合ランク + XP)
 // -----------------------------
@@ -501,29 +508,25 @@ app.get('/api/achievements', authenticateToken, async (req, res) => {
     const email = req.user.email;
     const userRow = await findUserByEmail(email);
     if (!userRow) {
-      return res.status(404).json({ success:false, error:'User not found' });
+      return res.status(404).json({ success: false, error: 'User not found' });
     }
-    const totalRankSql = `
+
+    const rankSql = `
       SELECT rank, label, badge_url
         FROM xp_total_ranks
        WHERE required_xp <= $1
     ORDER BY rank DESC
        LIMIT 1
     `;
-    const rankRes = await pool.query(totalRankSql, [userRow.xp_total]);
+    const rankRes = await pool.query(rankSql, [userRow.xp_total]);
     const totalRank = rankRes.rows[0];
 
     res.json({
       success: true,
       xp_total: userRow.xp_total,
       totalRank,
-      user: userRow   // カテゴリ別XP もフロントで使う想定
+      user: userRow
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success:false, error: err.message });
-  }
-});
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, error: err.message });
