@@ -251,3 +251,20 @@ export async function claimQR(token, qrToken) {
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * 総合ランク & 実績データを取得
+ * @param {string} token JWT
+ * @returns {object} { success, xp_total, totalRank, user } or { success:false, error }
+ */
+export async function getAchievements(token) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/achievements`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in getAchievements:', err);
+    return { success: false, error: err.message };
+  }
+}

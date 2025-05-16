@@ -331,7 +331,8 @@ app.get('/api/userinfo', authenticateToken, async (req, res) => {
       xp_light:   userRow.xp_light,
       xp_party:   userRow.xp_party,
       xp_gamble:  userRow.xp_gamble,
-      xp_quiz:    userRow.xp_quiz
+      xp_quiz:    userRow.xp_quiz,
+      xp_total:   userRow.xp_total,
     };
     return res.json(userData);
   } catch (err) {
@@ -365,6 +366,11 @@ app.post('/api/gameCategory', authenticateToken, async (req, res) => {
     const xpGain = 10;
     const updatedVal = await gainCategoryXP(userRow.id, category, xpGain);
     await insertDailyRecord(userRow.id, category);
+    // 合計XPを更新
+    await pool.query(
+      'UPDATE users SET xp_total = xp_total + $1 WHERE id = $2',
+      [xpGain, userRow.id]
+    );
 
     const currentXP = Object.values(updatedVal)[0];      // 例: 60
     const newRank   = await getRankInfo(category, currentXP);
@@ -421,6 +427,11 @@ app.post('/api/qr/claim', authenticateToken, async (req, res) => {
     const xpGain = 10;
     const updatedVal = await gainCategoryXP(userRow.id, category, xpGain);
     await insertDailyRecord(userRow.id, category);
+    // 合計XPを更新
+    await pool.query(
+      'UPDATE users SET xp_total = xp_total + $1 WHERE id = $2',
+      [xpGain, userRow.id]
+    );
 
     const currentXP = Object.values(updatedVal)[0];
     const newRank   = await getRankInfo(category, currentXP);
@@ -463,6 +474,11 @@ app.post('/api/giveXP', authenticateToken, authenticateAdmin, async (req, res) =
 
     // XP 加算
     const updated = await gainCategoryXP(targetUser.id, category, amount);
+    // 合計XP更新
+    await pool.query(
+      'UPDATE users SET xp_total = xp_total + $1 WHERE id = $2',
+      [amount, targetUser.id]
+    );
     const currentXP = Object.values(updated)[0];
     const rankInfo  = await getRankInfo(category, currentXP);
     const nextRank  = await getNextRankInfo(category, currentXP);
@@ -477,6 +493,37 @@ app.post('/api/giveXP', authenticateToken, authenticateAdmin, async (req, res) =
       label: rankInfo.label,
       next_required_xp: nextRank ? nextRank.required_xp : null
     });
+// -----------------------------
+// Achievements (総合ランク + XP)
+// -----------------------------
+app.get('/api/achievements', authenticateToken, async (req, res) => {
+  try {
+    const email = req.user.email;
+    const userRow = await findUserByEmail(email);
+    if (!userRow) {
+      return res.status(404).json({ success:false, error:'User not found' });
+    }
+    const totalRankSql = `
+      SELECT rank, label, badge_url
+        FROM xp_total_ranks
+       WHERE required_xp <= $1
+    ORDER BY rank DESC
+       LIMIT 1
+    `;
+    const rankRes = await pool.query(totalRankSql, [userRow.xp_total]);
+    const totalRank = rankRes.rows[0];
+
+    res.json({
+      success: true,
+      xp_total: userRow.xp_total,
+      totalRank,
+      user: userRow   // カテゴリ別XP もフロントで使う想定
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success:false, error: err.message });
+  }
+});
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, error: err.message });

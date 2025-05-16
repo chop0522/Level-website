@@ -28,6 +28,7 @@ const Reservation     = lazy(() => import('./pages/Reservation'));
 const AdminDashboard  = lazy(() => import('./pages/AdminDashboard'));
 const AdminXP         = lazy(() => import('./pages/AdminXP'));
 const QRPage          = lazy(() => import('./pages/QRPage'));
+const AchievementsPage = lazy(() => import('./pages/AchievementsPage'));
 const NotFound        = lazy(() => import('./pages/NotFound'));    // “最後の砦”
 
 /* =========================================
@@ -125,6 +126,13 @@ function App() {
                 <Route path="/signup"  element={<Signup setToken={setToken} />} />
                 <Route path="/login"    element={<Login    setToken={setToken} />} />
                 <Route path="/mypage"   element={<MyPage />} />
+                <Route
+                  path="/achievements"
+                  element={ token
+                    ? <AchievementsPage />
+                    : <Navigate to="/login" replace />
+                  }
+                />
 
                 {/* Admin */}
                 <Route path="/admin"
