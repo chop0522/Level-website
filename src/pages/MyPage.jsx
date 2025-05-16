@@ -9,6 +9,7 @@ import { getProfile } from '../services/api';
 import { getUserInfo } from '../services/api';
 import { gainXP } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import { AuthContext } from '../contexts/TokenContext';
 
@@ -231,6 +232,16 @@ function MyPage() {
               </Stack>
             </Card>
           )}
+
+          {/* Achievements ボタン */}
+          <Button
+            component={Link}
+            to="/achievements"
+            variant="contained"
+            sx={{ mt: 2 }}
+          >
+            実績を見る
+          </Button>
 
           {/* カテゴリ別 XP カード */}
           <Grid container spacing={2} sx={{ mt: 4 }}>
