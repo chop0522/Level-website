@@ -13,9 +13,12 @@ import {
   TableCell,
   TableBody,
   Avatar,
-  Paper
+  Paper,
+  TextField,
+  InputAdornment
 } from '@mui/material';
 import { getUsers } from '../services/api';
+import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const SORT_KEYS = [
@@ -33,6 +36,7 @@ export default function LeaderboardPage() {
   const [params, setParams] = useSearchParams();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   const sortKey = params.get('tab') || 'total';
 
@@ -73,6 +77,23 @@ export default function LeaderboardPage() {
         ))}
       </Tabs>
 
+      {/* Search bar */}
+      <TextField
+        variant="outlined"
+        placeholder="ユーザー検索…"
+        size="small"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        sx={{ mb: 2, width: 260 }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon fontSize="small" />
+            </InputAdornment>
+          )
+        }}
+      />
+
       {/* Table */}
       <Paper>
         <Table size="small">
@@ -89,7 +110,13 @@ export default function LeaderboardPage() {
                 <TableCell colSpan={3}>Loading…</TableCell>
               </TableRow>
             ) : (
-              users.map((u, idx) => (
+              users
+                .filter((u) =>
+                  (u.name || `User${u.id}`)
+                    .toLowerCase()
+                    .includes(search.toLowerCase())
+                )
+                .map((u, idx) => (
                 <TableRow
                   key={u.id}
                   hover
