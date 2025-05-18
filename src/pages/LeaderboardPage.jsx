@@ -13,7 +13,8 @@ import {
   Avatar,
   Paper,
   TextField,
-  InputAdornment
+  InputAdornment,
+  alpha
 } from '@mui/material';
 import { getUsers } from '../services/api';
 import SearchIcon from '@mui/icons-material/Search';
@@ -42,6 +43,15 @@ const SORT_KEYS = [
   { key: 'gamble', label: 'ギャンブル' },
   { key: 'quiz', label: 'クイズ' }
 ];
+
+const CAT_COLORS = {
+  stealth: '#3f51b5',
+  heavy:   '#795548',
+  light:   '#009688',
+  party:   '#ff9800',
+  gamble:  '#9c27b0',
+  quiz:    '#e91e63'
+};
 
 export default function LeaderboardPage() {
   const navigate = useNavigate();
@@ -141,8 +151,16 @@ export default function LeaderboardPage() {
                 <TableRow
                   key={u.id}
                   hover
-                  sx={{ cursor: 'pointer' }}
                   onClick={() => handleRowClick(u.id)}
+                  sx={(theme) => ({
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: alpha(
+                        sortKey === 'total' ? '#555' : CAT_COLORS[sortKey],
+                        theme.palette.mode === 'dark' ? 0.10 : 0.15
+                      )
+                    }
+                  })}
                 >
                   <TableCell>{idx + 1}</TableCell>
                   <TableCell>
