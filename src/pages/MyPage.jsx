@@ -260,6 +260,16 @@ function MyPage() {
             ランキングを見る
           </Button>
 
+          {/* 公開プロフィール ボタン */}
+          <Button
+            component={Link}
+            to={`/profile/${userInfo?.id}`}
+            variant="outlined"
+            sx={{ mt: 1, ml: 1 }}
+          >
+            公開プロフィール
+          </Button>
+
           {/* カテゴリ別 XP カード */}
           <Grid container spacing={2} sx={{ mt: 4 }}>
             {categories.map((cat) => {
