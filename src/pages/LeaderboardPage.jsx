@@ -19,6 +19,20 @@ import { getUsers } from '../services/api';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
+// ---- search helpers ----
+/**
+ * カタカナをひらがなへ変換し、全角・半角・スペースを無視した検索キーを生成
+ */
+function normalizeJa(str = '') {
+  return str
+    .replace(/[ァ-ン]/g, (s) =>
+      String.fromCharCode(s.charCodeAt(0) - 0x60)
+    )            // カナ→ひらがな
+    .toLowerCase()
+    .normalize('NFKC')        // 全角英数→半角
+    .replace(/\s+/g, '');     // 空白削除
+}
+
 const SORT_KEYS = [
   { key: 'total', label: '総合' },
   { key: 'stealth', label: '正体隠匿' },
@@ -33,6 +47,7 @@ export default function LeaderboardPage() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [users, setUsers] = useState([]);
+  const [normUsers, setNormUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
@@ -43,7 +58,15 @@ export default function LeaderboardPage() {
     setLoading(true);
     (async () => {
       const res = await getUsers(sortKey, 50);
-      if (res.success) setUsers(res.users);
+      if (res.success) {
+        setUsers(res.users);
+        setNormUsers(
+          res.users.map((u) => ({
+            ...u,
+            _norm: normalizeJa(u.name || `User${u.id}`)
+          }))
+        );
+      }
       setLoading(false);
     })();
   }, [sortKey]);
@@ -82,9 +105,6 @@ export default function LeaderboardPage() {
         size="small"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') setSearch(e.target.value);
-        }}
         sx={{ mb: 2, width: 260 }}
         InputProps={{
           startAdornment: (
@@ -111,10 +131,11 @@ export default function LeaderboardPage() {
                 <TableCell colSpan={3}>Loading…</TableCell>
               </TableRow>
             ) : (
-              users
+              normUsers
                 .filter((u) =>
-                  normalizeJP(u.name || `User${u.id}`)
-                    .includes(normalizeJP(search))
+                  normalizeJa(search).length === 0
+                    ? true
+                    : u._norm.includes(normalizeJa(search))
                 )
                 .map((u, idx) => (
                 <TableRow
@@ -142,21 +163,4 @@ export default function LeaderboardPage() {
       </Paper>
     </Container>
   );
-}
-
-/**
- * Normalize Japanese search:
- * - Full-width → half-width
- * - Katakana → Hiragana
- * - Lowercase
- */
-function normalizeJP(str = '') {
-  // NFKD converts full‑width to ASCII when possible
-  let s = str.normalize('NFKD').toLowerCase();
-
-  // Convert Katakana (30A0–30FF) to Hiragana (3040–309F)
-  s = s.replace(/[\u30a1-\u30f6]/g, ch =>
-    String.fromCharCode(ch.charCodeAt(0) - 0x60)
-  );
-  return s;
 }
