@@ -1,5 +1,3 @@
-
-
 // src/pages/LeaderboardPage.jsx
 import React, { useEffect, useState } from 'react';
 import {
@@ -84,6 +82,9 @@ export default function LeaderboardPage() {
         size="small"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') setSearch(e.target.value);
+        }}
         sx={{ mb: 2, width: 260 }}
         InputProps={{
           startAdornment: (
@@ -112,9 +113,8 @@ export default function LeaderboardPage() {
             ) : (
               users
                 .filter((u) =>
-                  (u.name || `User${u.id}`)
-                    .toLowerCase()
-                    .includes(search.toLowerCase())
+                  normalizeJP(u.name || `User${u.id}`)
+                    .includes(normalizeJP(search))
                 )
                 .map((u, idx) => (
                 <TableRow
@@ -142,4 +142,21 @@ export default function LeaderboardPage() {
       </Paper>
     </Container>
   );
+}
+
+/**
+ * Normalize Japanese search:
+ * - Full-width → half-width
+ * - Katakana → Hiragana
+ * - Lowercase
+ */
+function normalizeJP(str = '') {
+  // NFKD converts full‑width to ASCII when possible
+  let s = str.normalize('NFKD').toLowerCase();
+
+  // Convert Katakana (30A0–30FF) to Hiragana (3040–309F)
+  s = s.replace(/[\u30a1-\u30f6]/g, ch =>
+    String.fromCharCode(ch.charCodeAt(0) - 0x60)
+  );
+  return s;
 }
