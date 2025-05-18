@@ -254,8 +254,8 @@ function MyPage() {
           <Button
             component={Link}
             to="/leaderboard"
-            variant="outlined"
-            sx={{ mt: 1 }}
+            variant="contained"
+            sx={{ mt: 2, ml: 1 }}
           >
             ランキングを見る
           </Button>
@@ -264,8 +264,8 @@ function MyPage() {
           <Button
             component={Link}
             to={`/profile/${userInfo?.id}`}
-            variant="outlined"
-            sx={{ mt: 1, ml: 1 }}
+            variant="contained"
+            sx={{ mt: 2, ml: 1 }}
           >
             公開プロフィール
           </Button>
