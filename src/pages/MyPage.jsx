@@ -250,6 +250,16 @@ function MyPage() {
             実績を見る
           </Button>
 
+          {/* Leaderboard ボタン */}
+          <Button
+            component={Link}
+            to="/leaderboard"
+            variant="outlined"
+            sx={{ mt: 1 }}
+          >
+            ランキングを見る
+          </Button>
+
           {/* カテゴリ別 XP カード */}
           <Grid container spacing={2} sx={{ mt: 4 }}>
             {categories.map((cat) => {
