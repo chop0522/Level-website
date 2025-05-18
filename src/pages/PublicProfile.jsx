@@ -10,7 +10,8 @@ import {
   Grid,
   Button,
   Snackbar,
-  Alert
+  Alert,
+  keyframes
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { AuthContext } from '../contexts/TokenContext';
@@ -25,6 +26,15 @@ import XPCard from '../components/xp/XPCard';
  * 公開プロフィールページ（閲覧専用 + ハイタッチ）
  * URL: /profile/:id
  */
+// Glow & shake animation when high‑fived
+const highfiveKF = keyframes`
+  0%   { transform: scale(1); }
+  20%  { transform: scale(1.25) rotate(-6deg); }
+  40%  { transform: scale(1.25) rotate(6deg);  }
+  60%  { transform: scale(1.15); }
+  80%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+`;
 export default function PublicProfile() {
   const { id } = useParams();
   const { token, userInfo } = useContext(AuthContext);
@@ -34,6 +44,7 @@ export default function PublicProfile() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState('');
   const [disabled, setDisabled] = useState(false);
+  const [anim, setAnim] = useState(false);
 
   // fetch profile
   useEffect(() => {
@@ -55,6 +66,8 @@ export default function PublicProfile() {
     setDisabled(true);
     const res = await highfive(id, token);
     if (res.success) {
+      setAnim(true);
+      setTimeout(() => setAnim(false), 700);
       setToast('👏 ハイタッチ！友情パワー +1');
       setFriendship((prev) => (prev ?? 0) + 1);
     } else {
@@ -81,7 +94,13 @@ export default function PublicProfile() {
       <Card sx={{ p: 3, textAlign: 'center' }}>
         <Avatar
           src={profile.avatar_url}
-          sx={{ width: 96, height: 96, mx: 'auto', mb: 1 }}
+          sx={{
+            width: 96,
+            height: 96,
+            mx: 'auto',
+            mb: 1,
+            animation: anim ? `${highfiveKF} 0.7s ease-in-out` : 'none'
+          }}
         />
         <Typography variant="h5">{profile.name || `User ${id}`}</Typography>
         {profile.bio && (
