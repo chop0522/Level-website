@@ -43,9 +43,27 @@ const pool = new Pool({
   connectionString: DATABASE_URL
 });
 
+
 // -----------------------------
 // ヘルパー関数
 // -----------------------------
+
+/**
+ * Build ORDER BY clause for leaderboard
+ * @param {string} sortKey
+ * @returns {string}
+ */
+function leaderboardOrder(sortKey) {
+  switch (sortKey) {
+    case 'stealth': return 'xp_stealth DESC';
+    case 'heavy'  : return 'xp_heavy DESC';
+    case 'light'  : return 'xp_light DESC';
+    case 'party'  : return 'xp_party DESC';
+    case 'gamble' : return 'xp_gamble DESC';
+    case 'quiz'   : return 'xp_quiz DESC';
+    default       : return 'xp_total DESC';
+  }
+}
 
 /**
  * ユーザーをメールアドレスで検索
@@ -497,6 +515,78 @@ app.post('/api/giveXP', authenticateToken, authenticateAdmin, async (req, res) =
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// -----------------------------
+// Leaderboard 公開ユーザー一覧
+// -----------------------------
+app.get('/api/users', async (req, res) => {
+  try {
+    const sort  = req.query.sort || 'total';
+    const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+    const order = leaderboardOrder(sort);
+
+    const sql = `
+      SELECT id, name, avatar_url,
+             xp_total, xp_stealth, xp_heavy, xp_light,
+             xp_party, xp_gamble, xp_quiz
+        FROM users
+       WHERE is_public = TRUE
+    ORDER BY ${order}
+       LIMIT $1
+    `;
+    const result = await pool.query(sql, [limit]);
+    res.json({ success: true, users: result.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success:false, error: err.message });
+  }
+});
+
+// -----------------------------
+// 公開プロフィール (read-only)
+// -----------------------------
+app.get('/api/profile/:id', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({ success:false, error:'Invalid id' });
+    }
+    const sql = `
+      SELECT id, name, avatar_url, bio,
+             xp_total, xp_stealth, xp_heavy, xp_light,
+             xp_party, xp_gamble, xp_quiz,
+             is_public
+        FROM users
+       WHERE id = $1
+    `;
+    const result = await pool.query(sql, [userId]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success:false, error:'User not found' });
+    }
+    const profile = result.rows[0];
+
+    // private profile guard
+    if (!profile.is_public) {
+      const authHeader = req.headers['authorization'] || '';
+      const token = authHeader.split(' ')[1];
+      if (!token) {
+        return res.status(403).json({ success:false, error:'Profile is private' });
+      }
+      let decoded;
+      try { decoded = jwt.verify(token, JWT_SECRET); }
+      catch { return res.status(403).json({ success:false, error:'Invalid token'}); }
+      if (decoded.id !== userId) {
+        return res.status(403).json({ success:false, error:'Profile is private' });
+      }
+    }
+
+    delete profile.is_public;
+    res.json({ success:true, profile });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success:false, error: err.message });
   }
 });
 
