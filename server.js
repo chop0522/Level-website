@@ -66,6 +66,16 @@ function leaderboardOrder(sortKey) {
 }
 
 /**
+ * 並び順を固定して friendship ペアを一意化
+ * @param {number} a
+ * @param {number} b
+ * @returns {[number,number]} 昇順タプル
+ */
+function sortPair(a, b) {
+  return a < b ? [a, b] : [b, a];
+}
+
+/**
  * ユーザーをメールアドレスで検索
  * @param {string} email
  * @returns {object|null} ユーザーRow or null
@@ -515,6 +525,67 @@ app.post('/api/giveXP', authenticateToken, authenticateAdmin, async (req, res) =
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// -----------------------------
+// ハイタッチ: 1日1回 / ペア
+// -----------------------------
+app.post('/api/highfive', authenticateToken, async (req, res) => {
+  try {
+    const fromId = req.user.id;
+    const toId   = parseInt(req.body.target_id, 10);
+    if (!toId || fromId === toId) {
+      return res.status(400).json({ success:false, error:'Invalid target' });
+    }
+
+    // 重複チェック: 当日既にハイタッチ済み？
+    const sqlInsert = `
+      INSERT INTO highfives (user_from, user_to, date)
+      VALUES ($1, $2, CURRENT_DATE)
+      ON CONFLICT (user_from, user_to, date) DO NOTHING
+      RETURNING id
+    `;
+    const ins = await pool.query(sqlInsert, [fromId, toId]);
+    if (ins.rowCount === 0) {
+      return res.status(429).json({ success:false, error:'今日のハイタッチは完了しています' });
+    }
+
+    // friendship power ++
+    const [low, high] = sortPair(fromId, toId);
+    const sqlFr = `
+      INSERT INTO friendship (user_low, user_high, power)
+      VALUES ($1, $2, 1)
+      ON CONFLICT (user_low, user_high)
+      DO UPDATE SET power = friendship.power + 1
+      RETURNING power
+    `;
+    const fr = await pool.query(sqlFr, [low, high]);
+    res.json({ success:true, power: fr.rows[0].power });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success:false, error: err.message });
+  }
+});
+
+// -----------------------------
+// 友情パワー取得 (当事者のみ)
+// -----------------------------
+app.get('/api/friendship/:id', authenticateToken, async (req, res) => {
+  try {
+    const selfId = req.user.id;
+    const otherId = parseInt(req.params.id, 10);
+    if (!otherId || selfId === otherId) {
+      return res.status(400).json({ success:false, error:'Invalid id' });
+    }
+
+    const [low, high] = sortPair(selfId, otherId);
+    const sql = 'SELECT power FROM friendship WHERE user_low=$1 AND user_high=$2';
+    const fr = await pool.query(sql, [low, high]);
+    res.json({ success:true, power: fr.rows[0]?.power || 0 });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success:false, error: err.message });
   }
 });
 
