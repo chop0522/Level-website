@@ -603,7 +603,7 @@ app.get('/api/users', async (req, res) => {
              xp_total, xp_stealth, xp_heavy, xp_light,
              xp_party, xp_gamble, xp_quiz
         FROM users
-       WHERE is_public = TRUE
+       WHERE is_public IS NOT FALSE
     ORDER BY ${order}
        LIMIT $1
     `;
@@ -639,7 +639,7 @@ app.get('/api/profile/:id', async (req, res) => {
     const profile = result.rows[0];
 
     // private profile guard
-    if (!profile.is_public) {
+    if (profile.is_public === false) {
       const authHeader = req.headers['authorization'] || '';
       const token = authHeader.split(' ')[1];
       if (!token) {
