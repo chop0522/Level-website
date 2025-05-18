@@ -48,6 +48,7 @@ function MyPage() {
   const [profile, setProfile] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
   const [toast, setToast] = useState('');
+  const [rankUpAnim, setRankUpAnim] = useState({});
 
   // カテゴリ定義とランクテーブル
   const categories = [
@@ -111,13 +112,19 @@ function MyPage() {
       setToast('XP加算に失敗しました');
       return;
     }
-    // userInfo ステートを更新
+
+    // 更新 XP
     setUserInfo(prev => ({
       ...prev,
       [`xp_${catKey}`]: res.currentXP
     }));
-    // rankUp Toast
+
+    // ランクアップ演出
     if (res.rankUp) {
+      setRankUpAnim(prev => ({ ...prev, [catKey]: true }));
+      setTimeout(() => {
+        setRankUpAnim(prev => ({ ...prev, [catKey]: false }));
+      }, 1200);
       const ja = categories.find(c => c.key === catKey)?.ja || catKey;
       setToast(`${ja} が ${res.label} にランクアップ！`);
     } else {
@@ -261,6 +268,7 @@ function MyPage() {
                     badgeUrl={badgeUrl}
                     nextXP={nextRank ? nextRank.xp : null}
                     color={cat.color}
+                    animate={rankUpAnim[cat.key]}
                   />
                   {/* 開発用: XP 加算ボタン (admin かつ開発モードのみ表示) */}
                   {isDev && userInfo.role === 'admin' && (
