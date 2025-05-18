@@ -13,12 +13,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* ▼ PC時にヘッダーを固定する場合（任意）
-     position: sticky;
-     top: 0;
-     background-color: #fff;
-     z-index: 10000; 
-  */
+
+  /* 光を通すガラス風の背景 */
+  background-color: rgba(255, 255, 255, 0.8); /* light mode */
+  backdrop-filter: blur(4px);
+}
+
+/* ダークモード用背景 */
+@media (prefers-color-scheme: dark) {
+  .header {
+    background-color: rgba(0, 0, 0, 0.75);
+    border-bottom: 1px solid #444;
+  }
 }
 
 /* 左側ブロック (ロゴ + リンク集) */

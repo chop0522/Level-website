@@ -26,19 +26,22 @@ export default function XPCard({ category, currentXP, rankLabel, badgeUrl, nextX
 
   return (
     <Card
-      sx={{
+      sx={(theme) => ({
         p: 2,
-        backgroundColor: (theme) =>
-          alpha(color, theme.palette.mode === 'dark' ? 0.18 : 0.12),
+        backgroundColor: alpha(
+          color,
+          theme.palette.mode === 'dark' ? 0.10 : 0.12
+        ),
         transition: '0.3s',
+        boxShadow: theme.palette.mode === 'dark' ? 1 : 2,
         animation: animate
           ? `${rankUpAnim(color)} 1.2s ease-in-out`
           : 'none',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: 3
+          boxShadow: theme.palette.mode === 'dark' ? 2 : 4
         }
-      }}
+      })}
     >
       <Stack direction="row" spacing={2} alignItems="center">
         <Avatar src={badgeUrl} />
