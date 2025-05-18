@@ -268,3 +268,36 @@ export async function getAchievements(token) {
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * 公開ユーザー一覧を取得 (Leaderboard)
+ * @param {string} sort  'total'|'stealth'|'heavy'|'light'|'party'|'gamble'|'quiz'
+ * @param {number} limit 返却件数 (最大 200)
+ * @returns {object} { success:boolean, users:array } or { error }
+ */
+export async function getUsers(sort = 'total', limit = 50) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/users?sort=${sort}&limit=${limit}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Error in getUsers:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * 公開プロフィールを取得 (read-only)
+ * @param {number} userId
+ * @param {string} token (任意: private プロフ閲覧時に本人確認用)
+ * @returns {object} { success:boolean, profile:object } or { error }
+ */
+export async function getPublicProfile(userId, token = '') {
+  try {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch(`${SERVER_URL}/api/profile/${userId}`, { headers });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in getPublicProfile:', err);
+    return { success: false, error: err.message };
+  }
+}

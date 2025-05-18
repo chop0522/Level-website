@@ -23,6 +23,8 @@ const Login           = lazy(() => import('./pages/Login'));
 const MyPage          = lazy(() => import('./pages/MyPage'));
 const Menu            = lazy(() => import('./pages/Menu'));
 const FAQ             = lazy(() => import('./pages/FAQ'));
+const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'));
+const PublicProfile   = lazy(() => import('./pages/PublicProfile'));
 const Equipment       = lazy(() => import('./pages/Equipment'));
 const Reservation     = lazy(() => import('./pages/Reservation'));
 const AdminDashboard  = lazy(() => import('./pages/AdminDashboard'));
@@ -118,6 +120,8 @@ function App() {
                 <Route path="/"           element={<Home />} />
                 <Route path="/menu"       element={<Menu />} />
                 <Route path="/faq"        element={<FAQ />} />
+                <Route path="/leaderboard" element={<LeaderboardPage />} />
+                <Route path="/profile/:id" element={<PublicProfile />} />
                 <Route path="/equipment"  element={<Equipment />} />
                 <Route path="/reservation"element={<Reservation />} />
                 <Route path="/qr"         element={<QRPage />} />
