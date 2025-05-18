@@ -8,7 +8,7 @@
 
 /* 全体ヘッダー */
 .header {
-  padding: 10px 20px;
+  padding: 10px 16px;   /* 左右を 16px に統一 */
   border-bottom: 1px solid #ccc;
   display: flex;
   justify-content: space-between;
@@ -39,6 +39,8 @@
   font-size: 1.5rem;
   margin-right: 20px;
   color: var(--logo);
+  font-family: "Press Start 2P", sans-serif;
+  letter-spacing: -0.5px;
 }
 
 /* リンク集 (PC時は横並び、スマホ時は隠す→showMenuで表示) */
