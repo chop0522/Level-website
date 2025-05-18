@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Avatar, Box, Typography, LinearProgress, Stack } from '@mui/material';
+import { Card, Avatar, Box, Typography, LinearProgress, Stack, alpha } from '@mui/material';
 
 /**
  * XP カード
@@ -15,7 +15,18 @@ export default function XPCard({ category, currentXP, rankLabel, badgeUrl, nextX
   const percent = nextXP ? (currentXP / nextXP) * 100 : 100;
 
   return (
-    <Card sx={{ p: 2, backgroundColor: `${color}22` }}>
+    <Card
+      sx={{
+        p: 2,
+        backgroundColor: (theme) =>
+          alpha(color, theme.palette.mode === 'dark' ? 0.18 : 0.12),
+        transition: '0.3s',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: 3
+        }
+      }}
+    >
       <Stack direction="row" spacing={2} alignItems="center">
         <Avatar src={badgeUrl} />
         <Box flexGrow={1}>
