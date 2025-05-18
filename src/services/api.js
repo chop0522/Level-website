@@ -301,3 +301,44 @@ export async function getPublicProfile(userId, token = '') {
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * 友情パワーを取得（自分と targetId のペア）
+ * @param {number} targetId 相手ユーザーID
+ * @param {string} token    JWT (自分のログイン)
+ * @returns {object} { success:true, power:number } or { success:false, error }
+ */
+export async function getFriendship(targetId, token) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/friendship/${targetId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in getFriendship:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * ハイタッチ（友情パワー +1、1日1回制限）
+ * @param {number} targetId 相手ユーザーID
+ * @param {string} token    JWT
+ * @returns {object} { success:true, power:number } or { success:false, error }
+ */
+export async function highfive(targetId, token) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/highfive`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ target_id: targetId })
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in highfive:', err);
+    return { success: false, error: err.message };
+  }
+}
