@@ -38,6 +38,12 @@ ChartJS.register(
   Legend
 );
 
+// yyyy-mm-dd → 'M/D' 形式へ変換
+function formatDate(isoStr) {
+  const d = new Date(isoStr);
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
 function MyPage() {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -298,14 +304,19 @@ function MyPage() {
                   <Stack
                     key={p.id}
                     direction="row"
-                    spacing={1}
                     alignItems="center"
+                    justifyContent="space-between"
                     component={Link}
                     to={`/profile/${p.id}`}
                     sx={{ textDecoration: 'none', color: 'inherit' }}
                   >
-                    <Avatar src={p.avatar} sx={{ width: 32, height: 32 }} />
-                    <Typography variant="body2">{p.name}</Typography>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Avatar src={p.avatar} sx={{ width: 32, height: 32 }} />
+                      <Typography variant="body2">{p.name}</Typography>
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary">
+                      {formatDate(p.last)}
+                    </Typography>
                   </Stack>
                 ))}
               </Stack>
