@@ -590,6 +590,40 @@ app.get('/api/friendship/:id', authenticateToken, async (req, res) => {
 });
 
 // -----------------------------
+// 未読ハイタッチ一覧  (読み出したら既読扱い)
+// -----------------------------
+app.get('/api/highfives/unread', authenticateToken, async (req, res) => {
+  try {
+    const selfId = req.user.id;
+    const limit = Math.min(parseInt(req.query.limit || '20', 10), 50);
+
+    // 未読を取得 (last_seen 以降)
+    const sqlUnread = `
+      SELECT user_from AS from_id, date
+        FROM highfives
+       WHERE user_to = $1
+         AND date > (
+           SELECT COALESCE(last_seen_highfive, '1970-01-01') FROM users WHERE id=$1
+         )
+    ORDER BY date DESC
+       LIMIT $2
+    `;
+    const { rows } = await pool.query(sqlUnread, [selfId, limit]);
+
+    // 既読にする（最新アクセス時刻を更新）
+    await pool.query(
+      'UPDATE users SET last_seen_highfive = now() WHERE id = $1',
+      [selfId]
+    );
+
+    res.json({ success: true, unread: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success:false, error: err.message });
+  }
+});
+
+// -----------------------------
 // Leaderboard 公開ユーザー一覧
 // -----------------------------
 app.get('/api/users', async (req, res) => {

@@ -5,7 +5,14 @@ import { Avatar, Stack, Box, Card, Snackbar, Alert } from '@mui/material';
 import { Grid } from '@mui/material';
 import XPCard from '../components/xp/XPCard';
 import ProfileEditDialog from '../components/profile/ProfileEditDialog';
-import { getProfile, getUserInfo, gainXP, getRecentHighfives, getPublicProfile } from '../services/api';
+import {
+  getProfile,
+  getUserInfo,
+  gainXP,
+  getRecentHighfives,
+  getPublicProfile,
+  getUnreadHighfives
+} from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
@@ -110,6 +117,16 @@ function MyPage() {
             })
           );
           setRecentHF(enriched);
+        }
+
+        // 未読ハイタッチ通知
+        const unread = await getUnreadHighfives(token, 5);
+        if (unread.success && unread.unread.length > 0) {
+          const senderId = unread.unread[0].from_id;
+          const senderProf = await getPublicProfile(senderId, token);
+          const senderName =
+            (senderProf.profile && senderProf.profile.name) || `User${senderId}`;
+          setToast(`👏 ${senderName} さんからハイタッチ！`);
         }
       }
     } catch (err) {

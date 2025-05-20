@@ -360,3 +360,21 @@ export async function getRecentHighfives(token, limit = 10) {
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * 未読ハイタッチ一覧を取得しつつ既読化する
+ * @param {string} token JWT
+ * @param {number} limit 件数 (デフォルト20、最大50)
+ * @returns {object} { success:true, unread:[{ from_id:number, date:string }] } or { success:false, error }
+ */
+export async function getUnreadHighfives(token, limit = 20) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/highfives/unread?limit=${limit}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in getUnreadHighfives:', err);
+    return { success: false, error: err.message };
+  }
+}
