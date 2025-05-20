@@ -19,7 +19,11 @@ function Header() {
   };
 
     return (
-    <header className={styles.header} role="banner">
+    <header
+      className={styles.header}
+      role="banner"
+      style={{ position: 'relative', zIndex: 3000 }}
+    >
       {/* 左側: ロゴ + ナビ */}
       <div className={styles.navLeft}>
         <h1 className={styles.logo}>Board Game Cafe</h1>
