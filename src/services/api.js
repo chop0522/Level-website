@@ -342,3 +342,21 @@ export async function highfive(targetId, token) {
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * 最近ハイタッチした相手一覧を取得
+ * @param {string} token JWT
+ * @param {number} limit 取得件数（既定10, 最大50）
+ * @returns {object} { success:true, recent:[{ partner_id:number, last_date:string }] } or { success:false, error }
+ */
+export async function getRecentHighfives(token, limit = 10) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/highfives/recent?limit=${limit}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in getRecentHighfives:', err);
+    return { success: false, error: err.message };
+  }
+}

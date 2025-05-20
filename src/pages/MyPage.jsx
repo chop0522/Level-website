@@ -5,9 +5,7 @@ import { Avatar, Stack, Box, Card, Snackbar, Alert } from '@mui/material';
 import { Grid } from '@mui/material';
 import XPCard from '../components/xp/XPCard';
 import ProfileEditDialog from '../components/profile/ProfileEditDialog';
-import { getProfile } from '../services/api';
-import { getUserInfo } from '../services/api';
-import { gainXP } from '../services/api';
+import { getProfile, getUserInfo, gainXP, getRecentHighfives, getPublicProfile } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
@@ -49,6 +47,7 @@ function MyPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [toast, setToast] = useState('');
   const [rankUpAnim, setRankUpAnim] = useState({});
+  const [recentHF, setRecentHF] = useState([]);
 
   // カテゴリ定義とランクテーブル
   const categories = [
@@ -88,6 +87,24 @@ function MyPage() {
         navigate('/login', { replace: true });
       } else {
         setUserInfo(data);
+
+        // fetch recent highfives (limited to 10)
+        const hf = await getRecentHighfives(token, 10);
+        if (hf.success) {
+          // fetch partner profiles to get name & avatar (Promise.all)
+          const enriched = await Promise.all(
+            hf.recent.map(async (r) => {
+              const p = await getPublicProfile(r.partner_id, token);
+              return {
+                id: r.partner_id,
+                name: (p.profile && p.profile.name) || `User${r.partner_id}`,
+                avatar: p.profile?.avatar_url || '',
+                last: r.last_date
+              };
+            })
+          );
+          setRecentHF(enriched);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -269,6 +286,31 @@ function MyPage() {
           >
             公開プロフィール
           </Button>
+
+          {/* 最近ハイタッチした人 */}
+          {recentHF.length > 0 && (
+            <Card sx={{ p: 2, mt: 4, maxWidth: 480 }}>
+              <Typography variant="h6" gutterBottom>
+                最近ハイタッチした人
+              </Typography>
+              <Stack spacing={1}>
+                {recentHF.map((p) => (
+                  <Stack
+                    key={p.id}
+                    direction="row"
+                    spacing={1}
+                    alignItems="center"
+                    component={Link}
+                    to={`/profile/${p.id}`}
+                    sx={{ textDecoration: 'none', color: 'inherit' }}
+                  >
+                    <Avatar src={p.avatar} sx={{ width: 32, height: 32 }} />
+                    <Typography variant="body2">{p.name}</Typography>
+                  </Stack>
+                ))}
+              </Stack>
+            </Card>
+          )}
 
           {/* カテゴリ別 XP カード */}
           <Grid container spacing={2} sx={{ mt: 4 }}>
