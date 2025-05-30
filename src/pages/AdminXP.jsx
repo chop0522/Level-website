@@ -1,5 +1,3 @@
-
-
 import React, { useState, useContext } from 'react';
 import {
   Container,
@@ -39,7 +37,6 @@ export default function AdminXP() {
   const [delError, setDelError] = useState('');
   const [delMsg,   setDelMsg]   = useState('');
 
-  const handleGiveXP = async () => {
   const handleDeleteUser = async () => {
     setDelError('');
     if (!delId) {
@@ -55,6 +52,8 @@ export default function AdminXP() {
       setDelError(res.error || '削除に失敗しました');
     }
   };
+
+  const handleGiveXP = async () => {
     setErrorMsg('');
     if (!email) {
       setErrorMsg('メールアドレスを入力してください');
