@@ -4,7 +4,7 @@
 import React, { useContext, useMemo } from 'react';
 import { Stack, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { AuthContext } from '../../contexts/TokenContext';
+import { AuthContext } from '../contexts/TokenContext';
 
 /**
  * 共通ナビゲーションバー
