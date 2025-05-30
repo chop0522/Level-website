@@ -622,6 +622,32 @@ app.get('/api/highfives/unread', authenticateToken, async (req, res) => {
     res.status(500).json({ success:false, error: err.message });
   }
 });
+// -----------------------------
+// 管理者: ユーザー完全削除 (物理削除)
+// -----------------------------
+app.delete('/api/admin/users/:id', authenticateToken, authenticateAdmin, async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({ success: false, error: 'Invalid id' });
+    }
+
+    // 関連行を先に削除（外部キー制約対策）
+    await pool.query('DELETE FROM highfives  WHERE user_from=$1 OR user_to=$1', [userId]);
+    await pool.query('DELETE FROM friendship WHERE user_low=$1 OR user_high=$1', [userId]);
+
+    // ユーザー本体を削除
+    const result = await pool.query('DELETE FROM users WHERE id=$1 RETURNING id', [userId]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success:false, error:'User not found' });
+    }
+
+    res.json({ success:true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success:false, error: err.message });
+  }
+});
 
 // -----------------------------
 // Leaderboard 公開ユーザー一覧

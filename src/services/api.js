@@ -420,3 +420,22 @@ export async function deleteAccount(token) {
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * 管理者: ユーザー完全削除
+ * @param {number} userId  削除したいユーザーID
+ * @param {string} token   管理者 JWT
+ * @returns {object} { success:true } or { success:false, error }
+ */
+export async function adminDeleteUser(userId, token) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in adminDeleteUser:', err);
+    return { success: false, error: err.message };
+  }
+}

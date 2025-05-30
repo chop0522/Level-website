@@ -12,6 +12,7 @@ import {
   Stack
 } from '@mui/material';
 import { AuthContext } from '../contexts/TokenContext';
+import { adminDeleteUser } from '../services/api';
 
 /**
  * 管理者が任意ユーザーへ XP を付与する簡易ツール
@@ -34,8 +35,26 @@ export default function AdminXP() {
   const [loading,   setLoading]   = useState(false);
   const [toastMsg,  setToastMsg]  = useState('');
   const [errorMsg,  setErrorMsg]  = useState('');
+  const [delId,    setDelId]    = useState('');
+  const [delError, setDelError] = useState('');
+  const [delMsg,   setDelMsg]   = useState('');
 
   const handleGiveXP = async () => {
+  const handleDeleteUser = async () => {
+    setDelError('');
+    if (!delId) {
+      setDelError('ユーザーIDを入力してください');
+      return;
+    }
+    if (!window.confirm(`${delId} を削除します。よろしいですか？`)) return;
+    const res = await adminDeleteUser(delId, token);
+    if (res.success) {
+      setDelMsg(`ユーザー ${delId} を削除しました`);
+      setDelId('');
+    } else {
+      setDelError(res.error || '削除に失敗しました');
+    }
+  };
     setErrorMsg('');
     if (!email) {
       setErrorMsg('メールアドレスを入力してください');
@@ -103,6 +122,26 @@ export default function AdminXP() {
         {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
       </Stack>
 
+      {/* ユーザー削除 */}
+      <Stack spacing={2} sx={{ mt: 4 }}>
+        <Typography variant="h6">ユーザー削除 (物理削除)</Typography>
+        <TextField
+          label="ユーザー ID"
+          fullWidth
+          value={delId}
+          onChange={(e) => setDelId(e.target.value)}
+        />
+        <Button
+          variant="contained"
+          color="error"
+          onClick={handleDeleteUser}
+          disabled={!delId}
+        >
+          削除
+        </Button>
+        {delError && <Alert severity="error">{delError}</Alert>}
+      </Stack>
+
       <Snackbar
         open={Boolean(toastMsg)}
         autoHideDuration={3500}
@@ -111,6 +150,17 @@ export default function AdminXP() {
       >
         <Alert severity="success" onClose={() => setToastMsg('')}>
           {toastMsg}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={Boolean(delMsg)}
+        autoHideDuration={3500}
+        onClose={() => setDelMsg('')}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setDelMsg('')}>
+          {delMsg}
         </Alert>
       </Snackbar>
     </Container>
