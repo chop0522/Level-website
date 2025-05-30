@@ -378,3 +378,45 @@ export async function getUnreadHighfives(token, limit = 20) {
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * パスワードを変更
+ * @param {string} oldPassword  現在のパスワード
+ * @param {string} newPassword  新しいパスワード
+ * @param {string} token        JWT
+ * @returns {object} { success:true } or { success:false, error }
+ */
+export async function changePassword(oldPassword, newPassword, token) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/changePassword`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ oldPassword, newPassword })
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in changePassword:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * アカウントを削除（退会）
+ * @param {string} token JWT
+ * @returns {object} { success:true } or { success:false, error }
+ */
+export async function deleteAccount(token) {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/account`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error in deleteAccount:', err);
+    return { success: false, error: err.message };
+  }
+}

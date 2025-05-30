@@ -5,6 +5,7 @@ import { Avatar, Stack, Box, Card, Snackbar, Alert } from '@mui/material';
 import { Grid } from '@mui/material';
 import XPCard from '../components/xp/XPCard';
 import ProfileEditDialog from '../components/profile/ProfileEditDialog';
+import AccountSettingsDialog from '../components/account/AccountSettingsDialog';
 import {
   getProfile,
   getUserInfo,
@@ -61,6 +62,7 @@ function MyPage() {
   const [toast, setToast] = useState('');
   const [rankUpAnim, setRankUpAnim] = useState({});
   const [recentHF, setRecentHF] = useState([]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // カテゴリ定義とランクテーブル
   const categories = [
@@ -310,6 +312,15 @@ function MyPage() {
             公開プロフィール
           </Button>
 
+          {/* アカウント設定 */}
+          <Button
+            variant="contained"
+            sx={{ mt: 2, ml: 1 }}
+            onClick={() => setSettingsOpen(true)}
+          >
+            アカウント設定
+          </Button>
+
           {/* 最近ハイタッチした人 */}
           {recentHF.length > 0 && (
             <Card sx={{ p: 2, mt: 4, maxWidth: 480 }}>
@@ -404,6 +415,16 @@ function MyPage() {
           }}
         />
       )}
+
+      {/* アカウント設定ダイアログ */}
+      <AccountSettingsDialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        onLogout={() => {
+          localStorage.removeItem('token');
+          navigate('/login', { replace: true });
+        }}
+      />
 
       {/* 更新トースト */}
       <Snackbar
