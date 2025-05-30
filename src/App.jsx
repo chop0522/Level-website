@@ -66,7 +66,7 @@ theme = responsiveFontSizes(theme);
    ========================================= */
 function App() {
   const [token,    setToken]    = useState(localStorage.getItem('token') || '');
-  const [userRole, setUserRole] = useState('user');
+  const [userRole, setUserRole] = useState(null);   // null = 取得前
   const navigate = useNavigate();
 
   /* ---- ユーザー情報取得 ---- */
@@ -99,6 +99,9 @@ function App() {
 
   /* ---- 背景スタイル ---- */
   const appStyle = { minHeight:'100vh', backgroundColor:theme.palette.background.default };
+
+  // Loader for pending auth
+  const Pending = () => <div style={{textAlign:'center',marginTop:'2rem'}}>Loading...</div>;
 
   return (
     <HelmetProvider>
@@ -144,15 +147,21 @@ function App() {
 
                 {/* Admin */}
                 <Route path="/admin"
-                  element={ userRole === 'admin'
-                    ? <AdminDashboard />
-                    : <Navigate to="/" replace />
+                  element={
+                    userRole === null
+                      ? <Pending />
+                      : userRole === 'admin'
+                          ? <AdminDashboard />
+                          : <Navigate to="/" replace />
                   }
                 />
                 <Route path="/admin/xp"
-                  element={ userRole === 'admin'
-                    ? <AdminXP />
-                    : <Navigate to="/" replace />
+                  element={
+                    userRole === null
+                      ? <Pending />
+                      : userRole === 'admin'
+                          ? <AdminXP />
+                          : <Navigate to="/" replace />
                   }
                 />
 
