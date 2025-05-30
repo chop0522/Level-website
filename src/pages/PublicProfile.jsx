@@ -21,6 +21,7 @@ import {
   highfive
 } from '../services/api';
 import XPCard from '../components/xp/XPCard';
+import MyPageNav from '../components/MyPageNav';
 
 /**
  * 公開プロフィールページ（閲覧専用 + ハイタッチ）
@@ -91,6 +92,7 @@ export default function PublicProfile() {
 
   return (
     <Container sx={{ mt: 4 }}>
+      <MyPageNav />
       <Card sx={{ p: 3, textAlign: 'center' }}>
         <Avatar
           src={profile.avatar_url}

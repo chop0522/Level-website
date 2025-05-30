@@ -5,6 +5,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { Container, Typography, Grid, Card, Avatar } from '@mui/material';
 import { AuthContext } from '../contexts/TokenContext';
 import { getAchievements } from '../services/api';
+import MyPageNav from '../components/MyPageNav';
 
 const CAT_KEYS = [
   { key: 'stealth', label: '正体隠匿' },
@@ -33,6 +34,7 @@ export default function AchievementsPage() {
 
   return (
     <Container sx={{ mt: 4 }}>
+      <MyPageNav />
       <Typography variant="h4" gutterBottom>
         Achievements
       </Typography>

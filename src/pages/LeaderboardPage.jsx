@@ -17,6 +17,7 @@ import {
   alpha
 } from '@mui/material';
 import { getUsers } from '../services/api';
+import MyPageNav from '../components/MyPageNav';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -91,6 +92,7 @@ export default function LeaderboardPage() {
 
   return (
     <Container sx={{ mt: 4 }}>
+      <MyPageNav />
       <Typography variant="h4" gutterBottom>
         Leaderboard
       </Typography>

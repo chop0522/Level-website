@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
 import { AuthContext } from '../contexts/TokenContext';
+import MyPageNav from '../components/MyPageNav';
 
 // 開発判定（Vite でも Node でも安全に動く）
 const isDev =
@@ -234,6 +235,7 @@ function MyPage() {
       <Typography variant="h5" gutterBottom>
         My Page
       </Typography>
+      <MyPageNav />
 
       {error && (
         <Typography color="error" sx={{ mb: 2 }}>
@@ -282,40 +284,9 @@ function MyPage() {
             </Card>
           )}
 
-          {/* Achievements ボタン */}
           <Button
-            component={Link}
-            to="/achievements"
             variant="contained"
             sx={{ mt: 2 }}
-          >
-            実績を見る
-          </Button>
-
-          {/* Leaderboard ボタン */}
-          <Button
-            component={Link}
-            to="/leaderboard"
-            variant="contained"
-            sx={{ mt: 2, ml: 1 }}
-          >
-            ランキングを見る
-          </Button>
-
-          {/* 公開プロフィール ボタン */}
-          <Button
-            component={Link}
-            to={`/profile/${userInfo?.id}`}
-            variant="contained"
-            sx={{ mt: 2, ml: 1 }}
-          >
-            公開プロフィール
-          </Button>
-
-          {/* アカウント設定 */}
-          <Button
-            variant="contained"
-            sx={{ mt: 2, ml: 1 }}
             onClick={() => setSettingsOpen(true)}
           >
             アカウント設定
