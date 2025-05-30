@@ -80,7 +80,11 @@ function App() {
       .then(r => r.json())
       .then(d => {
         if (d.error) { handleLogout(); }
-        else { setUserRole(d.role === 'admin' ? 'admin' : 'user'); }
+        else {
+          // フラット形式 {role:'admin'} でも ネスト形式 {user:{role:'admin'}} でも拾う
+          const role = d.role || d.user?.role || 'user';
+          setUserRole(role === 'admin' ? 'admin' : 'user');
+        }
       })
       .catch(() => setUserRole('user'));
   }, []);
