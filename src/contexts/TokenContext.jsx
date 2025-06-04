@@ -8,6 +8,7 @@ export const AuthContext = createContext({
   token: '',
   setToken: () => {},
   userRole: 'user',
+  setUserRole: () => {},
   userInfo: null,
   setUserInfo: () => {},
   handleLogout: () => {}

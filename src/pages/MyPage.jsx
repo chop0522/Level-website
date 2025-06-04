@@ -54,7 +54,12 @@ function formatDate(isoStr) {
 }
 
 function MyPage() {
-  const { token, userInfo, setUserInfo } = useContext(AuthContext);
+  // Context may not provide userInfo / setUserInfo during SSR or fallback builds.
+  // Prepare graceful fallbacks so that MyPage still works and setUserInfo is always a function.
+  const { token, userInfo: ctxUserInfo, setUserInfo: ctxSetUserInfo } = useContext(AuthContext);
+  const [localUserInfo, localSetUserInfo] = useState(null);
+  const userInfo = ctxUserInfo ?? localUserInfo;
+  const setUserInfo = ctxSetUserInfo ?? localSetUserInfo;
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [profile, setProfile] = useState(null);
