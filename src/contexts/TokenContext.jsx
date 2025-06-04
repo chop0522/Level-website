@@ -11,6 +11,7 @@ export const AuthContext = createContext({
   setUserRole: () => {},
   userInfo: null,
   setUserInfo: () => {},
+  setUser: () => {},          // legacy alias (optional)
   handleLogout: () => {}
 });
 
@@ -36,6 +37,7 @@ export function TokenProvider({ children }) {
       setUserRole,
       userInfo,
       setUserInfo,
+      setUser: setUserInfo, // alias for backward compatibility
       handleLogout
     }}>
       {children}
