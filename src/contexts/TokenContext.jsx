@@ -1,8 +1,15 @@
-import { createContext, useState } from 'react';
+import { createContext, useState, useEffect } from 'react';
 
 /**
- * グローバル認証コンテキスト
- * token / setToken / userRole / handleLogout を共有
+ * 認証 & ユーザー情報コンテキスト
+ *
+ *  token         : JWT (localStorage に永続化)
+ *  setToken      : JWT setter
+ *  userRole      : 'admin' / 'user'
+ *  setUserRole   : 役割 setter
+ *  userInfo      : /api/userinfo で取得した基本情報
+ *  setUserInfo   : setter
+ *  handleLogout  : 全て初期化 & localStorage クリア
  */
 export const AuthContext = createContext({
   token: '',
@@ -11,23 +18,38 @@ export const AuthContext = createContext({
   setUserRole: () => {},
   userInfo: null,
   setUserInfo: () => {},
-  setUser: () => {},          // legacy alias (optional)
   handleLogout: () => {}
 });
 
+export const AuthProvider = ({ children }) => {
+  // JWT は localStorage と同期
+  const [token, setTokenState] = useState(() => localStorage.getItem('token') || '');
+  const [userRole, setUserRole]   = useState('user');
+  const [userInfo, setUserInfo]   = useState(null);
 
-export function TokenProvider({ children }) {
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
-  const [userRole, setUserRole] = useState('user');
-  const [userInfo, setUserInfo] = useState(null);
+  // token を更新したら localStorage へも保存
+  const setToken = (newToken) => {
+    setTokenState(newToken);
+    if (newToken) {
+      localStorage.setItem('token', newToken);
+    } else {
+      localStorage.removeItem('token');
+    }
+  };
 
-  // handleLogout clears localStorage & resets states
+  // ログアウト処理
   const handleLogout = () => {
-    localStorage.removeItem('token');
     setToken('');
     setUserRole('user');
     setUserInfo(null);
   };
+
+  // ページ読込時に localStorage から token を反映（他タブとの同期用）
+  useEffect(() => {
+    const listener = () => setTokenState(localStorage.getItem('token') || '');
+    window.addEventListener('storage', listener);
+    return () => window.removeEventListener('storage', listener);
+  }, []);
 
   return (
     <AuthContext.Provider value={{
@@ -37,10 +59,12 @@ export function TokenProvider({ children }) {
       setUserRole,
       userInfo,
       setUserInfo,
-      setUser: setUserInfo, // alias for backward compatibility
       handleLogout
     }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
+
+// 旧コンポーネント名との後方互換 (import { TokenProvider } …)
+export { AuthProvider as TokenProvider };
