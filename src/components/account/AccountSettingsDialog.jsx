@@ -49,7 +49,7 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
       setError('ユーザー名を入力してください');
       return;
     }
-    const res = await updateProfile({ name: newName.trim() }, token);
+    const res = await updateProfile(token, { name: newName.trim() });
     if (res.success) {
       setMsg('ユーザー名を変更しました');
       reset();

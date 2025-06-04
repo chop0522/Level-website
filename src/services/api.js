@@ -150,10 +150,10 @@ export async function getProfile(token) {
 }
 
 /**
- * プロフィールを更新 (avatar_url と/または bio)
+ * プロフィールを更新 (name, avatar_url と/または bio)
  * @param {string} token JWT
- * @param {object} body  { avatar_url?, bio? }
- * @returns {object} { success: true, avatar_url?, bio? } or { error }
+ * @param {object} body  { name?, avatar_url?, bio? }
+ * @returns {object} { success: true, user } or { error }
  */
 export async function updateProfile(token, body) {
   try {
