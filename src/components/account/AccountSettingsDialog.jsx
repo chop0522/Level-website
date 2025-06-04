@@ -23,7 +23,7 @@ import { AuthContext } from '../../contexts/TokenContext';
  *   onLogout func   // 退会完了時にログアウト & 画面遷移するために親が渡す
  */
 export default function AccountSettingsDialog({ open, onClose, onLogout }) {
-  const { token } = useContext(AuthContext);
+  const { token, setUserInfo } = useContext(AuthContext);
 
   const [mode, setMode] = useState('settings'); // settings | confirmDelete
   const [newName, setNewName] = useState('');
@@ -51,8 +51,13 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
     }
     const res = await updateProfile(token, { name: newName.trim() });
     if (res.success) {
+      // update global userInfo so UI reflects immediately
+      if (setUserInfo) {
+        setUserInfo(prev => ({ ...prev, name: newName.trim() }));
+      }
       setMsg('ユーザー名を変更しました');
       reset();
+      handleClose();            // auto-close after success
     } else {
       setError(res.error || '変更に失敗しました');
     }
