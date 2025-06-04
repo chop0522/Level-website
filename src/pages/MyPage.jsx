@@ -54,12 +54,8 @@ function formatDate(isoStr) {
 }
 
 function MyPage() {
-  // Context may not provide userInfo / setUserInfo during SSR or fallback builds.
-  // Prepare graceful fallbacks so that MyPage still works and setUserInfo is always a function.
-  const { token, userInfo: ctxUserInfo, setUserInfo: ctxSetUserInfo } = useContext(AuthContext);
-  const [localUserInfo, localSetUserInfo] = useState(null);
-  const userInfo = ctxUserInfo ?? localUserInfo;
-  const setUserInfo = ctxSetUserInfo ?? localSetUserInfo;
+  // コンテキストからダイレクトに取得（名前変更後に即再レンダ）
+  const { token, userInfo, setUserInfo } = useContext(AuthContext);
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [profile, setProfile] = useState(null);
