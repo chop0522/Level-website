@@ -779,21 +779,22 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
 // PATCH /api/profile  (avatar_url, bio の任意更新)
 app.patch('/api/profile', authenticateToken, async (req, res) => {
   try {
-    const { avatar_url, bio } = req.body;
-    if (!avatar_url && bio === undefined) {
+    const { name, avatar_url, bio } = req.body;
+    if (name === undefined && avatar_url === undefined && bio === undefined) {
       return res.status(400).json({ error: 'No fields to update' });
     }
     const email = req.user.email;
     const fields = [];
     const values = [];
+    if (name !== undefined)       { fields.push('name');       values.push(name); }
     if (avatar_url !== undefined) { fields.push('avatar_url'); values.push(avatar_url); }
     if (bio !== undefined)        { fields.push('bio');        values.push(bio); }
 
     const setClause = fields.map((f, i) => `${f} = $${i+1}`).join(', ');
-    const sql = `UPDATE users SET ${setClause} WHERE email = $${fields.length+1} RETURNING avatar_url, bio`;
+    const sql = `UPDATE users SET ${setClause} WHERE email = $${fields.length+1} RETURNING id, name, avatar_url, bio`;
     values.push(email);
     const result = await pool.query(sql, values);
-    res.json({ success: true, ...result.rows[0] });
+    res.json({ success: true, user: result.rows[0] });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
