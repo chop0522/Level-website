@@ -9,7 +9,7 @@ import {
   Typography,
   Button
 } from '@mui/material';
-import { changePassword, deleteAccount } from '../../services/api';
+import { changePassword, deleteAccount, updateProfile } from '../../services/api';
 import { AuthContext } from '../../contexts/TokenContext';
 
 /**
@@ -26,6 +26,7 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
   const { token } = useContext(AuthContext);
 
   const [mode, setMode] = useState('settings'); // settings | confirmDelete
+  const [newName, setNewName] = useState('');
   const [oldPw, setOldPw] = useState('');
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
@@ -33,11 +34,28 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
   const [error, setError] = useState('');
 
   const reset = () => {
+    setNewName('');
     setOldPw('');
     setNewPw('');
     setConfirmPw('');
     setMsg('');
     setError('');
+  };
+  // ユーザー名変更
+  const handleChangeName = async () => {
+    setError('');
+    setMsg('');
+    if (!newName.trim()) {
+      setError('ユーザー名を入力してください');
+      return;
+    }
+    const res = await updateProfile({ name: newName.trim() }, token);
+    if (res.success) {
+      setMsg('ユーザー名を変更しました');
+      reset();
+    } else {
+      setError(res.error || '変更に失敗しました');
+    }
   };
 
   const handleClose = () => {
@@ -83,6 +101,14 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
           <DialogContent dividers>
             {error && <Typography color="error" sx={{ mb: 1 }}>{error}</Typography>}
             {msg && <Typography color="primary" sx={{ mb: 1 }}>{msg}</Typography>}
+            {/* ユーザー名変更 */}
+            <TextField
+              label="新しいユーザー名"
+              fullWidth
+              margin="dense"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
             <TextField
               label="現在のパスワード"
               type="password"
@@ -110,13 +136,20 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
           </DialogContent>
           <DialogActions>
             <Button color="error" onClick={() => setMode('confirmDelete')}>退会する</Button>
+            <Button
+              variant="outlined"
+              onClick={handleChangeName}
+              disabled={!newName}
+            >
+              名前を変更
+            </Button>
             <Button onClick={handleClose}>閉じる</Button>
             <Button
               variant="contained"
               onClick={handleChangePw}
               disabled={!oldPw || !newPw || !confirmPw}
             >
-              変更
+              パスワード変更
             </Button>
           </DialogActions>
         </>
