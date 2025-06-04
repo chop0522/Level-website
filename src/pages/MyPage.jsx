@@ -54,9 +54,8 @@ function formatDate(isoStr) {
 }
 
 function MyPage() {
-  const { token } = useContext(AuthContext);
+  const { token, userInfo, setUserInfo } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [userInfo, setUserInfo] = useState(null);
   const [error, setError] = useState('');
   const [profile, setProfile] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
