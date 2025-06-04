@@ -399,6 +399,7 @@ function MyPage() {
           localStorage.removeItem('token');
           navigate('/login', { replace: true });
         }}
+        onProfileUpdated={fetchUserInfo}
       />
 
       {/* 更新トースト */}
