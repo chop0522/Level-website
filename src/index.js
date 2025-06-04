@@ -6,6 +6,7 @@ import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import App from './App';
 import './retroTheme.css'; // レトロ風CSS
 import { register as registerSW } from './serviceWorkerRegistration';
+import { AuthProvider } from './contexts/TokenContext';
 
 // prefers-color-scheme に従ってダーク / ライトを切替
 const prefersDark = window.matchMedia &&
@@ -70,9 +71,11 @@ const root = createRoot(container);
 root.render(
   <ThemeProvider theme={theme}>
     <CssBaseline />
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </AuthProvider>
   </ThemeProvider>
 );
 

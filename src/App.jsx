@@ -67,6 +67,7 @@ theme = responsiveFontSizes(theme);
 function App() {
   const [token,    setToken]    = useState(localStorage.getItem('token') || '');
   const [userRole, setUserRole] = useState(null);   // null = 取得前
+  const [userInfo, setUserInfo] = useState(null);
   const navigate = useNavigate();
 
   /* ---- ユーザー情報取得 ---- */
@@ -84,6 +85,7 @@ function App() {
           // フラット形式 {role:'admin'} でも ネスト形式 {user:{role:'admin'}} でも拾う
           const role = d.role || d.user?.role || 'user';
           setUserRole(role === 'admin' ? 'admin' : 'user');
+          setUserInfo(d.user || d);            // ← 追加
         }
       })
       .catch(() => setUserRole('user'));
@@ -106,7 +108,7 @@ function App() {
   return (
     <HelmetProvider>
       <ThemeProvider theme={theme}>
-        <AuthContext.Provider value={{ token, setToken, userRole, handleLogout }}>
+        <AuthContext.Provider value={{ token, setToken, userRole, userInfo, setUserInfo, handleLogout }}>
           {/* ---------- 共通メタ ---------- */}
           <Helmet>
             <title>ゲームカフェ.Level | 行徳のボードゲームカフェ</title>
