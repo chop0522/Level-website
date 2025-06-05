@@ -38,6 +38,7 @@ export default function AdminXP() {
   const [toastMsg,  setToastMsg]  = useState('');
   const [errorMsg,  setErrorMsg]  = useState('');
   const [delId,    setDelId]    = useState('');
+  // delId holds the numeric user.id chosen via Autocomplete, or manual input
   const [delError, setDelError] = useState('');
   const [delMsg,   setDelMsg]   = useState('');
 
@@ -125,7 +126,10 @@ export default function AdminXP() {
           inputValue={userQ}
           onInputChange={(_, v) => setUserQ(v)}
           value={selectedUser}
-          onChange={(_, v) => setSelectedUser(v)}
+          onChange={(_, v) => {
+            setSelectedUser(v);
+            setDelId(v?.id ?? '');
+          }}
           renderInput={(params) => (
             <TextField {...params} label="ユーザー検索" />
           )}
@@ -165,7 +169,8 @@ export default function AdminXP() {
       <Stack spacing={2} sx={{ mt: 4 }}>
         <Typography variant="h6">ユーザー削除 (物理削除)</Typography>
         <TextField
-          label="ユーザー ID"
+          label="ユーザー ID (数値)"
+          placeholder="検索で選択すると自動入力"
           fullWidth
           value={delId}
           onChange={(e) => setDelId(e.target.value)}
@@ -174,7 +179,7 @@ export default function AdminXP() {
           variant="contained"
           color="error"
           onClick={handleDeleteUser}
-          disabled={!(delId || selectedUser?.id)}
+          disabled={!delId}
         >
           削除
         </Button>
