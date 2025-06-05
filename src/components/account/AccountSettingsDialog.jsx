@@ -115,7 +115,8 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
               onChange={(e) => setNewName(e.target.value)}
             />
             <TextField
-              label="現在のパスワード"
+              label="現在のパスワード (パスワード変更用)"
+              helperText="※ユーザー名変更だけの場合は空欄で構いません"
               type="password"
               fullWidth
               margin="dense"

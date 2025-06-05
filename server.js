@@ -833,6 +833,65 @@ app.patch('/api/profile', authenticateToken, async (req, res) => {
 });
 
 // -----------------------------
+// ユーザー設定 (名前変更 / パスワード変更)
+// -----------------------------
+
+// PUT /api/users/me/name  ―  Display name change (no password required)
+app.put('/api/users/me/name', authenticateToken, async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ error: 'Name required' });
+    }
+
+    const sql = 'UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name';
+    const { rows } = await pool.query(sql, [name, req.user.id]);
+
+    res.json({ success: true, user: rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /api/users/me/password  ―  Password change (current password check)
+app.put('/api/users/me/password', authenticateToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current and new password required' });
+    }
+
+    // fetch current hash
+    const { rows } = await pool.query(
+      'SELECT password_hash FROM users WHERE id = $1',
+      [req.user.id]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // validate current password
+    const valid = await bcrypt.compare(currentPassword, rows[0].password_hash);
+    if (!valid) {
+      return res.status(403).json({ error: 'Wrong current password' });
+    }
+
+    // update with new hash
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await pool.query(
+      'UPDATE users SET password_hash = $1 WHERE id = $2',
+      [newHash, req.user.id]
+    );
+
+    res.json({ success: true, message: 'Password updated' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// -----------------------------
 // アバター画像アップロード (multipart/form-data)
 // -----------------------------
 app.post('/api/upload-avatar',
