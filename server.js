@@ -650,6 +650,36 @@ app.delete('/api/admin/users/:id', authenticateToken, authenticateAdmin, async (
 });
 
 // -----------------------------
+// 管理者: ユーザー検索 (名前 / メール & XP 合計)
+// GET /api/admin/users?q=keyword
+// -----------------------------
+app.get('/api/admin/users', authenticateToken, authenticateAdmin, async (req, res) => {
+  try {
+    const q = (req.query.q || '').trim();          // 検索クエリ
+    if (q.length === 0) {
+      return res.json({ success: true, users: [] }); // 何も入力されていない場合は空配列
+    }
+
+    const like = `%${q}%`;
+    const sql = `
+      SELECT id, name, email,
+             (xp_stealth + xp_heavy + xp_light +
+              xp_party  + xp_gamble + xp_quiz) AS xp_total
+        FROM users
+       WHERE email ILIKE $1
+          OR name  ILIKE $1
+       ORDER BY xp_total DESC
+       LIMIT 20
+    `;
+    const result = await pool.query(sql, [like]);
+    res.json({ success: true, users: result.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// -----------------------------
 // Leaderboard 公開ユーザー一覧
 // -----------------------------
 app.get('/api/users', async (req, res) => {
