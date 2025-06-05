@@ -7,7 +7,7 @@ const multer = require('multer');
 
 module.exports = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 200 * 1024 }, // 200 KB per image
+  limits: { fileSize: 1024 * 1024 }, // 1 MB per image
   fileFilter: (_req, file, cb) => {
     // Accept only PNG, JPEG, or WEBP images
     if (/^image\/(png|jpe?g|webp)$/.test(file.mimetype)) cb(null, true);
