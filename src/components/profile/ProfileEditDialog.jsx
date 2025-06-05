@@ -7,7 +7,9 @@ import { AuthContext } from '../../contexts/TokenContext';
 export default function ProfileEditDialog({ open, onClose, profile, onSaved }) {
   const { token } = useContext(AuthContext);
   const [bio, setBio] = useState(profile?.bio || '');
-  const [preview, setPreview] = useState(profile?.avatar_url || null);
+  const [preview, setPreview] = useState(
+    profile ? `/api/users/${profile.id}/avatar?${Date.now()}` : null
+  );
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
@@ -23,15 +25,16 @@ export default function ProfileEditDialog({ open, onClose, profile, onSaved }) {
   const handleSave = async () => {
     try {
       setLoading(true);
-      let avatarUrl = profile.avatar_url;
       if (file) {
+        // 画像を先にアップロード（DB の avatar 列に保存される）
         const up = await uploadAvatar(token, file);
         if (!up.success) throw new Error(up.error || 'アップロード失敗');
-        avatarUrl = up.avatar_url;
       }
-      const res = await updateProfile(token, { avatar_url: avatarUrl, bio });
+      // bio だけ更新
+      const res = await updateProfile(token, { bio });
       if (!res.success) throw new Error(res.error || '更新失敗');
-      onSaved(res); // MyPageに反映
+
+      onSaved(res); // MyPage に反映
       onClose();
     } catch (e) {
       setErr(e.message);
@@ -41,13 +44,13 @@ export default function ProfileEditDialog({ open, onClose, profile, onSaved }) {
   };
 
   React.useEffect(() => {
-    if (!open) {
-      setFile(null);
-      setPreview(profile?.avatar_url || null);
-      setBio(profile?.bio || '');
-      setErr('');
-      setLoading(false);
-    }
+      if (!open) {
+        setFile(null);
+        setPreview(profile ? `/api/users/${profile.id}/avatar?${Date.now()}` : null);
+        setBio(profile?.bio || '');
+        setErr('');
+        setLoading(false);
+      }
   }, [open, profile]);
 
   return (
@@ -55,7 +58,7 @@ export default function ProfileEditDialog({ open, onClose, profile, onSaved }) {
       <DialogTitle>プロフィール編集</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt:1 }}>
-          <Avatar src={preview} sx={{ width:80, height:80 }} />
+          <Avatar src={preview} sx={{ width:80, height:80 }} imgProps={{ referrerPolicy: 'no-referrer' }} />
           <Button variant="outlined" component="label">
             画像を選択
             <input type="file" hidden accept="image/*" onChange={handleFile} />

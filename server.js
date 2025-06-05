@@ -8,22 +8,8 @@ const path = require('path');
 
 const { Pool } = require('pg'); // PostgreSQL
 
-const multer  = require('multer');
-const fs      = require('fs');
-
-// アップロード先ディレクトリを確保 (./uploads)
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
-
-// ファイル名: avatar_<userId>_timestamp.ext
-const storage = multer.diskStorage({
-  destination: (_, __, cb) => cb(null, uploadDir),
-  filename   : (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `avatar_${req.user.id}_${Date.now()}${ext}`);
-  }
-});
-const upload = multer({ storage });
+// 画像はディスクではなくメモリに保持 → 直接 BYTEA に保存
+const upload = require('./uploadConfig');
 
 // 1) Expressアプリ初期化
 const app = express();
@@ -902,18 +888,37 @@ app.post('/api/upload-avatar',
       if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
-      // 保存先 URL を作成 (例: /uploads/filename.png)
-      const publicUrl = `/uploads/${req.file.filename}`;
 
-      // DB の avatar_url を更新
-      const sql = `UPDATE users SET avatar_url = $1 WHERE id = $2 RETURNING avatar_url`;
-      const result = await pool.query(sql, [publicUrl, req.user.id]);
+      // DB に画像バイナリと MIME を保存
+      const sql = `
+        UPDATE users
+           SET avatar = $1,
+               avatar_mime = $2
+         WHERE id = $3
+         RETURNING id
+      `;
+      await pool.query(sql, [req.file.buffer, req.file.mimetype, req.user.id]);
 
-      res.json({ success: true, avatar_url: result.rows[0].avatar_url });
+      res.json({ success: true });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: err.message });
     }
+});
+
+// アバター画像取得
+app.get('/api/users/:id/avatar', async (req, res) => {
+  const userId = parseInt(req.params.id, 10);
+  if (isNaN(userId)) return res.status(400).end();
+
+  const { rows } = await pool.query(
+    'SELECT avatar, avatar_mime FROM users WHERE id = $1',
+    [userId]
+  );
+  if (rows.length === 0 || !rows[0].avatar) return res.status(404).end();
+
+  res.set('Content-Type', rows[0].avatar_mime);
+  res.send(rows[0].avatar);
 });
 
 // -----------------------------
@@ -1045,7 +1050,6 @@ app.delete('/api/reservations/:id', authenticateToken, authenticateAdmin, async 
 // -----------------------------
 // フロントエンドのビルド成果物 (本番用)
 // -----------------------------
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'build')));
 
 app.get('*', (req, res) => {
