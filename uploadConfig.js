@@ -9,8 +9,8 @@ module.exports = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 1024 * 1024 }, // 1 MB per image
   fileFilter: (_req, file, cb) => {
-    // Accept only PNG, JPEG, or WEBP images
-    if (/^image\/(png|jpe?g|webp)$/.test(file.mimetype)) cb(null, true);
+    // Accept PNG, JPEG, WEBP, or GIF images
+    if (/^image\/(png|jpe?g|webp|gif)$/.test(file.mimetype)) cb(null, true);
     else cb(new Error('Only PNG, JPEG, and WEBP images are allowed'));
   }
 });
