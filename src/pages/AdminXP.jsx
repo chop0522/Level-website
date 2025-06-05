@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -9,6 +9,8 @@ import {
   Alert,
   Stack
 } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
+import debounce from 'lodash.debounce';
 import { AuthContext } from '../contexts/TokenContext';
 import { adminDeleteUser } from '../services/api';
 
@@ -28,7 +30,9 @@ const categories = [
 export default function AdminXP() {
   const { token } = useContext(AuthContext);
 
-  const [email,     setEmail]     = useState('');
+  const [userQ, setUserQ] = useState('');
+  const [options, setOptions] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [category,  setCategory]  = useState('stealth');
   const [loading,   setLoading]   = useState(false);
   const [toastMsg,  setToastMsg]  = useState('');
@@ -37,17 +41,35 @@ export default function AdminXP() {
   const [delError, setDelError] = useState('');
   const [delMsg,   setDelMsg]   = useState('');
 
+  const searchUsers = React.useMemo(
+    () => debounce(async (q) => {
+      if (!q) return setOptions([]);
+      try {
+        const res = await fetch(`/api/admin/users?query=${encodeURIComponent(q)}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (Array.isArray(data)) setOptions(data);
+      } catch { /* ignore */ }
+    }, 400),
+    [token]
+  );
+
+  useEffect(() => { searchUsers(userQ); }, [userQ, searchUsers]);
+
   const handleDeleteUser = async () => {
     setDelError('');
-    if (!delId) {
+    const targetId = delId || selectedUser?.id;
+    if (!targetId) {
       setDelError('ユーザーIDを入力してください');
       return;
     }
-    if (!window.confirm(`${delId} を削除します。よろしいですか？`)) return;
-    const res = await adminDeleteUser(delId, token);
+    if (!window.confirm(`${targetId} を削除します。よろしいですか？`)) return;
+    const res = await adminDeleteUser(targetId, token);
     if (res.success) {
-      setDelMsg(`ユーザー ${delId} を削除しました`);
+      setDelMsg(`ユーザー ${targetId} を削除しました`);
       setDelId('');
+      setSelectedUser(null);
     } else {
       setDelError(res.error || '削除に失敗しました');
     }
@@ -55,8 +77,8 @@ export default function AdminXP() {
 
   const handleGiveXP = async () => {
     setErrorMsg('');
-    if (!email) {
-      setErrorMsg('メールアドレスを入力してください');
+    if (!selectedUser) {
+      setErrorMsg('ユーザーを選択してください');
       return;
     }
     try {
@@ -67,12 +89,13 @@ export default function AdminXP() {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email, category, amount: 10 })
+        body: JSON.stringify({ email: selectedUser.email, category, amount: 10 })
       });
       const data = await res.json();
       if (data.success) {
-        setToastMsg(`${email} に ${categories.find(c => c.key === category)?.label} +10 XP を付与しました`);
-        setEmail('');
+        setToastMsg(`${selectedUser.email} に ${categories.find(c => c.key === category)?.label} +10 XP を付与しました`);
+        setSelectedUser(null);
+        setUserQ('');
       } else {
         setErrorMsg(data.error || '付与に失敗しました');
       }
@@ -90,12 +113,29 @@ export default function AdminXP() {
       </Typography>
 
       <Stack spacing={2} sx={{ mt: 2 }}>
-        <TextField
-          label="ユーザー Email"
+        <Autocomplete
           fullWidth
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          options={options}
+          getOptionLabel={(o) =>
+            o.name
+              ? `${o.name} (${o.email}) — ${o.xp_total} XP`
+              : ''
+          }
+          noOptionsText="該当なし"
+          inputValue={userQ}
+          onInputChange={(_, v) => setUserQ(v)}
+          value={selectedUser}
+          onChange={(_, v) => setSelectedUser(v)}
+          renderInput={(params) => (
+            <TextField {...params} label="ユーザー検索" />
+          )}
         />
+
+        {selectedUser && (
+          <Alert severity="info">
+            選択中: {selectedUser.name} ({selectedUser.email}) — 合計 {selectedUser.xp_total} XP
+          </Alert>
+        )}
 
         <TextField
           select
@@ -134,7 +174,7 @@ export default function AdminXP() {
           variant="contained"
           color="error"
           onClick={handleDeleteUser}
-          disabled={!delId}
+          disabled={!(delId || selectedUser?.id)}
         >
           削除
         </Button>
