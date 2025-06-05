@@ -10,12 +10,12 @@ import {
   TableRow,
   TableCell,
   TableBody,
-  Avatar,
   Paper,
   TextField,
   InputAdornment,
   alpha
 } from '@mui/material';
+import UserAvatar from '../components/common/UserAvatar';
 import { getUsers } from '../services/api';
 import MyPageNav from '../components/MyPageNav';
 import SearchIcon from '@mui/icons-material/Search';
@@ -166,8 +166,9 @@ export default function LeaderboardPage() {
                 >
                   <TableCell>{idx + 1}</TableCell>
                   <TableCell>
-                    <Avatar
-                      src={u.avatar_url}
+                    <UserAvatar
+                      id={u.id}
+                      size={28}
                       sx={{ width: 28, height: 28, mr: 1, display: 'inline-flex' }}
                     />
                     {u.name || `User${u.id}`}

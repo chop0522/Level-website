@@ -5,7 +5,6 @@ import React, { useEffect, useState, useContext } from 'react';
 import {
   Container,
   Card,
-  Avatar,
   Typography,
   Grid,
   Button,
@@ -13,6 +12,7 @@ import {
   Alert,
   keyframes
 } from '@mui/material';
+import UserAvatar from '../components/common/UserAvatar';
 import { useParams } from 'react-router-dom';
 import { AuthContext } from '../contexts/TokenContext';
 import {
@@ -94,8 +94,10 @@ export default function PublicProfile() {
     <Container sx={{ mt: 4 }}>
       <MyPageNav />
       <Card sx={{ p: 3, textAlign: 'center' }}>
-        <Avatar
-          src={profile.avatar_url}
+        <UserAvatar
+          id={profile.id}
+          size={96}
+          ver={Date.now()}
           sx={{
             width: 96,
             height: 96,

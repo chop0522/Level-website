@@ -133,9 +133,10 @@ export async function deleteReservation(reservationId, token) {
 // -----------------------------
 
 /**
- * プロフィールを取得 (avatar_url, bio)
+ * プロフィールを取得 (bio など)
+ * アバター画像は `/api/users/{id}/avatar` から取得してください
  * @param {string} token JWT
- * @returns {object} { id, name, avatar_url, bio } or { error }
+ * @returns {object} { id, name, bio } or { error }
  */
 export async function getProfile(token) {
   try {
@@ -150,9 +151,9 @@ export async function getProfile(token) {
 }
 
 /**
- * プロフィールを更新 (name, avatar_url と/または bio)
+ * プロフィールを更新 (name と/または bio)
  * @param {string} token JWT
- * @param {object} body  { name?, avatar_url?, bio? }
+ * @param {object} body  { name?, bio? }
  * @returns {object} { success: true, user } or { error }
  */
 export async function updateProfile(token, body) {
@@ -176,7 +177,7 @@ export async function updateProfile(token, body) {
  * アバター画像をアップロード
  * @param {string} token JWT
  * @param {File}   file  画像ファイル
- * @returns {object} { success: true, avatar_url } or { error }
+ * @returns {object} { success: true } or { error }
  */
 export async function uploadAvatar(token, file) {
   try {

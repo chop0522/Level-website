@@ -65,6 +65,9 @@ function MyPage() {
   const [recentHF, setRecentHF] = useState([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  // アバターのキャッシュバスター
+  const [avatarVer, setAvatarVer] = useState(Date.now());
+
   // カテゴリ定義とランクテーブル
   const categories = [
     { key: 'stealth', ja: '正体隠匿', color: '#3f51b5' },
@@ -141,7 +144,11 @@ function MyPage() {
   const fetchProfile = async () => {
     try {
       const p = await getProfile(token);
-      if (!p.error) setProfile(p);
+      if (!p.error) {
+        setProfile(p);
+        // 画像を最新にするためキャッシュバスターを更新
+        setAvatarVer(Date.now());
+      }
     } catch (err) {
       console.error(err);
     }
@@ -266,7 +273,7 @@ function MyPage() {
             <Card sx={{ p: 2, mt: 3, maxWidth: 480 }}>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Avatar
-                  src={profile.avatar_url || undefined}
+                  src={`/api/users/${userInfo.id}/avatar?${avatarVer}`}
                   sx={{ width: 64, height: 64 }}
                 />
                 <Box flexGrow={1}>
@@ -382,6 +389,8 @@ function MyPage() {
           profile={profile}
           onSaved={(p) => {
             setProfile((prev) => ({ ...prev, ...p }));
+            // アップロード成功後にキャッシュバスターを更新
+            setAvatarVer(Date.now());
             setToast('プロフィールを更新しました');
           }}
         />
