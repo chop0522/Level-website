@@ -651,16 +651,17 @@ app.delete('/api/admin/users/:id', authenticateToken, authenticateAdmin, async (
 
 // -----------------------------
 // 管理者: ユーザー検索 (名前 / メール & XP 合計)
-// GET /api/admin/users?q=keyword
+// GET /api/admin/users?q=keyword  または ?query=keyword
 // -----------------------------
 app.get('/api/admin/users', authenticateToken, authenticateAdmin, async (req, res) => {
   try {
-    const q = (req.query.q || '').trim();          // 検索クエリ
-    if (q.length === 0) {
-      return res.json({ success: true, users: [] }); // 何も入力されていない場合は空配列
+    // 両方のクエリパラメータを受け付ける
+    const raw = (req.query.q ?? req.query.query ?? '').trim();
+    if (raw.length === 0) {
+      return res.json([]);          // 空配列を返す
     }
 
-    const like = `%${q}%`;
+    const like = `%${raw}%`;
     const sql = `
       SELECT id, name, email,
              (xp_stealth + xp_heavy + xp_light +
@@ -672,10 +673,10 @@ app.get('/api/admin/users', authenticateToken, authenticateAdmin, async (req, re
        LIMIT 20
     `;
     const result = await pool.query(sql, [like]);
-    res.json({ success: true, users: result.rows });
+    return res.json(result.rows);   // ← フロントは配列を期待
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 

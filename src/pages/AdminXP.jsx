@@ -9,7 +9,7 @@ import {
   Alert,
   Stack
 } from '@mui/material';
-import Autocomplete from '@mui/material/Autocomplete';
+import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import debounce from 'lodash.debounce';
 import { AuthContext } from '../contexts/TokenContext';
 import { adminDeleteUser } from '../services/api';
@@ -42,9 +42,14 @@ export default function AdminXP() {
   const [delError, setDelError] = useState('');
   const [delMsg,   setDelMsg]   = useState('');
 
+  const filter = createFilterOptions({ limit: 20, stringify: (o) => `${o.name} ${o.email}` });
+
   const searchUsers = React.useMemo(
     () => debounce(async (q) => {
-      if (!q) return setOptions([]);
+      if (!q || q.trim().length < 2) {
+        setOptions([]);
+        return;
+      }
       try {
         const res = await fetch(`/api/admin/users?query=${encodeURIComponent(q)}`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -117,6 +122,7 @@ export default function AdminXP() {
         <Autocomplete
           fullWidth
           options={options}
+          filterOptions={(opts) => opts}
           getOptionLabel={(o) =>
             o.name
               ? `${o.name} (${o.email}) — ${o.xp_total} XP`
@@ -126,6 +132,7 @@ export default function AdminXP() {
           inputValue={userQ}
           onInputChange={(_, v) => setUserQ(v)}
           value={selectedUser}
+          isOptionEqualToValue={(opt, val) => opt.id === val.id}
           onChange={(_, v) => {
             setSelectedUser(v);
             setDelId(v?.id ?? '');
