@@ -3,6 +3,7 @@ import { Dialog, DialogTitle, DialogContent, TextField, Button, Stack, Avatar } 
 import { uploadAvatar, updateProfile } from '../../services/api';
 import { useContext } from 'react';
 import { AuthContext } from '../../contexts/TokenContext';
+import imageCompression from 'browser-image-compression';
 
 export default function ProfileEditDialog({ open, onClose, profile, onSaved }) {
   const { token } = useContext(AuthContext);
@@ -14,11 +15,24 @@ export default function ProfileEditDialog({ open, onClose, profile, onSaved }) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
 
-  const handleFile = (e) => {
-    const f = e.target.files[0];
-    if (f) {
-      setFile(f);
-      setPreview(URL.createObjectURL(f));
+  const handleFile = async (e) => {
+    const original = e.target.files?.[0];
+    if (!original) return;
+
+    try {
+      // 256×256 以内、最大 0.2 MB、WebP へ変換
+      const compressed = await imageCompression(original, {
+        maxSizeMB: 0.2,
+        maxWidthOrHeight: 256,
+        fileType: 'image/webp'
+      });
+
+      setFile(compressed);
+      setPreview(URL.createObjectURL(compressed));
+      setErr('');
+    } catch (err) {
+      console.error('imageCompression error:', err);
+      setErr('画像の圧縮に失敗しました');
     }
   };
 
