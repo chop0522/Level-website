@@ -20,6 +20,7 @@ app.use(cors());
 const {
   DATABASE_URL,
   JWT_SECRET,
+  JWT_EXPIRES = '30d',           // デフォルト 30 日
   QR_SECRET = 'qr_secret_change_me',
   PORT = 3001
 } = process.env;
@@ -283,7 +284,7 @@ app.post('/auth/register', async (req, res) => {
     const token = jwt.sign(
       { id: newUser.id, email, role: newUser.role },
       JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: JWT_EXPIRES }
     );
     return res.json({ success: true, token, user: newUser });
   } catch (err) {
@@ -311,7 +312,7 @@ app.post('/auth/login', async (req, res) => {
     const token = jwt.sign(
       { id: userRow.id, email, role: userRow.role },
       JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: JWT_EXPIRES }
     );
     const userData = {
       id: userRow.id,
