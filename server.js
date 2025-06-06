@@ -676,11 +676,12 @@ app.get('/api/users', async (req, res) => {
     const order = leaderboardOrder(sort);
 
     const sql = `
-      SELECT id, name, avatar_url,
+      SELECT id, name,
              xp_total, xp_stealth, xp_heavy, xp_light,
              xp_party, xp_gamble, xp_quiz
         FROM users
        WHERE is_public IS NOT FALSE
+         AND role <> 'admin'          -- 管理者をランキングから除外
     ORDER BY ${order}
        LIMIT $1
     `;
