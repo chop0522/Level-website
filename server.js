@@ -8,6 +8,12 @@ const path = require('path');
 const dayjs   = require('dayjs');           // 日付ユーティリティ
 // 麻雀ポイント計算ユーティリティ
 const { calcMahjongPoint } = require('./utils/mahjong');
+// ---------------------------------
+// Express initialization (moved up so routes can be declared safely)
+const app = express();
+app.use(express.json());
+app.use(cors());
+// ---------------------------------
 // -----------------------------
 // 麻雀: 対局登録
 // -----------------------------
@@ -68,9 +74,6 @@ const { Pool } = require('pg'); // PostgreSQL
 const upload = require('./uploadConfig');
 
 // 1) Expressアプリ初期化
-const app = express();
-app.use(express.json());
-app.use(cors());
 
 // 2) 環境変数の読み込み
 const {
