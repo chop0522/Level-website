@@ -315,7 +315,7 @@ function MyPage() {
               <Typography variant="h6" gutterBottom>
                 最近ハイタッチした人
               </Typography>
-              <Stack spacing={1}>cho
+              <Stack spacing={1}>
                 {recentHF.map((p) => (
                   <Stack
                     key={p.id}

@@ -1,7 +1,8 @@
 // src/pages/MahjongPage.jsx
 import { useState, useEffect } from 'react';
 import { Tabs, Tab, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
-import apiFetch from '../api';
+import apiFetch from '../services/api';
+import dayjs from 'dayjs';
 
 export default function MahjongPage() {
   const [tab, setTab] = useState(0);           // 0=今月, 1=先月
