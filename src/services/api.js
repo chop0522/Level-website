@@ -1,6 +1,37 @@
 // src/services/api.js
 
 const SERVER_URL = ''; 
+/**
+ * 汎用 fetch ラッパー
+ * Usage:
+ *   apiFetch('/api/mahjong/monthly')
+ *   apiFetch('/api/mahjong/games', { method:'POST', body: JSON.stringify({...}) })
+ *
+ * - `opts.body` が FormData でない限り JSON を想定し、Content-Type を自動付与
+ * - `localStorage.token` があれば Authorization ヘッダーを自動付与
+ * - 成功時は JSON を返す（204 No Content の場合は null）
+ * - 失敗時は throw Error
+ */
+export async function apiFetch(path, opts = {}) {
+  const token = localStorage.getItem('token') || '';
+  const headers = opts.body instanceof FormData
+    ? { ...(opts.headers || {}), Authorization: token ? `Bearer ${token}` : undefined }
+    : {
+        'Content-Type': 'application/json',
+        ...(opts.headers || {}),
+        ...(token && { Authorization: `Bearer ${token}` })
+      };
+
+  const res = await fetch(`${SERVER_URL}${path}`, { ...opts, headers });
+  if (!res.ok) {
+    const msg = await res.text();
+    throw new Error(msg || res.statusText);
+  }
+  return res.status === 204 ? null : res.json();
+}
+
+// 既存モジュールとの互換のため default でも輸出
+export default apiFetch;
 // 同じサーバーで運用なら ""
 // 分ける場合は "http://localhost:3001" 等を指定
 
