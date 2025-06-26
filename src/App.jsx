@@ -33,6 +33,8 @@ const QRPage          = lazy(() => import('./pages/QRPage'));
 const AchievementsPage = lazy(() => import('./pages/AchievementsPage'));
 const NotFound        = lazy(() => import('./pages/NotFound'));    // “最後の砦”
 
+const MahjongPage     = lazy(() => import('./pages/MahjongPage'));
+
 /* =========================================
    2) 高度な MUI テーマ
    ========================================= */
@@ -144,6 +146,14 @@ function App() {
                   element={ token
                     ? <AchievementsPage />
                     : <Navigate to="/login" replace />
+                  }
+                />
+                <Route
+                  path="/mahjong"
+                  element={
+                    token
+                      ? <MahjongPage />
+                      : <Navigate to="/login" replace />
                   }
                 />
 

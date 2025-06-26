@@ -15,7 +15,7 @@ import {
   getUnreadHighfives
 } from '../services/api';
 import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 
 import { AuthContext } from '../contexts/TokenContext';
 import MyPageNav from '../components/MyPageNav';
@@ -299,6 +299,16 @@ function MyPage() {
             アカウント設定
           </Button>
 
+          {/* 麻雀ランキングを見るボタン */}
+          <Button
+            variant="outlined"
+            component={RouterLink}
+            to="/mahjong"
+            sx={{ mt: 2, ml: 2 }}
+          >
+            麻雀ランキングを見る
+          </Button>
+
           {/* 最近ハイタッチした人 */}
           {recentHF.length > 0 && (
             <Card sx={{ p: 2, mt: 4, maxWidth: 480 }}>
@@ -312,7 +322,7 @@ function MyPage() {
                     direction="row"
                     alignItems="center"
                     justifyContent="space-between"
-                    component={Link}
+                    component={RouterLink}
                     to={`/profile/${p.id}`}
                     sx={{ textDecoration: 'none', color: 'inherit' }}
                   >
