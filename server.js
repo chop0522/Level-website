@@ -5,6 +5,62 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
+const dayjs   = require('dayjs');           // 日付ユーティリティ
+// 麻雀ポイント計算ユーティリティ
+const { calcMahjongPoint } = require('./utils/mahjong');
+// -----------------------------
+// 麻雀: 対局登録
+// -----------------------------
+app.post('/api/mahjong/games', authenticateToken, async (req, res) => {
+  try {
+    const { rank, finalScore } = req.body;
+    // 入力バリデーション
+    if (![1, 2, 3, 4].includes(rank) || !Number.isInteger(finalScore)) {
+      return res.status(400).json({ error: 'rank(1-4) と整数 finalScore が必要' });
+    }
+
+    // ポイント計算
+    const point = calcMahjongPoint(rank, finalScore);
+
+    // DB へ挿入
+    await pool.query(
+      `INSERT INTO mahjong_games (user_id, rank, final_score, point)
+       VALUES ($1, $2, $3, $4)`,
+      [req.user.id, rank, finalScore, point]
+    );
+
+    res.json({ success: true, point });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// -----------------------------
+// 麻雀: 月間ランキング取得
+// -----------------------------
+app.get('/api/mahjong/monthly', async (req, res) => {
+  try {
+    // ?month=YYYY-MM が無ければ今月
+    const month = req.query.month || dayjs().startOf('month').format('YYYY-MM');
+    const sql = `
+      SELECT u.id, u.name,
+             m.monthly_pt
+        FROM mahjong_monthly m
+        JOIN users u ON u.id = m.user_id
+       WHERE m.month = $1
+    ORDER BY m.monthly_pt DESC
+       LIMIT 100
+    `;
+    const { rows } = await pool.query(sql, [month + '-01']); // YYYY-MM-01 形式
+    res.json({ success: true, month, ranking: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+// -----------------------------
+// Leaderboard 公開ユーザー一覧
 
 const { Pool } = require('pg'); // PostgreSQL
 
