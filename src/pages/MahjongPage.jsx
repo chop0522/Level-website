@@ -16,10 +16,11 @@ import {
 } from '@mui/material';
 import { apiFetch } from '../services/api';
 import UserAvatar from '../components/common/UserAvatar';
-import useAuth from '../hooks/useAuth';
+import { useContext } from 'react';
+import { AuthContext } from '../contexts/TokenContext';
 
 export default function MahjongPage() {
-  const { token, user } = useAuth();           // 認証情報
+  const { token, userInfo: user } = useContext(AuthContext); // 認証情報
   const [tab, setTab] = useState(0);           // 0=今月, 1=先月
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
