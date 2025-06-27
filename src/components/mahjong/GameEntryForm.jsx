@@ -11,7 +11,7 @@ import {
   Alert
 } from '@mui/material';
 import { apiFetch } from '../../services/api';
-import { ranks } from '../../../utils/mahjong'; // rank list
+import { ranks } from '../../utils/mahjong'; // rank list
 
 export default function GameEntryForm({ open, onClose, onSubmitted }) {
   const [rank, setRank] = useState(1);
