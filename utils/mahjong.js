@@ -10,3 +10,5 @@ export function calcMahjongPoint(rank, finalScore) {
   const delta   = Math.floor((finalScore - 25000) / 1000);
   return delta + (rankPts[rank] ?? 0);
 }
+
+export const ranks = [1, 2, 3, 4];

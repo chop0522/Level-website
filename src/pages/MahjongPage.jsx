@@ -12,12 +12,15 @@ import {
   TableBody,
   CircularProgress,
   Typography,
-  Paper
+  Paper,
+  IconButton
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { apiFetch } from '../services/api';
 import UserAvatar from '../components/common/UserAvatar';
 import { useContext } from 'react';
 import { AuthContext } from '../contexts/TokenContext';
+import GameEntryForm from '../components/mahjong/GameEntryForm';
 
 export default function MahjongPage() {
   const { token, userInfo: user } = useContext(AuthContext); // 認証情報
@@ -25,6 +28,7 @@ export default function MahjongPage() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [formOpen, setFormOpen] = useState(false); // 対局登録フォーム
 
   // 月間ランキング取得
   useEffect(() => {
@@ -55,6 +59,16 @@ export default function MahjongPage() {
         <Tab label="今月" />
         <Tab label="先月" />
       </Tabs>
+
+      {user && user.role === 'admin' && (
+        <IconButton
+          size="small"
+          sx={{ ml: 1 }}
+          onClick={() => setFormOpen(true)}
+        >
+          <AddIcon />
+        </IconButton>
+      )}
 
       {loading && (
         <Box sx={{ textAlign: 'center', mt: 4 }}>
@@ -101,6 +115,12 @@ export default function MahjongPage() {
           </Table>
         </Paper>
       )}
+
+      <GameEntryForm
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        onSubmitted={() => setTab((prev) => prev)} /* re-fetch current tab */
+      />
     </Box>
   );
 }
