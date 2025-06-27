@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -10,6 +10,7 @@ import {
   Stack,
   Alert
 } from '@mui/material';
+import { AuthContext } from '../../contexts/TokenContext';
 import { apiFetch } from '../../services/api';
 import { ranks } from '../../utils/mahjong'; // rank list
 
@@ -18,13 +19,19 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
   const [score, setScore] = useState(25000);
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const { userInfo: user } = useContext(AuthContext);
 
   const handleSubmit = async () => {
     try {
       setLoading(true);
       await apiFetch('/api/mahjong/games', {
         method: 'POST',
-        body: JSON.stringify({ rank, finalScore: score })
+        body: JSON.stringify({
+          rank,
+          finalScore: score,
+          email: email.trim() || undefined
+        })
       });
       onSubmitted();
       onClose();
@@ -41,6 +48,15 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           {err && <Alert severity="error">{err}</Alert>}
+          {user?.role === 'admin' && (
+            <TextField
+              label="対象ユーザーのメール"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+            />
+          )}
           <TextField
             select
             label="順位"

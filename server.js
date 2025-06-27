@@ -19,10 +19,25 @@ app.use(cors());
 // -----------------------------
 app.post('/api/mahjong/games', authenticateToken, async (req, res) => {
   try {
-    const { rank, finalScore } = req.body;
+    // rank: 1‑4, finalScore: 持ち点, (admin only) email: 対象ユーザー
+    const { rank, finalScore, email } = req.body;
     // 入力バリデーション
     if (![1, 2, 3, 4].includes(rank) || !Number.isInteger(finalScore)) {
       return res.status(400).json({ error: 'rank(1-4) と整数 finalScore が必要' });
+    }
+
+    // 対象ユーザーを決定（email が無ければ自分自身）
+    let targetId = req.user.id;
+    if (email) {
+      // email 指定は管理者のみ許可
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'email 指定は admin 限定' });
+      }
+      const target = await findUserByEmail(email);
+      if (!target) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      targetId = target.id;
     }
 
     // ポイント計算
@@ -32,7 +47,7 @@ app.post('/api/mahjong/games', authenticateToken, async (req, res) => {
     await pool.query(
       `INSERT INTO mahjong_games (user_id, rank, final_score, point)
        VALUES ($1, $2, $3, $4)`,
-      [req.user.id, rank, finalScore, point]
+      [targetId, rank, finalScore, point]
     );
 
     // 対局追加後に月間ビューを最新化
