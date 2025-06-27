@@ -35,6 +35,9 @@ app.post('/api/mahjong/games', authenticateToken, async (req, res) => {
       [req.user.id, rank, finalScore, point]
     );
 
+    // 対局追加後に月間ビューを最新化
+    await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY mahjong_monthly');
+
     res.json({ success: true, point });
   } catch (err) {
     console.error(err);
