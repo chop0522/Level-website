@@ -19,26 +19,23 @@ app.use(cors());
 // -----------------------------
 app.post('/api/mahjong/games', authenticateToken, async (req, res) => {
   try {
-    // rank: 1‑4, finalScore: 持ち点, (admin only) email: 対象ユーザー
-    const { rank, finalScore, email } = req.body;
+    // rank: 1‑4, finalScore: 持ち点, (admin only) username: 対象ユーザー名
+    const { rank, finalScore, username } = req.body;
+    // 管理者のみ登録可能
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin only' });
+    }
     // 入力バリデーション
     if (![1, 2, 3, 4].includes(rank) || !Number.isInteger(finalScore)) {
       return res.status(400).json({ error: 'rank(1-4) と整数 finalScore が必要' });
     }
 
-    // 対象ユーザーを決定（email が無ければ自分自身）
-    let targetId = req.user.id;
-    if (email) {
-      // email 指定は管理者のみ許可
-      if (req.user.role !== 'admin') {
-        return res.status(403).json({ error: 'email 指定は admin 限定' });
-      }
-      const target = await findUserByEmail(email);
-      if (!target) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-      targetId = target.id;
+    // 対象ユーザーを名前で検索
+    const target = await findUserByName(username);
+    if (!target) {
+      return res.status(404).json({ error: 'User not found' });
     }
+    const targetId = target.id;
 
     // ポイント計算
     const point = calcMahjongPoint(rank, finalScore);
@@ -152,6 +149,16 @@ async function findUserByEmail(email) {
     return res.rows[0];
   }
   return null;
+}
+
+/**
+ * ユーザーを名前で検索
+ * @param {string} name
+ * @returns {object|null}
+ */
+async function findUserByName(name) {
+  const res = await pool.query('SELECT * FROM users WHERE name = $1', [name]);
+  return res.rows[0] || null;
 }
 
 /**
@@ -738,6 +745,19 @@ app.get('/api/admin/users', authenticateToken, authenticateAdmin, async (req, re
     `;
     const result = await pool.query(sql, [like]);
     return res.json(result.rows);   // ← フロントは配列を期待
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// -----------------------------
+// 管理者: ユーザー名リスト (ドロップダウン用)
+// -----------------------------
+app.get('/api/users/list', authenticateToken, authenticateAdmin, async (_req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT name FROM users ORDER BY name');
+    res.json(rows.map(r => r.name));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });

@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -19,8 +19,20 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
   const [score, setScore] = useState(25000);
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
+
+  const [username, setUsername] = useState('');
+  const [userList, setUserList] = useState([]);
+
   const { userInfo: user } = useContext(AuthContext);
+
+  // 管理者はユーザー名一覧を取得してドロップダウンに表示
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      apiFetch('/api/users/list')
+        .then(setUserList)
+        .catch(() => setUserList([]));
+    }
+  }, [user]);
 
   const handleSubmit = async () => {
     try {
@@ -30,7 +42,7 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
         body: JSON.stringify({
           rank,
           finalScore: score,
-          email: email.trim() || undefined
+          username: username || undefined
         })
       });
       onSubmitted();
@@ -50,12 +62,18 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
           {err && <Alert severity="error">{err}</Alert>}
           {user?.role === 'admin' && (
             <TextField
-              label="対象ユーザーのメール"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              select
+              label="対象ユーザー名"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               fullWidth
-            />
+            >
+              {userList.map((n) => (
+                <MenuItem key={n} value={n}>
+                  {n}
+                </MenuItem>
+              ))}
+            </TextField>
           )}
           <TextField
             select
