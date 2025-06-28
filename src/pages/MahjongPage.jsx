@@ -15,6 +15,8 @@ import {
   Paper,
   IconButton
 } from '@mui/material';
+import Chip from '@mui/material/Chip';
+import { getRankFromPoint } from '../utils/mahjongRank';
 import AddIcon from '@mui/icons-material/Add';
 import { apiFetch } from '../services/api';
 import UserAvatar from '../components/common/UserAvatar';
@@ -105,7 +107,16 @@ export default function MahjongPage() {
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <UserAvatar id={r.id} size={28} sx={{ mr: 1 }} />
-                      {r.name}
+                      <Typography component="span">{r.name}</Typography>
+                      <Chip
+                        label={getRankFromPoint(r.monthly_pt).label}
+                        size="small"
+                        sx={{
+                          bgcolor: getRankFromPoint(r.monthly_pt).color,
+                          color: '#fff',
+                          ml: 1
+                        }}
+                      />
                     </Box>
                   </TableCell>
                   <TableCell align="right">{r.monthly_pt}</TableCell>

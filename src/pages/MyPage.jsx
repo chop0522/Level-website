@@ -3,6 +3,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Container, Typography, Button } from '@mui/material';
 import { Avatar, Stack, Box, Card, Snackbar, Alert } from '@mui/material';
 import { Grid } from '@mui/material';
+import Chip from '@mui/material/Chip';
+import { getRankFromPoint } from '../utils/mahjongRank';
 import XPCard from '../components/xp/XPCard';
 import ProfileEditDialog from '../components/profile/ProfileEditDialog';
 import AccountSettingsDialog from '../components/account/AccountSettingsDialog';
@@ -67,6 +69,8 @@ function MyPage() {
 
   // アバターのキャッシュバスター
   const [avatarVer, setAvatarVer] = useState(Date.now());
+  // 段位バッジ用
+  const rankInfo = getRankFromPoint(userInfo?.mahjong_pt || 0);
 
   // カテゴリ定義とランクテーブル
   const categories = [
@@ -277,7 +281,14 @@ function MyPage() {
                   sx={{ width: 64, height: 64 }}
                 />
                 <Box flexGrow={1}>
-                  <Typography>{userInfo.name}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography>{userInfo.name}</Typography>
+                    <Chip
+                      label={rankInfo.label}
+                      size="small"
+                      sx={{ bgcolor: rankInfo.color, color: '#fff', ml: 1 }}
+                    />
+                  </Box>
                   {profile.bio && (
                     <Typography variant="body2" color="text.secondary">
                       {profile.bio}
