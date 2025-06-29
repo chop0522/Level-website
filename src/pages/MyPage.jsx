@@ -37,11 +37,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import { Radar, Line } from 'react-chartjs-2';
-import {
-  CategoryScale,
-  LinearScale
-} from 'chart.js';
+import { Radar } from 'react-chartjs-2';
 
 // Register radar components
 ChartJS.register(
@@ -50,9 +46,7 @@ ChartJS.register(
   LineElement,
   Filler,
   Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale
+  Legend
 );
 
 // yyyy-mm-dd → 'M/D' 形式へ変換
@@ -234,23 +228,6 @@ function MyPage() {
     };
   };
 
-
-  // スパークライン用データ (通算Pt と 今月Pt の二点)
-  function createSparkData(totalPt, monthlyPt) {
-    return {
-      labels: ['通算', '今月'],
-      datasets: [
-        {
-          data: [totalPt, monthlyPt],
-          fill: true,
-          tension: 0.4,
-          backgroundColor: 'rgba(102,187,106,0.15)',
-          borderColor: '#66bb6a',
-          pointRadius: 3
-        }
-      ]
-    };
-  }
 
   // レーダーチャートオプション
   const radarOptions = {
@@ -459,26 +436,6 @@ function MyPage() {
             )}
           </div>
 
-          {/* 麻雀ポイント スパークライン */}
-          <div style={{ marginTop: '30px', maxWidth: '400px' }}>
-            <Typography variant="h6" gutterBottom>
-              麻雀 通算ポイント & 月間ポイント
-            </Typography>
-            <Line
-              data={createSparkData(userInfo.total_pt || 0, userInfo.monthly_pt || 0)}
-              options={{
-                plugins: { legend: { display: false } },
-                scales: {
-                  x: { display: false },
-                  y: { display: false }
-                },
-                elements: {
-                  line: { borderWidth: 2 },
-                  point: { hoverRadius: 4 }
-                }
-              }}
-            />
-          </div>
         </>
       )}
 
