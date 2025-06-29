@@ -34,6 +34,7 @@ const AchievementsPage = lazy(() => import('./pages/AchievementsPage'));
 const NotFound        = lazy(() => import('./pages/NotFound'));    // “最後の砦”
 
 const MahjongPage     = lazy(() => import('./pages/MahjongPage'));
+const LifetimeRankingPage = lazy(() => import('./pages/LifetimeRankingPage'));
 
 /* =========================================
    2) 高度な MUI テーマ
@@ -153,6 +154,14 @@ function App() {
                   element={
                     token
                       ? <MahjongPage />
+                      : <Navigate to="/login" replace />
+                  }
+                />
+                <Route
+                  path="/mahjong/lifetime"
+                  element={
+                    token
+                      ? <LifetimeRankingPage />
                       : <Navigate to="/login" replace />
                   }
                 />
