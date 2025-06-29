@@ -10,6 +10,7 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  Button,
   CircularProgress,
   Typography,
   Paper,
@@ -21,6 +22,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { apiFetch } from '../services/api';
 import UserAvatar from '../components/common/UserAvatar';
 import { useContext } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import { AuthContext } from '../contexts/TokenContext';
 import GameEntryForm from '../components/mahjong/GameEntryForm';
 
@@ -56,6 +58,16 @@ export default function MahjongPage() {
       <Typography variant="h5" gutterBottom>
         麻雀月間ランキング
       </Typography>
+
+      <Button
+        component={RouterLink}
+        to="/mahjong/lifetime"
+        variant="outlined"
+        size="small"
+        sx={{ mb: 2 }}
+      >
+        通算ランキングへ
+      </Button>
 
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
         <Tab label="今月" />

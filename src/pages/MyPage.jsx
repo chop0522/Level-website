@@ -323,6 +323,16 @@ function MyPage() {
             麻雀ランキングを見る
           </Button>
 
+          {/* 通算ランキングを見るボタン */}
+          <Button
+            variant="outlined"
+            component={RouterLink}
+            to="/mahjong/lifetime"
+            sx={{ mt: 2, ml: 1 }}
+          >
+            通算ランキングを見る
+          </Button>
+
           {/* 最近ハイタッチした人 */}
           {recentHF.length > 0 && (
             <Card sx={{ p: 2, mt: 4, maxWidth: 480 }}>

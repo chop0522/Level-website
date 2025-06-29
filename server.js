@@ -86,6 +86,28 @@ app.get('/api/mahjong/monthly', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// -----------------------------
+// 麻雀: 通算 (ライフタイム) ランキング取得
+// -----------------------------
+app.get('/api/mahjong/lifetime', async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit || '100', 10), 200);
+    const sql = `
+      SELECT id, name, total_pt
+        FROM users
+       WHERE role <> 'admin'               -- 管理者は除外
+         AND total_pt IS NOT NULL
+    ORDER BY total_pt DESC
+       LIMIT $1
+    `;
+    const { rows } = await pool.query(sql, [limit]);
+    res.json({ success: true, ranking: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
 // -----------------------------
 // Leaderboard 公開ユーザー一覧
 
