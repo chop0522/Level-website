@@ -37,12 +37,10 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import { Radar } from 'react-chartjs-2';
-import { Bar } from 'react-chartjs-2';
+import { Radar, Line } from 'react-chartjs-2';
 import {
   CategoryScale,
-  LinearScale,
-  BarElement
+  LinearScale
 } from 'chart.js';
 
 // Register radar components
@@ -54,8 +52,7 @@ ChartJS.register(
   Tooltip,
   Legend,
   CategoryScale,
-  LinearScale,
-  BarElement
+  LinearScale
 );
 
 // yyyy-mm-dd → 'M/D' 形式へ変換
@@ -237,15 +234,19 @@ function MyPage() {
     };
   };
 
-  // バーチャート用データ (通算Pt vs 今月Pt)
-  function createBarData(totalPt, monthlyPt) {
+
+  // スパークライン用データ (通算Pt と 今月Pt の二点)
+  function createSparkData(totalPt, monthlyPt) {
     return {
       labels: ['通算', '今月'],
       datasets: [
         {
-          label: 'ポイント',
           data: [totalPt, monthlyPt],
-          backgroundColor: ['#42a5f5', '#66bb6a']
+          fill: true,
+          tension: 0.4,
+          backgroundColor: 'rgba(102,187,106,0.15)',
+          borderColor: '#66bb6a',
+          pointRadius: 3
         }
       ]
     };
@@ -458,18 +459,22 @@ function MyPage() {
             )}
           </div>
 
-          {/* ポイント比較バーチャート */}
+          {/* 麻雀ポイント スパークライン */}
           <div style={{ marginTop: '30px', maxWidth: '400px' }}>
             <Typography variant="h6" gutterBottom>
-              通算ポイント vs 今月ポイント
+              麻雀 通算ポイント & 月間ポイント
             </Typography>
-            <Bar
-              data={createBarData(userInfo.total_pt || 0, userInfo.monthly_pt || 0)}
+            <Line
+              data={createSparkData(userInfo.total_pt || 0, userInfo.monthly_pt || 0)}
               options={{
-                indexAxis: 'y',
                 plugins: { legend: { display: false } },
                 scales: {
-                  x: { beginAtZero: true }
+                  x: { display: false },
+                  y: { display: false }
+                },
+                elements: {
+                  line: { borderWidth: 2 },
+                  point: { hoverRadius: 4 }
                 }
               }}
             />
