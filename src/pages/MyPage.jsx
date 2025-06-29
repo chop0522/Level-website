@@ -69,8 +69,8 @@ function MyPage() {
 
   // アバターのキャッシュバスター
   const [avatarVer, setAvatarVer] = useState(Date.now());
-  // 段位バッジ用
-  const rankInfo = getRankFromPoint(userInfo?.mahjong_pt || 0);
+  // 累積ポイントで段位を計算
+  const rankInfo = getRankFromPoint(userInfo?.total_pt || 0);
 
   // カテゴリ定義とランクテーブル
   const categories = [
@@ -289,6 +289,9 @@ function MyPage() {
                       sx={{ bgcolor: rankInfo.color, color: '#fff', ml: 1 }}
                     />
                   </Box>
+                  <Typography variant="caption" sx={{ display:'block', mt: 0.5 }}>
+                    通算Pt: {userInfo.total_pt} / 今月Pt: {userInfo.monthly_pt}
+                  </Typography>
                   {profile.bio && (
                     <Typography variant="body2" color="text.secondary">
                       {profile.bio}

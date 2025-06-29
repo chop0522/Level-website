@@ -438,6 +438,12 @@ app.get('/api/userinfo', authenticateToken, async (req, res) => {
       xp_gamble:  userRow.xp_gamble,
       xp_quiz:    userRow.xp_quiz,
       xp_total:   userRow.xp_total,
+
+      // --- Mahjong cumulative & monthly ---
+      total_pt:   userRow.total_pt,
+      monthly_pt: userRow.monthly_pt,
+      mahjong_rank:    userRow.mahjong_rank,
+      mahjong_subrank: userRow.mahjong_subrank,
     };
     return res.json(userData);
   } catch (err) {
