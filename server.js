@@ -47,6 +47,12 @@ app.post('/api/mahjong/games', authenticateToken, async (req, res) => {
       [targetId, rank, finalScore, point]
     );
 
+    // 通算ポイントを加算
+    await pool.query(
+      'UPDATE users SET total_pt = total_pt + $1 WHERE id = $2',
+      [point, targetId]
+    );
+
     // 対局追加後に月間ビューを最新化
     await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY mahjong_monthly');
 
