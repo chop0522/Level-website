@@ -298,25 +298,47 @@ function MyPage() {
           {/* プロフィールカード */}
           {profile && (
             <Card sx={{ p: 2, mt: 3, maxWidth: 480 }}>
-              <Stack direction="row" spacing={2} alignItems="center">
-                <Avatar
-                  src={`/api/users/${userInfo.id}/avatar?${avatarVer}`}
-                  sx={{ width: 64, height: 64 }}
-                />
-                <Box flexGrow={1}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography>{userInfo.name}</Typography>
+              <Stack direction="row" spacing={2} alignItems="center" sx={{ flexWrap: 'wrap' }}>
+                <Box sx={{
+                  position: 'relative',
+                  width: 88,
+                  height: 88,
+                  borderRadius: '50%',
+                  boxShadow: '0 0 0 3px',
+                  borderColor: rankInfo.color,
+                  p: 0.5
+                }}>
+                  <Avatar
+                    src={`/api/users/${userInfo.id}/avatar?${avatarVer}`}
+                    sx={{ width: 80, height: 80 }}
+                  />
+                </Box>
+                <Box sx={{ flexGrow: 1, minWidth: 200 }}>
+                  <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+                    {userInfo.name}
                     <Chip
                       label={rankInfo.label}
                       size="small"
                       sx={{ bgcolor: rankInfo.color, color: '#fff', ml: 1 }}
                     />
-                  </Box>
-                  <Typography variant="caption" sx={{ display:'block', mt: 0.5 }}>
-                    通算Pt: {userInfo.total_pt} / 今月Pt: {userInfo.monthly_pt}
                   </Typography>
+
+                  {/* ポイント表示: Chip を2つ並べて目立たせる */}
+                  <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
+                    <Chip
+                      label={`通算 ${userInfo.total_pt}`}
+                      size="small"
+                      color="primary"
+                    />
+                    <Chip
+                      label={`今月 ${userInfo.monthly_pt}`}
+                      size="small"
+                      color="success"
+                    />
+                  </Stack>
+
                   {profile.bio && (
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                       {profile.bio}
                     </Typography>
                   )}
