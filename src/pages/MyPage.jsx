@@ -38,6 +38,12 @@ import {
   Legend
 } from 'chart.js';
 import { Radar } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
+import {
+  CategoryScale,
+  LinearScale,
+  BarElement
+} from 'chart.js';
 
 // Register radar components
 ChartJS.register(
@@ -46,7 +52,10 @@ ChartJS.register(
   LineElement,
   Filler,
   Tooltip,
-  Legend
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement
 );
 
 // yyyy-mm-dd → 'M/D' 形式へ変換
@@ -227,6 +236,20 @@ function MyPage() {
       ]
     };
   };
+
+  // バーチャート用データ (通算Pt vs 今月Pt)
+  function createBarData(totalPt, monthlyPt) {
+    return {
+      labels: ['通算', '今月'],
+      datasets: [
+        {
+          label: 'ポイント',
+          data: [totalPt, monthlyPt],
+          backgroundColor: ['#42a5f5', '#66bb6a']
+        }
+      ]
+    };
+  }
 
   // レーダーチャートオプション
   const radarOptions = {
@@ -411,6 +434,23 @@ function MyPage() {
                 options={radarOptions}
               />
             )}
+          </div>
+
+          {/* ポイント比較バーチャート */}
+          <div style={{ marginTop: '30px', maxWidth: '400px' }}>
+            <Typography variant="h6" gutterBottom>
+              通算ポイント vs 今月ポイント
+            </Typography>
+            <Bar
+              data={createBarData(userInfo.total_pt || 0, userInfo.monthly_pt || 0)}
+              options={{
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                  x: { beginAtZero: true }
+                }
+              }}
+            />
           </div>
         </>
       )}
