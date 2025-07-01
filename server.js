@@ -108,6 +108,42 @@ app.get('/api/mahjong/lifetime', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// -----------------------------
+// 管理者: 月間ポイント調整 (テスト用)
+// POST /api/admin/monthlyPt
+// body: { user_id: 3, year_month: '2025-06', pt: 420 }
+// -----------------------------
+app.post('/api/admin/monthlyPt', authenticateToken, authenticateAdmin, async (req, res) => {
+  try {
+    const { user_id, year_month, pt } = req.body;
+    if (!user_id || !year_month || pt === undefined) {
+      return res.status(400).json({ error: 'user_id, year_month, pt are required' });
+    }
+    // year_month → YYYY-MM-01 に変換
+    const monthDate = `${year_month}-01`;
+
+    // UPSERT into mahjong_monthly
+    await pool.query(
+      `INSERT INTO mahjong_monthly (user_id, month, monthly_pt)
+         VALUES ($1, $2::date, $3)
+       ON CONFLICT (user_id, month)
+         DO UPDATE SET monthly_pt = EXCLUDED.monthly_pt`,
+      [user_id, monthDate, pt]
+    );
+
+    // マテビュー最新化
+    await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY mahjong_monthly');
+
+    // ★ 直後に demotion 部分のみ再計算したい場合は、簡易的に
+    //    refresh_mahjong.sql と同じ UPDATE ～ WHERE 部分を呼び出す。
+    //    ここでは最小構成として、後続の cron で反映させるため省略。
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
 // -----------------------------
 // Leaderboard 公開ユーザー一覧
 
