@@ -34,12 +34,11 @@ export default function AdminMonthlyPtDialog({ open, onClose, onSuccess }) {
   // ユーザー一覧を取得
   useEffect(() => {
     if (!open) return;
-    apiFetch('/api/users/list')
-      .then((names) => {
-        // Dialog のセレクトは id が必要なので別 API を叩く
-        // names だけの場合は名前をキーに選ぶ
-        setUsers(names);
-        if (!userId && names.length) setUserId(names[0].id ?? names[0]); // 互換
+    apiFetch('/api/admin/users/list')
+      .then((list) => {
+        // list = [{ id, name }]
+        setUsers(list);
+        if (!userId && list.length) setUserId(list[0].id);
       })
       .catch(() => setUsers([]));
   }, [open]);
@@ -83,8 +82,8 @@ export default function AdminMonthlyPtDialog({ open, onClose, onSuccess }) {
             fullWidth
           >
             {users.map((u) => (
-              <MenuItem key={u.id ?? u} value={u.id ?? u}>
-                {u.name ?? u}
+              <MenuItem key={u.id} value={u.id}>
+                {u.name}
               </MenuItem>
             ))}
           </TextField>

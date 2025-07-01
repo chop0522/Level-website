@@ -791,6 +791,20 @@ app.delete('/api/admin/users/:id', authenticateToken, authenticateAdmin, async (
 });
 
 // -----------------------------
+// 管理者: ユーザー簡易リスト (ドロップダウン用)
+// GET /api/admin/users/list  -> [{ id, name }]
+// -----------------------------
+app.get('/api/admin/users/list', authenticateToken, authenticateAdmin, async (_req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT id, name FROM users ORDER BY name');
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// -----------------------------
 // 管理者: ユーザー検索 (名前 / メール & XP 合計)
 // GET /api/admin/users?q=keyword  または ?query=keyword
 // -----------------------------
@@ -823,16 +837,17 @@ app.get('/api/admin/users', authenticateToken, authenticateAdmin, async (req, re
 
 // -----------------------------
 // 管理者: ユーザー名リスト (ドロップダウン用)
+// (DEPRECATED: use /api/admin/users/list instead)
 // -----------------------------
-app.get('/api/users/list', authenticateToken, authenticateAdmin, async (_req, res) => {
-  try {
-    const { rows } = await pool.query('SELECT name FROM users ORDER BY name');
-    res.json(rows.map(r => r.name));
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-});
+// app.get('/api/users/list', authenticateToken, authenticateAdmin, async (_req, res) => {
+//   try {
+//     const { rows } = await pool.query('SELECT name FROM users ORDER BY name');
+//     res.json(rows.map(r => r.name));
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
 // -----------------------------
 // Leaderboard 公開ユーザー一覧
