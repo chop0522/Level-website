@@ -116,29 +116,32 @@ app.get('/api/mahjong/lifetime', async (req, res) => {
 // -----------------------------
 app.post('/api/admin/monthlyPt', authenticateToken, authenticateAdmin, async (req, res) => {
   try {
-    const { user_id, year_month, pt } = req.body;
-    if (!user_id || !year_month || pt === undefined) {
-      return res.status(400).json({ error: 'user_id, year_month, pt are required' });
+    const { user_id, pt } = req.body;              // year_month はテスト用途として無視
+    if (!user_id || pt === undefined) {
+      return res.status(400).json({ error: 'user_id and pt are required' });
     }
-    // year_month → YYYY-MM-01 に変換
-    const monthDate = `${year_month}-01`;
 
-    // UPSERT into mahjong_monthly
+    // 現在の monthly_pt を取得して差分を算出
+    const { rows } = await pool.query(
+      'SELECT monthly_pt FROM users WHERE id = $1',
+      [user_id]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const currentMonthly = rows[0].monthly_pt || 0;
+    const diff = pt - currentMonthly;
+
+    // users テーブルだけを更新 (total_pt に差分を加算)
     await pool.query(
-      `INSERT INTO mahjong_monthly (user_id, month, monthly_pt)
-         VALUES ($1, $2::date, $3)
-       ON CONFLICT (user_id, month)
-         DO UPDATE SET monthly_pt = EXCLUDED.monthly_pt`,
-      [user_id, monthDate, pt]
+      `UPDATE users
+          SET monthly_pt = $2,
+              total_pt   = total_pt + $3
+        WHERE id = $1`,
+      [user_id, pt, diff]
     );
 
-    // マテビュー最新化
-    await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY mahjong_monthly');
-
-    // ★ 直後に demotion 部分のみ再計算したい場合は、簡易的に
-    //    refresh_mahjong.sql と同じ UPDATE ～ WHERE 部分を呼び出す。
-    //    ここでは最小構成として、後続の cron で反映させるため省略。
-    res.json({ success: true });
+    res.json({ success: true, diff });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
