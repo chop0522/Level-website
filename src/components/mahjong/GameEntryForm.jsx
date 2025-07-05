@@ -28,8 +28,8 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
   // 管理者はユーザー名一覧を取得してドロップダウンに表示
   useEffect(() => {
     if (user?.role === 'admin') {
-      apiFetch('/api/users/list')
-        .then(setUserList)
+      apiFetch('/api/admin/users/list')
+        .then((list) => setUserList(list.map((u) => u.name)))
         .catch(() => setUserList([]));
     }
   }, [user]);
