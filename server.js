@@ -229,6 +229,58 @@ app.patch('/api/mahjong/games/:id', authenticateToken, authenticateAdmin, async 
 });
 
 // -----------------------------
+// 麻雀: 対局一覧（管理者・編集用テーブル用）
+// GET /api/mahjong/games?month=YYYY-MM&test=all|true|false&limit=50
+// -----------------------------
+app.get('/api/mahjong/games', authenticateToken, authenticateAdmin, async (req, res) => {
+  try {
+    const { month, test, limit = 50 } = req.query;
+
+    // 念のため is_test 列を用意（冪等）
+    await ensureIsTestColumn();
+
+    const params = [];
+    let where = 'WHERE 1=1';
+
+    if (month) {
+      where += ` AND date_trunc('month', (g.played_at AT TIME ZONE 'Asia/Tokyo'))::date = $${params.length + 1}::date`;
+      params.push(`${month}-01`);
+    }
+
+    if (test === 'true') {
+      where += ' AND g.is_test = true';
+    } else if (test === 'false') {
+      // NULL を含めないよう明示的に false 指定
+      where += ' AND g.is_test = false';
+    }
+
+    const sql = `
+      SELECT
+        g.id,
+        (g.played_at AT TIME ZONE 'Asia/Tokyo') AS played_at_jst,
+        g.user_id,
+        u.name,
+        g.rank,
+        g.final_score,
+        g.point,
+        COALESCE(g.is_test,false) AS is_test
+      FROM public.mahjong_games g
+      JOIN public.users u ON u.id = g.user_id
+      ${where}
+      ORDER BY g.played_at DESC
+      LIMIT $${params.length + 1}
+    `;
+    params.push(Math.max(1, Math.min(parseInt(limit, 10) || 50, 500)));
+
+    const { rows } = await pool.query(sql, params);
+    res.json({ success: true, rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// -----------------------------
 // 麻雀: 月間ランキング取得
 // -----------------------------
 app.get('/api/mahjong/monthly', async (req, res) => {

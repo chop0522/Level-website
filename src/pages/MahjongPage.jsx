@@ -25,6 +25,7 @@ import { useContext } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { AuthContext } from '../contexts/TokenContext';
 import GameEntryForm from '../components/mahjong/GameEntryForm';
+import AdminGameList from '../components/mahjong/AdminGameList';
 
 export default function MahjongPage() {
   const { token, userInfo: user } = useContext(AuthContext); // 認証情報
@@ -33,6 +34,7 @@ export default function MahjongPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formOpen, setFormOpen] = useState(false); // 対局登録フォーム
+  const [adminOpen, setAdminOpen] = useState(false); // 管理者: 履歴編集ダイアログ
 
   // 月間ランキング取得
   useEffect(() => {
@@ -75,13 +77,18 @@ export default function MahjongPage() {
       </Tabs>
 
       {user && user.role === 'admin' && (
-        <IconButton
-          size="small"
-          sx={{ ml: 1 }}
-          onClick={() => setFormOpen(true)}
-        >
-          <AddIcon />
-        </IconButton>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
+          <IconButton
+            size="small"
+            onClick={() => setFormOpen(true)}
+            title="対局を追加"
+          >
+            <AddIcon />
+          </IconButton>
+          <Button variant="outlined" size="small" onClick={() => setAdminOpen(true)}>
+            対局履歴を編集（管理者）
+          </Button>
+        </Box>
       )}
 
       {loading && (
@@ -139,6 +146,7 @@ export default function MahjongPage() {
         </Paper>
       )}
 
+      <AdminGameList open={adminOpen} onClose={() => setAdminOpen(false)} />
       <GameEntryForm
         open={formOpen}
         onClose={() => setFormOpen(false)}
