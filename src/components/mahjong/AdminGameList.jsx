@@ -53,7 +53,6 @@ export default function AdminGameList({ open, onClose }) {
 
   useEffect(() => {
     if (open) fetchRows();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, month, testFilter]);
 
   const updateField = (idx, key, val) => {
