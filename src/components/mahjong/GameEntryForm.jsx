@@ -14,6 +14,8 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { AuthContext } from '../../contexts/TokenContext';
@@ -24,7 +26,7 @@ import { ranks } from '../../utils/mahjong'; // rank list (non-admin 単票用)
  * 改善版 GameEntryForm
  * - 管理者: 4人分をテーブルで一括入力（ユーザーはAutocomplete、点数は直接入力、順位は1～4）
  * - 一般ユーザー: 既存の単票フォームのまま
- * - 送信は暫定的に /api/mahjong/games を 4 回呼ぶ（将来的に /api/mahjong/matches に切替可）
+ * - 送信は /api/mahjong/matches** に一括POST（`test: true` でランキングに反映しない）
  * - サーバが user_id に対応している場合は user_id を、未対応でも username を渡すフォールバック
  */
 export default function GameEntryForm({ open, onClose, onSubmitted }) {
@@ -38,6 +40,7 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
   // ===== 共通 =====
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isTest, setIsTest] = useState(false);
 
   // ===== 管理者（4人一括）用 =====
   const [userList, setUserList] = useState([]); // [{id, name}] を想定（文字列のみでも受ける）
@@ -119,23 +122,20 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
     setErr('');
     setLoading(true);
     try {
-      // 暫定: /api/mahjong/games を4回呼ぶ（サーバが /matches に対応したら切替）
-      for (const r of rows) {
-        const payload = {
+      const payload = {
+        test: isTest,
+        results: rows.map((r) => ({
           rank: r.rank,
           finalScore: Number(r.score),
-        };
-        // user_id 優先、無ければ username
-        const uid = r.user.id ?? null;
-        if (uid) payload.user_id = uid;
-        else payload.username = r.user.name; // フォールバック
+          ...(r.user?.id ? { user_id: r.user.id } : { username: r.user?.name })
+        }))
+      };
 
-        // eslint-disable-next-line no-await-in-loop
-        await apiFetch('/api/mahjong/games', {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        });
-      }
+      await apiFetch('/api/mahjong/matches', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+
       onSubmitted?.();
       onClose?.();
       resetAdminForm();
@@ -226,7 +226,11 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
                   ))}
                 </TableBody>
               </Table>
-              <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+              <Stack direction="row" spacing={1} sx={{ mt: 1 }} alignItems="center">
+                <FormControlLabel
+                  control={<Checkbox checked={isTest} onChange={(e) => setIsTest(e.target.checked)} />}
+                  label="テスト（ランキングに反映しない）"
+                />
                 <Button onClick={autoRankByScore} variant="outlined">自動順位（点数降順）</Button>
                 <Button onClick={resetAdminForm} variant="text">リセット</Button>
               </Stack>

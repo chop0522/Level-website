@@ -19,8 +19,8 @@ app.use(cors());
 // -----------------------------
 app.post('/api/mahjong/games', authenticateToken, async (req, res) => {
   try {
-    // rank: 1‑4, finalScore: 持ち点, (admin only) username: 対象ユーザー名
-    const { rank, finalScore, username } = req.body;
+    // rank: 1‑4, finalScore: 持ち点, (admin only) username or user_id, optional test
+    const { rank, finalScore, username, user_id, test } = req.body;
     // 管理者のみ登録可能
     if (req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Admin only' });
@@ -30,33 +30,47 @@ app.post('/api/mahjong/games', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'rank(1-4) と整数 finalScore が必要' });
     }
 
-    // 対象ユーザーを名前で検索
-    const target = await findUserByName(username);
-    if (!target) {
-      return res.status(404).json({ error: 'User not found' });
+    // 対象ユーザーを id 優先で特定、なければ名前検索
+    let targetId = user_id || null;
+    if (!targetId) {
+      const target = await findUserByName(username);
+      if (!target) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      targetId = target.id;
     }
-    const targetId = target.id;
 
     // ポイント計算
     const point = calcMahjongPoint(rank, finalScore);
 
-    // DB へ挿入
+    const isTest = !!test;
+    if (isTest) {
+      // テストモード: 列が無くても安全に追加（冪等）
+      await ensureIsTestColumn();
+      await pool.query(
+        `INSERT INTO mahjong_games (user_id, rank, final_score, point, is_test)
+         VALUES ($1, $2, $3, $4, true)`,
+        [targetId, rank, finalScore, point]
+      );
+      // テストは totals 更新も月次REFRESH もしない（ランキングに影響させない）
+      return res.json({ success: true, point, test: true });
+    }
+
+    // 通常登録（ランキング反映）
     await pool.query(
       `INSERT INTO mahjong_games (user_id, rank, final_score, point)
        VALUES ($1, $2, $3, $4)`,
       [targetId, rank, finalScore, point]
     );
 
-    // 通算ポイントを加算
     await pool.query(
       'UPDATE users SET total_pt = total_pt + $1 WHERE id = $2',
       [point, targetId]
     );
 
-    // 対局追加後に月間ビューを最新化
     await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY public.mahjong_monthly');
 
-    res.json({ success: true, point });
+    res.json({ success: true, point, test: false });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -70,7 +84,7 @@ app.post('/api/mahjong/games', authenticateToken, async (req, res) => {
 // -----------------------------
 app.post('/api/mahjong/matches', authenticateToken, authenticateAdmin, async (req, res) => {
   try {
-    const { results } = req.body || {};
+    const { results = [], test } = req.body || {};
     if (!Array.isArray(results) || results.length !== 4) {
       return res.status(400).json({ error: 'results は4件の配列で送ってください' });
     }
@@ -80,6 +94,14 @@ app.post('/api/mahjong/matches', authenticateToken, authenticateAdmin, async (re
     if (!(rankSet.size === 4 && [1,2,3,4].every(n => rankSet.has(n)))) {
       return res.status(400).json({ error: 'rank は 1,2,3,4 を各1回ずつにしてください' });
     }
+
+    // 1つでもテスト行があるなら列を用意
+    const anyTest = !!test || results.some(r => !!r.test);
+    if (anyTest) {
+      await ensureIsTestColumn();
+    }
+
+    let updatedRealTotals = false; // 実データで total_pt を更新したか
 
     await pool.query('BEGIN');
     try {
@@ -96,17 +118,26 @@ app.post('/api/mahjong/matches', authenticateToken, authenticateAdmin, async (re
         if (!userId) throw new Error('user_id か username のいずれかを指定してください');
 
         const point = calcMahjongPoint(r.rank, Number(r.finalScore));
+        const rowIsTest = r.test !== undefined ? !!r.test : !!test;
 
-        await pool.query(
-          `INSERT INTO mahjong_games (user_id, rank, final_score, point)
-           VALUES ($1, $2, $3, $4)`,
-          [userId, r.rank, Number(r.finalScore), point]
-        );
-
-        await pool.query(
-          'UPDATE users SET total_pt = total_pt + $1 WHERE id = $2',
-          [point, userId]
-        );
+        if (rowIsTest) {
+          await pool.query(
+            `INSERT INTO mahjong_games (user_id, rank, final_score, point, is_test)
+             VALUES ($1, $2, $3, $4, true)`,
+            [userId, r.rank, Number(r.finalScore), point]
+          );
+        } else {
+          await pool.query(
+            `INSERT INTO mahjong_games (user_id, rank, final_score, point)
+             VALUES ($1, $2, $3, $4)`,
+            [userId, r.rank, Number(r.finalScore), point]
+          );
+          await pool.query(
+            'UPDATE users SET total_pt = total_pt + $1 WHERE id = $2',
+            [point, userId]
+          );
+          updatedRealTotals = true;
+        }
       }
       await pool.query('COMMIT');
     } catch (e) {
@@ -114,10 +145,12 @@ app.post('/api/mahjong/matches', authenticateToken, authenticateAdmin, async (re
       throw e;
     }
 
-    // 対局追加後に月間ビューを最新化
-    await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY public.mahjong_monthly');
+    // 実データが含まれていれば月次を更新、テストだけなら更新不要
+    if (updatedRealTotals) {
+      await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY public.mahjong_monthly');
+    }
 
-    res.json({ success: true });
+    res.json({ success: true, testMode: anyTest && !updatedRealTotals });
   } catch (err) {
     console.error(err);
     res.status(400).json({ error: err.message });
@@ -242,6 +275,14 @@ const pool = new Pool({
 // -----------------------------
 // ヘルパー関数
 // -----------------------------
+
+/**
+ * Ensure mahjong_games.is_test column exists (idempotent)
+ */
+async function ensureIsTestColumn() {
+  await pool.query(`ALTER TABLE public.mahjong_games
+    ADD COLUMN IF NOT EXISTS is_test boolean NOT NULL DEFAULT false`);
+}
 
 /**
  * Build ORDER BY clause for leaderboard
