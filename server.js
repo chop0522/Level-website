@@ -64,6 +64,67 @@ app.post('/api/mahjong/games', authenticateToken, async (req, res) => {
 });
 
 // -----------------------------
+// 麻雀: 4人分を一括登録（管理者）
+// POST /api/mahjong/matches
+// body: { results: [{ user_id | username, rank, finalScore }, ... 4件] }
+// -----------------------------
+app.post('/api/mahjong/matches', authenticateToken, authenticateAdmin, async (req, res) => {
+  try {
+    const { results } = req.body || {};
+    if (!Array.isArray(results) || results.length !== 4) {
+      return res.status(400).json({ error: 'results は4件の配列で送ってください' });
+    }
+
+    const ranks = results.map(r => r.rank);
+    const rankSet = new Set(ranks);
+    if (!(rankSet.size === 4 && [1,2,3,4].every(n => rankSet.has(n)))) {
+      return res.status(400).json({ error: 'rank は 1,2,3,4 を各1回ずつにしてください' });
+    }
+
+    await pool.query('BEGIN');
+    try {
+      for (const r of results) {
+        if (![1,2,3,4].includes(r.rank) || !Number.isFinite(Number(r.finalScore))) {
+          throw new Error('rank(1-4) と数値 finalScore が必要です');
+        }
+        let userId = r.user_id || null;
+        if (!userId && r.username) {
+          const target = await findUserByName(r.username);
+          if (!target) throw new Error(`User not found: ${r.username}`);
+          userId = target.id;
+        }
+        if (!userId) throw new Error('user_id か username のいずれかを指定してください');
+
+        const point = calcMahjongPoint(r.rank, Number(r.finalScore));
+
+        await pool.query(
+          `INSERT INTO mahjong_games (user_id, rank, final_score, point)
+           VALUES ($1, $2, $3, $4)`,
+          [userId, r.rank, Number(r.finalScore), point]
+        );
+
+        await pool.query(
+          'UPDATE users SET total_pt = total_pt + $1 WHERE id = $2',
+          [point, userId]
+        );
+      }
+      await pool.query('COMMIT');
+    } catch (e) {
+      await pool.query('ROLLBACK');
+      throw e;
+    }
+
+    // 対局追加後に月間ビューを最新化
+    await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY public.mahjong_monthly');
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// -----------------------------
 // 麻雀: 月間ランキング取得
 // -----------------------------
 app.get('/api/mahjong/monthly', async (req, res) => {
