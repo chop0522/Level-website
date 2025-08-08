@@ -1,13 +1,13 @@
 -- refresh_mahjong.sql
 -- (1) 今月マテビュー更新
-REFRESH MATERIALIZED VIEW CONCURRENTLY mahjong_monthly;
+REFRESH MATERIALIZED VIEW CONCURRENTLY public.mahjong_monthly;
 
--- (2) users.monthly_pt 更新（キャッシュ用途）
-UPDATE users u
-SET    monthly_pt = m.monthly_pt
-FROM   mahjong_monthly m
+-- (2) users.monthly_pt 更新（キャッシュ用途／JST基準）
+UPDATE public.users u
+SET    monthly_pt = COALESCE(m.monthly_pt, m.total_points)
+FROM   public.mahjong_monthly m
 WHERE  u.id = m.user_id
-  AND  m.month = date_trunc('month', now())::date;
+  AND  m.month = date_trunc('month', (now() AT TIME ZONE 'Asia/Tokyo'))::date;
 
 -- (3) 段位更新 (累積 total_pt 基準)
 WITH rank_calc AS (
@@ -37,9 +37,9 @@ WITH rank_calc AS (
            WHEN total_pt >=  100 THEN 2
            ELSE 1
          END AS subr
-    FROM users
+    FROM public.users
 )
-UPDATE users u
+UPDATE public.users u
 SET    mahjong_rank    = rc.r,
        mahjong_subrank = rc.subr
 FROM   rank_calc rc
@@ -54,9 +54,12 @@ WHERE  u.id = rc.id;
 ========================================================== */
 WITH recent AS (
   SELECT user_id,
-         SUM(monthly_pt) AS recent_pt
-    FROM mahjong_monthly
-   WHERE month >= date_trunc('month', now() - INTERVAL '6 months')::date
+         SUM(COALESCE(monthly_pt, total_points)) AS recent_pt
+    FROM public.mahjong_monthly
+   WHERE month >= date_trunc(
+                     'month',
+                     ((now() AT TIME ZONE 'Asia/Tokyo') - INTERVAL '6 months')
+                   )::date
    GROUP BY user_id
 ), new_grade AS (
   SELECT user_id,
@@ -86,7 +89,7 @@ WITH recent AS (
          END AS subr
     FROM recent
 )
-UPDATE users u
+UPDATE public.users u
 SET    mahjong_rank =
           LEAST(u.mahjong_rank, ng.rnk),
        mahjong_subrank =
