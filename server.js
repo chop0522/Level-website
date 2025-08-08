@@ -54,7 +54,7 @@ app.post('/api/mahjong/games', authenticateToken, async (req, res) => {
     );
 
     // 対局追加後に月間ビューを最新化
-    await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY mahjong_monthly');
+    await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY public.mahjong_monthly');
 
     res.json({ success: true, point });
   } catch (err) {
@@ -69,18 +69,24 @@ app.post('/api/mahjong/games', authenticateToken, async (req, res) => {
 app.get('/api/mahjong/monthly', async (req, res) => {
   try {
     // ?month=YYYY-MM が無ければ今月
-    const month = req.query.month || dayjs().startOf('month').format('YYYY-MM');
+    const month = req.query.month || null; // 'YYYY-MM' or null
+    const responseMonth = (req.query.month || dayjs().startOf('month').format('YYYY-MM'));
     const sql = `
-      SELECT u.id, u.name,
-             m.monthly_pt
-        FROM mahjong_monthly m
-        JOIN users u ON u.id = m.user_id
-       WHERE m.month = $1
-    ORDER BY m.monthly_pt DESC
-       LIMIT 100
+      SELECT
+        u.id,
+        u.name,
+        m.total_points AS monthly_pt
+      FROM public.mahjong_monthly m
+      JOIN public.users u ON u.id = m.user_id
+      WHERE m.month = COALESCE(
+        $1::date,
+        date_trunc('month', (now() AT TIME ZONE 'Asia/Tokyo'))::date
+      )
+      ORDER BY m.total_points DESC
+      LIMIT 100
     `;
-    const { rows } = await pool.query(sql, [month + '-01']); // YYYY-MM-01 形式
-    res.json({ success: true, month, ranking: rows });
+    const { rows } = await pool.query(sql, [month ? month + '-01' : null]); // month未指定ならJST今月
+    res.json({ success: true, month: responseMonth, ranking: rows });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
