@@ -156,6 +156,77 @@ app.post('/api/mahjong/matches', authenticateToken, authenticateAdmin, async (re
     res.status(400).json({ error: err.message });
   }
 });
+// -----------------------------
+// 麻雀: 既存対局の修正（管理者・直接点数編集）
+// PATCH /api/mahjong/games/:id
+// body: { finalScore?, rank?, user_id? | username? }
+// ・is_test 行は totals/MV に影響させない
+// ・通常行は差分で users.total_pt を調整し、MVをREFRESH
+// -----------------------------
+app.patch('/api/mahjong/games/:id', authenticateToken, authenticateAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid id' });
+
+    const { rows: [orig] } = await pool.query(
+      'SELECT id, user_id, rank, final_score, point, is_test, played_at FROM public.mahjong_games WHERE id = $1',
+      [id]
+    );
+    if (!orig) return res.status(404).json({ error: 'game not found' });
+
+    const nextRank = req.body.rank ?? orig.rank;
+    const nextFinal = req.body.finalScore !== undefined ? Number(req.body.finalScore) : orig.final_score;
+    if (![1,2,3,4].includes(nextRank) || !Number.isFinite(nextFinal)) {
+      return res.status(400).json({ error: 'rank(1-4) と数値 finalScore が必要' });
+    }
+
+    let nextUserId = req.body.user_id || orig.user_id;
+    if (!nextUserId && req.body.username) {
+      const target = await findUserByName(req.body.username);
+      if (!target) return res.status(404).json({ error: 'User not found' });
+      nextUserId = target.id;
+    }
+
+    const newPoint = calcMahjongPoint(nextRank, nextFinal);
+    const oldPoint = orig.point;
+
+    await pool.query('BEGIN');
+    try {
+      await pool.query(
+        `UPDATE public.mahjong_games
+           SET user_id = $1, rank = $2, final_score = $3, point = $4
+         WHERE id = $5`,
+        [nextUserId, nextRank, nextFinal, newPoint, id]
+      );
+
+      if (!orig.is_test) {
+        if (nextUserId !== orig.user_id) {
+          await pool.query('UPDATE public.users SET total_pt = total_pt - $1 WHERE id = $2', [oldPoint, orig.user_id]);
+          await pool.query('UPDATE public.users SET total_pt = total_pt + $1 WHERE id = $2', [newPoint, nextUserId]);
+        } else {
+          const delta = newPoint - oldPoint;
+          if (delta !== 0) {
+            await pool.query('UPDATE public.users SET total_pt = total_pt + $1 WHERE id = $2', [delta, orig.user_id]);
+          }
+        }
+      }
+
+      await pool.query('COMMIT');
+    } catch (e) {
+      await pool.query('ROLLBACK');
+      throw e;
+    }
+
+    if (!orig.is_test) {
+      await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY public.mahjong_monthly');
+    }
+
+    res.json({ success: true, id, test: orig.is_test });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // -----------------------------
 // 麻雀: 月間ランキング取得
