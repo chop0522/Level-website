@@ -5,7 +5,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, Stack, Alert, TextField, MenuItem,
   Table, TableHead, TableRow, TableCell, TableBody,
-  CircularProgress, Switch
+  CircularProgress, Switch, Snackbar
 } from '@mui/material';
 import dayjs from 'dayjs';
 import { AuthContext } from '../../contexts/TokenContext';
@@ -25,6 +25,7 @@ export default function AdminGameList({ open, onClose }) {
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
   const [savingId, setSavingId] = useState(null);
+  const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
 
   const [month, setMonth] = useState(dayjs().format('YYYY-MM'));
   const [testFilter, setTestFilter] = useState('all'); // all | true | false
@@ -43,9 +44,17 @@ export default function AdminGameList({ open, onClose }) {
       if (month) q.set('month', month);
       if (testFilter !== 'all') q.set('test', testFilter);
       const res = await apiFetch(`/api/mahjong/games?${q.toString()}`);
-      setRows(res?.rows ?? []);
+      const data = res?.rows ?? [];
+      setRows(data.map(r => ({
+        ...r,
+        _origRank: r.rank,
+        _origFinalScore: r.final_score,
+        _origIsTest: !!r.is_test,
+      })));
     } catch (e) {
-      setErr(e.message || '読み込みに失敗しました');
+      const msg = e.message || '読み込みに失敗しました';
+      setErr(msg);
+      setSnack({ open: true, message: msg, severity: 'error' });
     } finally {
       setLoading(false);
     }
@@ -63,6 +72,25 @@ export default function AdminGameList({ open, onClose }) {
     });
   };
 
+  const openSnack = (message, severity = 'success') => {
+    setSnack({ open: true, message, severity });
+  };
+  const closeSnack = () => setSnack(s => ({ ...s, open: false }));
+
+  const handleScoreKeyDown = (idx, e) => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const step = e.shiftKey ? 1000 : 100;
+      const delta = e.key === 'ArrowUp' ? step : -step;
+      setRows(prev => {
+        const next = [...prev];
+        const current = Number(next[idx].final_score) || 0;
+        next[idx] = { ...next[idx], final_score: current + delta };
+        return next;
+      });
+    }
+  };
+
   const toggleTest = async (r, idx, checked) => {
     setErr('');
     setSavingId(r.id);
@@ -72,8 +100,11 @@ export default function AdminGameList({ open, onClose }) {
         body: JSON.stringify({ is_test: !!checked })
       });
       await fetchRows();
+      openSnack(checked ? 'テストに切り替えました' : '通常に戻しました', 'success');
     } catch (e) {
-      setErr(e.message || 'テスト切替に失敗しました');
+      const msg = e.message || 'テスト切替に失敗しました';
+      setErr(msg);
+      openSnack(msg, 'error');
       // 失敗時は元に戻す
       updateField(idx, 'is_test', r.is_test);
     } finally {
@@ -88,8 +119,11 @@ export default function AdminGameList({ open, onClose }) {
     try {
       await apiFetch(`/api/mahjong/games/${r.id}` , { method: 'DELETE' });
       await fetchRows();
+      openSnack('削除しました', 'success');
     } catch (e) {
-      setErr(e.message || '削除に失敗しました');
+      const msg = e.message || '削除に失敗しました';
+      setErr(msg);
+      openSnack(msg, 'error');
     } finally {
       setSavingId(null);
     }
@@ -107,8 +141,11 @@ export default function AdminGameList({ open, onClose }) {
         }),
       });
       await fetchRows(); // ポイント再計算＆MV更新があるので再取得
+      openSnack('保存しました', 'success');
     } catch (e) {
-      setErr(e.message || '保存に失敗しました');
+      const msg = e.message || '保存に失敗しました';
+      setErr(msg);
+      openSnack(msg, 'error');
     } finally {
       setSavingId(null);
     }
@@ -171,6 +208,7 @@ export default function AdminGameList({ open, onClose }) {
                     size="small"
                     value={r.final_score}
                     inputProps={{ step: 100 }}
+                    onKeyDown={(e) => handleScoreKeyDown(idx, e)}
                     onChange={(e) => updateField(idx, 'final_score', Number(e.target.value))}
                   />
                 </TableCell>
@@ -193,7 +231,9 @@ export default function AdminGameList({ open, onClose }) {
                       variant="outlined"
                       size="small"
                       onClick={() => saveRow(r, idx)}
-                      disabled={savingId === r.id}
+                      disabled={
+                        savingId === r.id || (r.rank === r._origRank && Number(r.final_score) === Number(r._origFinalScore))
+                      }
                     >
                       {savingId === r.id ? '保存中…' : '保存'}
                     </Button>
@@ -217,6 +257,16 @@ export default function AdminGameList({ open, onClose }) {
             )}
           </TableBody>
         </Table>
+        <Snackbar
+          open={snack.open}
+          autoHideDuration={2500}
+          onClose={closeSnack}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={closeSnack} severity={snack.severity} sx={{ width: '100%' }}>
+            {snack.message}
+          </Alert>
+        </Snackbar>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>閉じる</Button>
