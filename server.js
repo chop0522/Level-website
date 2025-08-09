@@ -168,13 +168,17 @@ app.patch('/api/mahjong/games/:id', authenticateToken, authenticateAdmin, async 
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid id' });
 
+    // 念のため is_test 列を用意（冪等）
+    await ensureIsTestColumn();
+
     const { rows: [orig] } = await pool.query(
       'SELECT id, user_id, rank, final_score, point, is_test, played_at FROM public.mahjong_games WHERE id = $1',
       [id]
     );
     if (!orig) return res.status(404).json({ error: 'game not found' });
 
-    const nextRank = req.body.rank ?? orig.rank;
+    // 変更後の値を決定
+    const nextRank  = req.body.rank ?? orig.rank;
     const nextFinal = req.body.finalScore !== undefined ? Number(req.body.finalScore) : orig.final_score;
     if (![1,2,3,4].includes(nextRank) || !Number.isFinite(nextFinal)) {
       return res.status(400).json({ error: 'rank(1-4) と数値 finalScore が必要' });
@@ -187,30 +191,93 @@ app.patch('/api/mahjong/games/:id', authenticateToken, authenticateAdmin, async 
       nextUserId = target.id;
     }
 
+    // is_test 切り替え（boolean / 'true' / 'false' / 1 / '1' を許容）
+    const hasIsTest = Object.prototype.hasOwnProperty.call(req.body, 'is_test');
+    const nextIsTest = hasIsTest
+      ? (req.body.is_test === true || req.body.is_test === 'true' || req.body.is_test === 1 || req.body.is_test === '1')
+      : !!orig.is_test;
+
     const newPoint = calcMahjongPoint(nextRank, nextFinal);
     const oldPoint = orig.point;
 
+    let touchedReal = false; // ランキング/total_pt に影響があったか
+
     await pool.query('BEGIN');
     try {
+      // ゲーム本体を更新
       await pool.query(
         `UPDATE public.mahjong_games
-           SET user_id = $1, rank = $2, final_score = $3, point = $4
-         WHERE id = $5`,
-        [nextUserId, nextRank, nextFinal, newPoint, id]
+           SET user_id = $1, rank = $2, final_score = $3, point = $4, is_test = $5
+         WHERE id = $6`,
+        [nextUserId, nextRank, nextFinal, newPoint, nextIsTest, id]
       );
 
-      if (!orig.is_test) {
+      // total_pt 調整（orig.is_test/nextIsTest と、ユーザー変更・ポイント差分を考慮）
+      if (!orig.is_test && !nextIsTest) {
+        // 実データ → 実データ
         if (nextUserId !== orig.user_id) {
           await pool.query('UPDATE public.users SET total_pt = total_pt - $1 WHERE id = $2', [oldPoint, orig.user_id]);
           await pool.query('UPDATE public.users SET total_pt = total_pt + $1 WHERE id = $2', [newPoint, nextUserId]);
+          touchedReal = true;
         } else {
           const delta = newPoint - oldPoint;
           if (delta !== 0) {
             await pool.query('UPDATE public.users SET total_pt = total_pt + $1 WHERE id = $2', [delta, orig.user_id]);
+            touchedReal = true;
           }
         }
+      } else if (!orig.is_test && nextIsTest) {
+        // 実データ → テスト化（ランキングから除外）
+        await pool.query('UPDATE public.users SET total_pt = total_pt - $1 WHERE id = $2', [oldPoint, orig.user_id]);
+        touchedReal = true;
+      } else if (orig.is_test && !nextIsTest) {
+        // テスト → 実データ化（ランキングに反映）
+        await pool.query('UPDATE public.users SET total_pt = total_pt + $1 WHERE id = $2', [newPoint, nextUserId]);
+        touchedReal = true;
+      } else {
+        // テスト → テスト（トータルは触らない）
       }
 
+      await pool.query('COMMIT');
+    } catch (e) {
+      await pool.query('ROLLBACK');
+      throw e;
+    }
+
+    if (touchedReal) {
+      await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY public.mahjong_monthly');
+    }
+
+    res.json({ success: true, id, is_test: nextIsTest });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+// -----------------------------
+// 麻雀: 既存対局の削除（管理者）
+// DELETE /api/mahjong/games/:id
+// -----------------------------
+app.delete('/api/mahjong/games/:id', authenticateToken, authenticateAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ error: 'invalid id' });
+
+    await ensureIsTestColumn();
+
+    const { rows } = await pool.query(
+      'SELECT id, user_id, point, is_test FROM public.mahjong_games WHERE id = $1',
+      [id]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: 'game not found' });
+    const orig = rows[0];
+
+    await pool.query('BEGIN');
+    try {
+      await pool.query('DELETE FROM public.mahjong_games WHERE id = $1', [id]);
+      if (!orig.is_test) {
+        await pool.query('UPDATE public.users SET total_pt = total_pt - $1 WHERE id = $2', [orig.point, orig.user_id]);
+      }
       await pool.query('COMMIT');
     } catch (e) {
       await pool.query('ROLLBACK');
@@ -221,7 +288,7 @@ app.patch('/api/mahjong/games/:id', authenticateToken, authenticateAdmin, async 
       await pool.query('REFRESH MATERIALIZED VIEW CONCURRENTLY public.mahjong_monthly');
     }
 
-    res.json({ success: true, id, test: orig.is_test });
+    res.json({ success: true, id });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });

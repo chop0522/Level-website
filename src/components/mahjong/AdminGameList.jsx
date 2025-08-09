@@ -5,7 +5,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, Stack, Alert, TextField, MenuItem,
   Table, TableHead, TableRow, TableCell, TableBody,
-  Chip, CircularProgress
+  CircularProgress, Switch
 } from '@mui/material';
 import dayjs from 'dayjs';
 import { AuthContext } from '../../contexts/TokenContext';
@@ -61,6 +61,38 @@ export default function AdminGameList({ open, onClose }) {
       next[idx] = { ...next[idx], [key]: val };
       return next;
     });
+  };
+
+  const toggleTest = async (r, idx, checked) => {
+    setErr('');
+    setSavingId(r.id);
+    try {
+      await apiFetch(`/api/mahjong/games/${r.id}` , {
+        method: 'PATCH',
+        body: JSON.stringify({ is_test: !!checked })
+      });
+      await fetchRows();
+    } catch (e) {
+      setErr(e.message || 'テスト切替に失敗しました');
+      // 失敗時は元に戻す
+      updateField(idx, 'is_test', r.is_test);
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const deleteRow = async (r) => {
+    if (!window.confirm('この対局を削除します。よろしいですか？')) return;
+    setErr('');
+    setSavingId(r.id);
+    try {
+      await apiFetch(`/api/mahjong/games/${r.id}` , { method: 'DELETE' });
+      await fetchRows();
+    } catch (e) {
+      setErr(e.message || '削除に失敗しました');
+    } finally {
+      setSavingId(null);
+    }
   };
 
   const saveRow = async (r, idx) => {
@@ -119,7 +151,7 @@ export default function AdminGameList({ open, onClose }) {
               <TableCell width={140}>終局持ち点</TableCell>
               <TableCell width={80}>Pt</TableCell>
               <TableCell width={80}>テスト</TableCell>
-              <TableCell width={120} />
+              <TableCell width={160} />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -143,16 +175,38 @@ export default function AdminGameList({ open, onClose }) {
                   />
                 </TableCell>
                 <TableCell>{r.point}</TableCell>
-                <TableCell>{r.is_test ? <Chip size="small" label="TEST"/> : '-'}</TableCell>
                 <TableCell>
-                  <Button
-                    variant="outlined"
+                  <Switch
                     size="small"
-                    onClick={() => saveRow(r, idx)}
+                    checked={!!r.is_test}
+                    onChange={(e) => {
+                      const ck = e.target.checked;
+                      updateField(idx, 'is_test', ck);
+                      toggleTest(r, idx, ck);
+                    }}
                     disabled={savingId === r.id}
-                  >
-                    {savingId === r.id ? '保存中…' : '保存'}
-                  </Button>
+                  />
+                </TableCell>
+                <TableCell>
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => saveRow(r, idx)}
+                      disabled={savingId === r.id}
+                    >
+                      {savingId === r.id ? '保存中…' : '保存'}
+                    </Button>
+                    <Button
+                      variant="text"
+                      size="small"
+                      color="error"
+                      onClick={() => deleteRow(r)}
+                      disabled={savingId === r.id}
+                    >
+                      削除
+                    </Button>
+                  </Stack>
                 </TableCell>
               </TableRow>
             ))}
