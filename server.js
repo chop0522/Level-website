@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const dayjs   = require('dayjs');           // 日付ユーティリティ
 // 麻雀ポイント計算ユーティリティ
 const { calcMahjongPoint } = require('./utils/mahjong');
@@ -463,6 +464,22 @@ app.post('/api/admin/monthlyPt', authenticateToken, authenticateAdmin, async (re
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// -----------------------------
+// 管理者: 月次ランキング再構築（DROP→CREATE→INDEX→REFRESH→付随更新）
+// POST /api/admin/mahjong/rebuild-monthly
+// -----------------------------
+app.post('/api/admin/mahjong/rebuild-monthly', authenticateToken, authenticateAdmin, async (_req, res) => {
+  try {
+    const sqlPath = path.join(__dirname, 'scripts', 'refresh_mahjong.sql');
+    const sqlText = fs.readFileSync(sqlPath, 'utf8');
+    await pool.query(sqlText);
+    res.json({ success: true, message: 'mahjong_monthly rebuilt' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 // -----------------------------

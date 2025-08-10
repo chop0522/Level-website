@@ -26,6 +26,7 @@ export default function AdminGameList({ open, onClose }) {
   const [loading, setLoading] = useState(false);
   const [savingId, setSavingId] = useState(null);
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
+  const [rebuilding, setRebuilding] = useState(false);
 
   const [month, setMonth] = useState(dayjs().format('YYYY-MM'));
   const [testFilter, setTestFilter] = useState('all'); // all | true | false
@@ -129,6 +130,23 @@ export default function AdminGameList({ open, onClose }) {
     }
   };
 
+  const rebuildMonthly = async () => {
+    if (!window.confirm('月次ランキングを再構築します。よろしいですか？')) return;
+    setErr('');
+    setRebuilding(true);
+    try {
+      await apiFetch('/api/admin/mahjong/rebuild-monthly', { method: 'POST' });
+      openSnack('月次ランキングを再構築しました', 'success');
+      await fetchRows();
+    } catch (e) {
+      const msg = e.message || '再構築に失敗しました';
+      setErr(msg);
+      openSnack(msg, 'error');
+    } finally {
+      setRebuilding(false);
+    }
+  };
+
   const saveRow = async (r, idx) => {
     setErr('');
     setSavingId(r.id);
@@ -174,8 +192,9 @@ export default function AdminGameList({ open, onClose }) {
               <MenuItem value="false">通常のみ</MenuItem>
               <MenuItem value="true">テストのみ</MenuItem>
             </TextField>
-            <Button onClick={fetchRows} disabled={loading}>再読み込み</Button>
-            {loading && <CircularProgress size={18} />}
+            <Button onClick={fetchRows} disabled={loading || rebuilding}>再読み込み</Button>
+            <Button onClick={rebuildMonthly} disabled={loading || rebuilding}>ランキング再構築</Button>
+            {(loading || rebuilding) && <CircularProgress size={18} />}
           </Stack>
         </Stack>
 
