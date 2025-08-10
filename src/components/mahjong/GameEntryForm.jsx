@@ -16,6 +16,7 @@ import {
   TableBody,
   FormControlLabel,
   Checkbox,
+  Radio,
 } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { AuthContext } from '../../contexts/TokenContext';
@@ -50,6 +51,26 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
   );
   const [rows, setRows] = useState(defaultRows);
 
+  const TOTAL_POINTS = 100000;
+  const [autoIndex, setAutoIndex] = useState(3); // 自動計算する行（0-3）。初期は4行目
+
+  const computeTotal = (list) => list.reduce((sum, r) => sum + (Number(r.score) || 0), 0);
+
+  const recalcAuto = (list, ai = autoIndex) => {
+    const others = list.reduce((sum, r, i) => sum + (i === ai ? 0 : (Number(r.score) || 0)), 0);
+    const autoScore = TOTAL_POINTS - others;
+    const next = [...list];
+    next[ai] = { ...next[ai], score: autoScore };
+    return next;
+  };
+
+  const setAutoIndexAndRecalc = (ai) => {
+    setRows((prev) => recalcAuto(prev, ai));
+    setAutoIndex(ai);
+  };
+
+  const totalPoints = useMemo(() => computeTotal(rows), [rows]);
+
   // 管理者はユーザー一覧取得（id/name の両対応にしておく）
   useEffect(() => {
     let ignore = false;
@@ -80,8 +101,11 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
 
   const handleAdminCellChange = (index, key, value) => {
     setRows((prev) => {
-      const next = [...prev];
+      let next = [...prev];
       next[index] = { ...next[index], [key]: value };
+      if (key === 'score' && index !== autoIndex) {
+        next = recalcAuto(next, autoIndex);
+      }
       return next;
     });
   };
@@ -109,6 +133,10 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
     const ranksSet = new Set(rows.map((r) => r.rank));
     if (ranksSet.size !== 4 || Math.min(...ranksSet) !== 1 || Math.max(...ranksSet) !== 4) {
       return '順位は1～4を各1回ずつにしてください（「自動順位」ボタンで割り当て可）。';
+    }
+    const total = computeTotal(rows);
+    if (total !== TOTAL_POINTS) {
+      return `4人の合計が100,000点ではありません（現在: ${total.toLocaleString()}）`;
     }
     return '';
   };
@@ -181,6 +209,7 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
               <Table size="small">
                 <TableHead>
                   <TableRow>
+                    <TableCell width={64}>自動</TableCell>
                     <TableCell width={64}>順位</TableCell>
                     <TableCell>プレイヤー</TableCell>
                     <TableCell width={160}>終局持ち点</TableCell>
@@ -189,6 +218,13 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
                 <TableBody>
                   {rows.map((row, idx) => (
                     <TableRow key={idx}>
+                      <TableCell>
+                        <Radio
+                          size="small"
+                          checked={autoIndex === idx}
+                          onChange={() => setAutoIndexAndRecalc(idx)}
+                        />
+                      </TableCell>
                       <TableCell>
                         <TextField
                           select
@@ -220,12 +256,17 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
                           value={row.score}
                           onChange={(e) => handleAdminCellChange(idx, 'score', Number(e.target.value))}
                           inputProps={{ step: 100 }}
+                          disabled={autoIndex === idx}
+                          helperText={autoIndex === idx ? '自動計算' : ''}
                         />
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
+              <div style={{ fontSize: 12, marginTop: 4, color: totalPoints === TOTAL_POINTS ? '#2e7d32' : '#d32f2f' }}>
+                合計: {totalPoints.toLocaleString()} / 100,000
+              </div>
               <Stack direction="row" spacing={1} sx={{ mt: 1 }} alignItems="center">
                 <FormControlLabel
                   control={<Checkbox checked={isTest} onChange={(e) => setIsTest(e.target.checked)} />}

@@ -95,8 +95,36 @@ app.post('/api/mahjong/matches', authenticateToken, authenticateAdmin, async (re
       return res.status(400).json({ error: 'rank は 1,2,3,4 を各1回ずつにしてください' });
     }
 
+    // 合計=100,000 のサーバ検証 + 1人だけ未入力なら自動計算
+    const TOTAL = 100000;
+    let missingIndex = -1;
+    let sumKnown = 0;
+
+    const normalized = results.map((r, i) => {
+      const v = r.finalScore;
+      if (v === undefined || v === null || v === '' || Number.isNaN(Number(v))) {
+        if (missingIndex >= 0) {
+          throw new Error('finalScore は3名分を数値で、残り1名のみ未指定にしてください（合計100,000で自動計算）');
+        }
+        missingIndex = i;
+        return { ...r, finalScore: null };
+      }
+      const n = Number(v);
+      sumKnown += n;
+      return { ...r, finalScore: n };
+    });
+
+    if (missingIndex >= 0) {
+      normalized[missingIndex].finalScore = TOTAL - sumKnown;
+      sumKnown = TOTAL;
+    } else {
+      if (sumKnown !== TOTAL) {
+        return res.status(400).json({ error: `4人の合計が100,000ではありません（現在: ${sumKnown}）` });
+      }
+    }
+
     // 1つでもテスト行があるなら列を用意
-    const anyTest = !!test || results.some(r => !!r.test);
+    const anyTest = !!test || normalized.some(r => !!r.test);
     if (anyTest) {
       await ensureIsTestColumn();
     }
@@ -105,7 +133,7 @@ app.post('/api/mahjong/matches', authenticateToken, authenticateAdmin, async (re
 
     await pool.query('BEGIN');
     try {
-      for (const r of results) {
+      for (const r of normalized) {
         if (![1,2,3,4].includes(r.rank) || !Number.isFinite(Number(r.finalScore))) {
           throw new Error('rank(1-4) と数値 finalScore が必要です');
         }
