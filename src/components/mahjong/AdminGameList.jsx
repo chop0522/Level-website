@@ -172,7 +172,15 @@ export default function AdminGameList({ open, onClose }) {
   if (!isAdmin) return null;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="lg"
+      fullWidth
+      scroll="paper"
+      sx={{ zIndex: 13000 }}
+      PaperProps={{ sx: { my: { xs: 2, sm: 4 } } }}
+    >
       <DialogTitle>対局履歴（管理者）— 直接編集</DialogTitle>
       <DialogContent>
         <Stack spacing={1} sx={{ mb: 1 }}>
