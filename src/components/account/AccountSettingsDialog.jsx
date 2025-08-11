@@ -344,29 +344,3 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
     </Dialog>
   );
 }
-
-// server.js
-// -----------------------------
-// 自分のログイン用メールを変更（要ログイン）
-// PATCH /api/me/email  body: { email }
-// -----------------------------
-app.patch('/api/me/email', authenticateToken, async (req, res) => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: 'unauthorized' });
-
-    const email = (req.body?.email || '').trim();
-    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    if (!emailOk) return res.status(400).json({ error: '不正なメール形式です' });
-
-    // すでに使用されていないか確認（大文字小文字を無視）
-    const dup = await pool.query('SELECT 1 FROM public.users WHERE LOWER(email) = LOWER($1) AND id <> $2 LIMIT 1', [email, userId]);
-    if (dup.rows.length > 0) return res.status(409).json({ error: 'このメールアドレスは既に使われています' });
-
-    await pool.query('UPDATE public.users SET email = $1 WHERE id = $2', [email, userId]);
-    return res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: err.message });
-  }
-});
