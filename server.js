@@ -824,12 +824,23 @@ app.post('/auth/login', async (req, res) => {
 // ユーザー情報 (要JWT)
 app.get('/api/userinfo', authenticateToken, async (req, res) => {
   try {
-    const { email } = req.user;
-    const userRow = await findUserByEmail(email);
+    const userId = req.user.id;
+    let userRow = null;
+
+    // まずはIDで取得（メール変更直後でも破綻しない）
+    const byId = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+    if (byId.rows.length > 0) {
+      userRow = byId.rows[0];
+    } else {
+      // 念のため旧トークン用にメールでも探す
+      const { email } = req.user;
+      userRow = await findUserByEmail(email);
+    }
+
     if (!userRow) {
       return res.status(404).json({ error: "User not found" });
     }
-    // 全列返す例 (roleやXP系を含む)
+
     const userData = {
       id: userRow.id,
       name: userRow.name,
@@ -1404,6 +1415,32 @@ app.put('/api/users/me/password', authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// 自分のログイン用メールを変更（要ログイン）
+// PATCH /api/me/email  body: { email }
+app.patch('/api/me/email', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'unauthorized' });
+
+    const email = (req.body?.email || '').trim();
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!emailOk) return res.status(400).json({ error: '不正なメール形式です' });
+
+    // すでに使用されていないか確認（大文字小文字を無視）
+    const dup = await pool.query(
+      'SELECT 1 FROM public.users WHERE LOWER(email) = LOWER($1) AND id <> $2 LIMIT 1',
+      [email, userId]
+    );
+    if (dup.rows.length > 0) return res.status(409).json({ error: 'このメールアドレスは既に使われています' });
+
+    await pool.query('UPDATE public.users SET email = $1 WHERE id = $2', [email, userId]);
+    return res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
   }
 });
 

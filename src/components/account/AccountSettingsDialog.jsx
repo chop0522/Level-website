@@ -34,6 +34,7 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
   const [oldPw, setOldPw] = useState('');
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
+  const [newEmail, setNewEmail] = useState('');
 
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
@@ -44,21 +45,26 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
 
   const normalizeName = (s) => (s || '').replace(/\s+/g, ' ').trim();
   const originalName = userInfo?.name || '';
+  const originalEmail = userInfo?.email || '';
 
   useEffect(() => {
     if (open) {
       setMode('settings');
       setNewName(originalName);
+      setNewEmail(originalEmail);
       setOldPw('');
       setNewPw('');
       setConfirmPw('');
       setError('');
       setSnack({ open: false, message: '', severity: 'success' });
     }
-  }, [open, originalName]);
+  }, [open, originalName, originalEmail]);
 
   const cleanName = normalizeName(newName);
   const canSaveName = !!cleanName && cleanName !== originalName && cleanName.length <= 32;
+  const cleanEmail = (newEmail || '').trim();
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail);
+  const canSaveEmail = emailValid && cleanEmail.toLowerCase() !== (originalEmail || '').toLowerCase();
 
   const pwMatch = newPw === confirmPw;
   const pwScore = useMemo(() => {
@@ -98,6 +104,30 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
         setError(msg);
         openSnack(msg, 'error');
       }
+    } catch (e) {
+      const msg = e.message || '変更に失敗しました';
+      setError(msg);
+      openSnack(msg, 'error');
+    }
+  };
+
+  // メールアドレス変更（トークンのみで認証・重複チェックあり）
+  const handleChangeEmail = async () => {
+    setError('');
+    if (!canSaveEmail) return;
+    try {
+      const res = await fetch('/api/me/email', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email: cleanEmail }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data?.error) throw new Error(data?.error || '変更に失敗しました');
+      if (setUserInfo) setUserInfo((prev) => ({ ...prev, email: cleanEmail }));
+      openSnack('メールアドレスを変更しました', 'success');
     } catch (e) {
       const msg = e.message || '変更に失敗しました';
       setError(msg);
@@ -189,9 +219,19 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
 
             {/* セキュリティ */}
             <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                ログイン & セキュリティ（パスワード）
-              </Typography>
+              <TextField
+                label="ログイン用メール"
+                type="email"
+                fullWidth
+                margin="dense"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                helperText={emailValid ? '有効なメール形式です' : '例: user@example.com'}
+                error={!!newEmail && !emailValid}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && canSaveEmail) handleChangeEmail();
+                }}
+              />
               <TextField
                 label="現在のパスワード"
                 type={showOld ? 'text' : 'password'}
@@ -260,6 +300,13 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
             >
               名前を変更
             </Button>
+            <Button
+              variant="outlined"
+              onClick={handleChangeEmail}
+              disabled={!canSaveEmail}
+            >
+              メールを変更
+            </Button>
             <Button onClick={handleClose}>閉じる</Button>
             <Button
               variant="contained"
@@ -297,3 +344,29 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
     </Dialog>
   );
 }
+
+// server.js
+// -----------------------------
+// 自分のログイン用メールを変更（要ログイン）
+// PATCH /api/me/email  body: { email }
+// -----------------------------
+app.patch('/api/me/email', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'unauthorized' });
+
+    const email = (req.body?.email || '').trim();
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!emailOk) return res.status(400).json({ error: '不正なメール形式です' });
+
+    // すでに使用されていないか確認（大文字小文字を無視）
+    const dup = await pool.query('SELECT 1 FROM public.users WHERE LOWER(email) = LOWER($1) AND id <> $2 LIMIT 1', [email, userId]);
+    if (dup.rows.length > 0) return res.status(409).json({ error: 'このメールアドレスは既に使われています' });
+
+    await pool.query('UPDATE public.users SET email = $1 WHERE id = $2', [email, userId]);
+    return res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
+  }
+});
