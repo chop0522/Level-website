@@ -55,7 +55,6 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
       setError('');
       setSnack({ open: false, message: '', severity: 'success' });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, originalName]);
 
   const cleanName = normalizeName(newName);
