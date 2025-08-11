@@ -8,7 +8,6 @@ import { getRankFromPoint } from '../utils/mahjongRank';
 import XPCard from '../components/xp/XPCard';
 import ProfileEditDialog from '../components/profile/ProfileEditDialog';
 import AccountSettingsDialog from '../components/account/AccountSettingsDialog';
-import AdminMonthlyPtDialog from '../components/admin/AdminMonthlyPtDialog';
 import {
   getProfile,
   getUserInfo,
@@ -67,8 +66,6 @@ function MyPage() {
   const [rankUpAnim, setRankUpAnim] = useState({});
   const [recentHF, setRecentHF] = useState([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  // 管理者: 月間Pt調整ダイアログ
-  const [adminPtOpen, setAdminPtOpen] = useState(false);
 
   // アバターのキャッシュバスター
   const [avatarVer, setAvatarVer] = useState(Date.now());
@@ -359,17 +356,6 @@ function MyPage() {
             通算ランキングを見る
           </Button>
 
-          {/* 月間Pt 調整 (管理者) */}
-          {userInfo.role === 'admin' && (
-            <Button
-              variant="outlined"
-              color="warning"
-              sx={{ mt: 2, ml: 1 }}
-              onClick={() => setAdminPtOpen(true)}
-            >
-              ポイント調整
-            </Button>
-          )}
 
           {/* 最近ハイタッチした人 */}
           {recentHF.length > 0 && (
@@ -492,16 +478,6 @@ function MyPage() {
         </Alert>
       </Snackbar>
 
-      {/* 管理者: 月間ポイント調整ダイアログ */}
-      <AdminMonthlyPtDialog
-        open={adminPtOpen}
-        onClose={() => setAdminPtOpen(false)}
-        onSuccess={() => {
-          setAdminPtOpen(false);
-          // 反映後に最新ユーザー情報取得
-          fetchUserInfo();
-        }}
-      />
     </Container>
   );
 }
