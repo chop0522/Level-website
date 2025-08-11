@@ -1,4 +1,5 @@
-// utils/mahjong.js
+// NOTE: This is the SOURCE OF TRUTH for Mahjong point calculation.
+// It is auto-copied to src/utils/mahjong.js via NPM scripts (see package.json: copy:mahjong).
 /**
  * 麻雀ポイント計算
  * @param {1|2|3|4} rank        終局順位
