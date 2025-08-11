@@ -98,66 +98,29 @@ export async function getUserInfo(token) {
 }
 
 /**
- * 予約を作成
- * @param {object} param0 { name, phone, dateTime, people, note }
- * @returns {object} { success: boolean, reservation?: object, error?: string }
+ * 予約作成 [廃止]
+ * 予約は公式LINEで運用しているため、このAPIは無効化しました。
+ * 呼び出された場合は即座にエラーを返します。
  */
-export async function createReservation({ name, phone, dateTime, people, note }) {
-  try {
-    const res = await fetch(`${SERVER_URL}/api/reservations`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, phone, dateTime, people, note })
-    });
-    return await res.json();
-  } catch (err) {
-    console.error("Error in createReservation:", err);
-    return { success: false, error: err.message };
-  }
+export async function createReservation() {
+  console.warn('[deprecated] createReservation: 予約機能は廃止されました');
+  return { success: false, error: '予約フォームは廃止しました。公式LINEからご予約ください。' };
 }
 
 /**
- * 予約一覧を取得 (管理者用)
- * @param {string} token 管理者JWT
- * @returns {array|object} 成功時 reservations配列, 失敗時 { error: string }
+ * 予約一覧取得 (管理者) [廃止]
  */
-export async function getAllReservations(token) {
-  try {
-    const res = await fetch(`${SERVER_URL}/api/reservations`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      return { error: data.error || '予約一覧の取得に失敗しました' };
-    }
-    return data; // reservations配列
-  } catch (err) {
-    console.error("Error in getAllReservations:", err);
-    return { error: err.message };
-  }
+export async function getAllReservations() {
+  console.warn('[deprecated] getAllReservations: 予約機能は廃止されました');
+  return { error: '予約管理は廃止しました（/admin も非表示）' };
 }
 
 /**
- * 予約を削除 (管理者用)
- * @param {number} reservationId
- * @param {string} token 管理者JWT
- * @returns {object} { success: boolean, error?: string }
+ * 予約削除 (管理者) [廃止]
  */
-export async function deleteReservation(reservationId, token) {
-  try {
-    const res = await fetch(`${SERVER_URL}/api/reservations/${reservationId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    return await res.json();
-  } catch (err) {
-    console.error("Error in deleteReservation:", err);
-    return { success: false, error: err.message };
-  }
+export async function deleteReservation() {
+  console.warn('[deprecated] deleteReservation: 予約機能は廃止されました');
+  return { success: false, error: '予約管理は廃止しました' };
 }
 // -----------------------------
 // Profile (avatar & bio)

@@ -704,19 +704,29 @@ function authenticateToken(req, res, next) {
 }
 
 /**
- * 管理者チェック (role==='admin')
+ * 管理者チェック (role==='admin') - ID優先, メールはフォールバック
  */
 async function authenticateAdmin(req, res, next) {
   try {
-    const email = req.user.email;
-    const userRow = await findUserByEmail(email);
+    const { id, email } = req.user;
+    let userRow = null;
+
+    // まずはIDで取得（メール変更直後の旧トークンでも動作させる）
+    if (id) {
+      const byId = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+      if (byId.rows.length > 0) userRow = byId.rows[0];
+    }
+    // 念のためメールでも検索
+    if (!userRow && email) {
+      userRow = await findUserByEmail(email);
+    }
+
     if (!userRow) {
       return res.status(404).json({ error: "User not found" });
     }
     if (userRow.role !== 'admin') {
       return res.status(403).json({ error: "Admin only" });
     }
-    // adminならOK
     next();
   } catch (err) {
     console.error(err);
@@ -841,37 +851,39 @@ app.get('/api/userinfo', authenticateToken, async (req, res) => {
 });
 
 // -----------------------------
-// カテゴリXP加算 (1日1回制限)
+// カテゴリXP加算 (1日1回制限) - IDベース実装
 // -----------------------------
 app.post('/api/gameCategory', authenticateToken, async (req, res) => {
   try {
-    const { email } = req.user;
+    const userId = req.user.id;
     const { category } = req.body;
     if (!category) {
       return res.status(400).json({ error: "Missing category" });
     }
-    const userRow = await findUserByEmail(email);
+
+    // ユーザー存在確認（メール変更直後の旧トークンでもIDで安定）
+    const { rows: [userRow] } = await pool.query('SELECT id, xp_total FROM users WHERE id = $1', [userId]);
     if (!userRow) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: 'User not found' });
     }
 
     // 今日同じカテゴリを獲得済みかチェック
-    const alreadyGot = await checkDailyCategory(userRow.id, category);
+    const alreadyGot = await checkDailyCategory(userId, category);
     if (alreadyGot) {
       return res.json({ success: false, msg: "You already got XP for this category today." });
     }
 
     // XP加算 (例: +10)
     const xpGain = 10;
-    const updatedVal = await gainCategoryXP(userRow.id, category, xpGain);
-    await insertDailyRecord(userRow.id, category);
+    const updatedVal = await gainCategoryXP(userId, category, xpGain);
+    await insertDailyRecord(userId, category);
     // 合計XPを更新
     await pool.query(
       'UPDATE users SET xp_total = xp_total + $1 WHERE id = $2',
-      [xpGain, userRow.id]
+      [xpGain, userId]
     );
 
-    const currentXP = Object.values(updatedVal)[0];      // 例: 60
+    const currentXP = Object.values(updatedVal)[0];
     const newRank   = await getRankInfo(category, currentXP);
     const prevRank  = await getRankInfo(category, currentXP - xpGain);
     const rankUp = !prevRank || newRank.rank > prevRank.rank;
@@ -895,7 +907,7 @@ app.post('/api/gameCategory', authenticateToken, async (req, res) => {
 });
 
 // -----------------------------
-// QRコード用 XP クレーム
+// QRコード用 XP クレーム - IDベース実装
 // -----------------------------
 app.post('/api/qr/claim', authenticateToken, async (req, res) => {
   try {
@@ -916,20 +928,23 @@ app.post('/api/qr/claim', authenticateToken, async (req, res) => {
       return res.status(400).json({ success: false, error: 'Invalid category' });
     }
 
+    const userId = req.user.id;
+    const { rows: [userRow] } = await pool.query('SELECT id FROM users WHERE id = $1', [userId]);
+    if (!userRow) return res.status(404).json({ success: false, error: 'User not found' });
+
     // Same daily check
-    const userRow = await findUserByEmail(req.user.email);
-    const already = await checkDailyCategory(userRow.id, category);
+    const already = await checkDailyCategory(userId, category);
     if (already) {
       return res.json({ success: false, error: 'Already claimed today' });
     }
 
     const xpGain = 10;
-    const updatedVal = await gainCategoryXP(userRow.id, category, xpGain);
-    await insertDailyRecord(userRow.id, category);
+    const updatedVal = await gainCategoryXP(userId, category, xpGain);
+    await insertDailyRecord(userId, category);
     // 合計XPを更新
     await pool.query(
       'UPDATE users SET xp_total = xp_total + $1 WHERE id = $2',
-      [xpGain, userRow.id]
+      [xpGain, userId]
     );
 
     const currentXP = Object.values(updatedVal)[0];
@@ -954,49 +969,14 @@ app.post('/api/qr/claim', authenticateToken, async (req, res) => {
   }
 });
 
-// -----------------------------
-// XP付与 (管理者操作)  /api/giveXP
-// -----------------------------
-app.post('/api/giveXP', authenticateToken, authenticateAdmin, async (req, res) => {
-  try {
-    const { email, category, amount = 10 } = req.body;
-    if (!email || !category) {
-      return res.status(400).json({ success: false, error: 'Missing email or category' });
-    }
-    if (!['stealth','heavy','light','party','gamble','quiz'].includes(category)) {
-      return res.status(400).json({ success: false, error: 'Invalid category' });
-    }
-    const targetUser = await findUserByEmail(email);
-    if (!targetUser) {
-      return res.status(404).json({ success: false, error: 'Target user not found' });
-    }
-
-    // XP 加算
-    const updated = await gainCategoryXP(targetUser.id, category, amount);
-    // 合計XP更新
-    await pool.query(
-      'UPDATE users SET xp_total = xp_total + $1 WHERE id = $2',
-      [amount, targetUser.id]
-    );
-    const currentXP = Object.values(updated)[0];
-    const rankInfo  = await getRankInfo(category, currentXP);
-    const nextRank  = await getNextRankInfo(category, currentXP);
-
-    res.json({
-      success: true,
-      email,
-      category,
-      amount,
-      currentXP,
-      rank: rankInfo.rank,
-      label: rankInfo.label,
-      next_required_xp: nextRank ? nextRank.required_xp : null
-    });
-    return; // giveXP 正常終了
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: err.message });
-  }
+// XP付与 (管理者操作) [DEPRECATED]
+// 旧: POST /api/giveXP
+// AdminXP を廃止したため、手動付与は受け付けません。
+app.post('/api/giveXP', authenticateToken, authenticateAdmin, (_req, res) => {
+  return res.status(410).json({
+    success: false,
+    error: '廃止されたエンドポイントです。XP は通常の記録フローで自動加算されます。'
+  });
 });
 
 // -----------------------------
@@ -1093,31 +1073,14 @@ app.get('/api/highfives/unread', authenticateToken, async (req, res) => {
     res.status(500).json({ success:false, error: err.message });
   }
 });
-// -----------------------------
-// 管理者: ユーザー完全削除 (物理削除)
-// -----------------------------
-app.delete('/api/admin/users/:id', authenticateToken, authenticateAdmin, async (req, res) => {
-  try {
-    const userId = parseInt(req.params.id, 10);
-    if (isNaN(userId)) {
-      return res.status(400).json({ success: false, error: 'Invalid id' });
-    }
-
-    // 関連行を先に削除（外部キー制約対策）
-    await pool.query('DELETE FROM highfives  WHERE user_from=$1 OR user_to=$1', [userId]);
-    await pool.query('DELETE FROM friendship WHERE user_low=$1 OR user_high=$1', [userId]);
-
-    // ユーザー本体を削除
-    const result = await pool.query('DELETE FROM users WHERE id=$1 RETURNING id', [userId]);
-    if (result.rowCount === 0) {
-      return res.status(404).json({ success:false, error:'User not found' });
-    }
-
-    res.json({ success:true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success:false, error: err.message });
-  }
+// 管理者: ユーザー物理削除 [DEPRECATED]
+// 旧: DELETE /api/admin/users/:id
+// 誤操作防止のため停止します。統合作業は個別SQL/運用フローで対応。
+app.delete('/api/admin/users/:id', authenticateToken, authenticateAdmin, (_req, res) => {
+  return res.status(410).json({
+    success: false,
+    error: 'ユーザー削除APIは廃止しました（410）。必要な場合は運用手順で統合してください。'
+  });
 });
 
 // -----------------------------
@@ -1134,35 +1097,11 @@ app.get('/api/admin/users/list', authenticateToken, authenticateAdmin, async (_r
   }
 });
 
-// -----------------------------
-// 管理者: ユーザー検索 (名前 / メール & XP 合計)
-// GET /api/admin/users?q=keyword  または ?query=keyword
-// -----------------------------
-app.get('/api/admin/users', authenticateToken, authenticateAdmin, async (req, res) => {
-  try {
-    // 両方のクエリパラメータを受け付ける
-    const raw = (req.query.q ?? req.query.query ?? '').trim();
-    if (raw.length === 0) {
-      return res.json([]);          // 空配列を返す
-    }
-
-    const like = `%${raw}%`;
-    const sql = `
-      SELECT id, name, email,
-             (xp_stealth + xp_heavy + xp_light +
-              xp_party  + xp_gamble + xp_quiz) AS xp_total
-        FROM users
-       WHERE email ILIKE $1
-          OR name  ILIKE $1
-       ORDER BY xp_total DESC
-       LIMIT 20
-    `;
-    const result = await pool.query(sql, [like]);
-    return res.json(result.rows);   // ← フロントは配列を期待
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
+// 管理者: ユーザー検索 [DEPRECATED]
+// 旧: GET /api/admin/users?query=...
+// AdminXP 廃止に伴い、サーバ側の検索エンドポイントも停止。
+app.get('/api/admin/users', authenticateToken, authenticateAdmin, (_req, res) => {
+  return res.status(410).json({ error: '廃止されたエンドポイントです（/api/admin/users/list は存続）' });
 });
 
 // -----------------------------
@@ -1253,12 +1192,12 @@ app.get('/api/profile/:id', async (req, res) => {
 });
 
 // -----------------------------
-// Achievements (総合ランク + XP)
+// Achievements (総合ランク + XP) - IDベース実装
 // -----------------------------
 app.get('/api/achievements', authenticateToken, async (req, res) => {
   try {
-    const email = req.user.email;
-    const userRow = await findUserByEmail(email);
+    const userId = req.user.id;
+    const { rows: [userRow] } = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
     if (!userRow) {
       return res.status(404).json({ success: false, error: 'User not found' });
     }
@@ -1289,12 +1228,16 @@ app.get('/api/achievements', authenticateToken, async (req, res) => {
 // プロフィール取得・更新
 // -----------------------------
 
-// GET /api/profile  (JWT 必須)
+// GET /api/profile  (JWT 必須) - IDベースの実装
 app.get('/api/profile', authenticateToken, async (req, res) => {
   try {
-    const email = req.user.email;
-    const userRow = await findUserByEmail(email);
-    if (!userRow) return res.status(404).json({ error: 'User not found' });
+    const userId = req.user.id;
+    const { rows } = await pool.query(
+      'SELECT id, name, avatar_url, bio FROM users WHERE id = $1',
+      [userId]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
+    const userRow = rows[0];
     res.json({
       id: userRow.id,
       name: userRow.name,
@@ -1307,14 +1250,14 @@ app.get('/api/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// PATCH /api/profile  (avatar_url, bio の任意更新)
+// PATCH /api/profile  (avatar_url, bio の任意更新) - IDベース更新
 app.patch('/api/profile', authenticateToken, async (req, res) => {
   try {
     const { name, avatar_url, bio } = req.body;
     if (name === undefined && avatar_url === undefined && bio === undefined) {
       return res.status(400).json({ error: 'No fields to update' });
     }
-    const email = req.user.email;
+    const userId = req.user.id;
     const fields = [];
     const values = [];
     if (name !== undefined)       { fields.push('name');       values.push(name); }
@@ -1322,8 +1265,8 @@ app.patch('/api/profile', authenticateToken, async (req, res) => {
     if (bio !== undefined)        { fields.push('bio');        values.push(bio); }
 
     const setClause = fields.map((f, i) => `${f} = $${i+1}`).join(', ');
-    const sql = `UPDATE users SET ${setClause} WHERE email = $${fields.length+1} RETURNING id, name, avatar_url, bio`;
-    values.push(email);
+    const sql = `UPDATE users SET ${setClause} WHERE id = $${fields.length+1} RETURNING id, name, avatar_url, bio`;
+    values.push(userId);
     const result = await pool.query(sql, values);
     res.json({ success: true, user: result.rows[0] });
   } catch (err) {
@@ -1544,47 +1487,27 @@ app.delete('/api/events/:id', authenticateToken, authenticateAdmin, async (req, 
 // 予約機能 (要: reservationsテーブル)
 // -----------------------------
 
-// 作成 (ユーザー→DB保存)
-app.post('/api/reservations', async (req, res) => {
-  try {
-    const { name, phone, dateTime, people, note } = req.body;
-    if (!name || !phone || !dateTime || !people) {
-      return res.status(400).json({ success: false, error: "Missing required fields" });
-    }
-    const newReservation = await createReservationInDB(name, phone, dateTime, people, note || '');
-    return res.json({ success: true, reservation: newReservation });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: err.message });
-  }
+// 予約作成 [DEPRECATED]
+// 旧: POST /api/reservations
+// 現在は公式LINEで受け付けています。
+app.post('/api/reservations', (_req, res) => {
+  return res.status(410).json({
+    success: false,
+    error: '予約フォームは廃止しました。公式LINEからご予約ください。'
+  });
 });
 
-// 予約一覧 (管理者用)
-app.get('/api/reservations', authenticateToken, authenticateAdmin, async (req, res) => {
-  try {
-    const sql = 'SELECT * FROM reservations ORDER BY date_time ASC';
-    const result = await pool.query(sql);
-    res.json(result.rows); // [{ id, name, phone, date_time, people, note, ... }, ...]
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
+// 予約一覧 (管理者) [DEPRECATED]
+// 旧: GET /api/reservations
+// 予約管理は公式LINE運用に移行しました。
+app.get('/api/reservations', authenticateToken, authenticateAdmin, (_req, res) => {
+  return res.status(410).json({ error: '予約管理は廃止しました（公式LINE運用）' });
 });
 
-// 予約削除 (管理者用)
-app.delete('/api/reservations/:id', authenticateToken, authenticateAdmin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const sql = 'DELETE FROM reservations WHERE id=$1 RETURNING id';
-    const result = await pool.query(sql, [id]);
-    if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, error: 'Reservation not found' });
-    }
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: err.message });
-  }
+// 予約削除 (管理者) [DEPRECATED]
+// 旧: DELETE /api/reservations/:id
+app.delete('/api/reservations/:id', authenticateToken, authenticateAdmin, (_req, res) => {
+  return res.status(410).json({ success: false, error: '予約管理は廃止しました' });
 });
 
 // -----------------------------

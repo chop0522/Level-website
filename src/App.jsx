@@ -27,8 +27,6 @@ const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'));
 const PublicProfile   = lazy(() => import('./pages/PublicProfile'));
 const Equipment       = lazy(() => import('./pages/Equipment'));
 const Reservation     = lazy(() => import('./pages/Reservation'));
-const AdminDashboard  = lazy(() => import('./pages/AdminDashboard'));
-const AdminXP         = lazy(() => import('./pages/AdminXP'));
 const QRPage          = lazy(() => import('./pages/QRPage'));
 const AchievementsPage = lazy(() => import('./pages/AchievementsPage'));
 const NotFound        = lazy(() => import('./pages/NotFound'));    // “最後の砦”
@@ -105,8 +103,6 @@ function App() {
   /* ---- 背景スタイル ---- */
   const appStyle = { minHeight:'100vh', backgroundColor:theme.palette.background.default };
 
-  // Loader for pending auth
-  const Pending = () => <div style={{textAlign:'center',marginTop:'2rem'}}>Loading...</div>;
 
   return (
     <HelmetProvider>
@@ -141,7 +137,7 @@ function App() {
                 {/* Auth */}
                 <Route path="/signup"  element={<Signup setToken={setToken} />} />
                 <Route path="/login"    element={<Login    setToken={setToken} />} />
-                <Route path="/mypage"   element={<MyPage />} />
+                <Route path="/mypage"   element={ token ? <MyPage /> : <Navigate to="/login" replace /> } />
                 <Route
                   path="/achievements"
                   element={ token
@@ -166,25 +162,6 @@ function App() {
                   }
                 />
 
-                {/* Admin */}
-                <Route path="/admin"
-                  element={
-                    userRole === null
-                      ? <Pending />
-                      : userRole === 'admin'
-                          ? <AdminDashboard />
-                          : <Navigate to="/" replace />
-                  }
-                />
-                <Route path="/admin/xp"
-                  element={
-                    userRole === null
-                      ? <Pending />
-                      : userRole === 'admin'
-                          ? <AdminXP />
-                          : <Navigate to="/" replace />
-                  }
-                />
 
                 {/* 404 */}
                 <Route path="*" element={<NotFound />} />

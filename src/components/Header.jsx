@@ -10,7 +10,7 @@ import styles from './Header.module.css';
 import { AuthContext } from '../contexts/TokenContext';
 
 function Header() {
-  const { token = '', userRole = 'user', handleLogout } = useContext(AuthContext);
+  const { token = '', handleLogout } = useContext(AuthContext);
   // ▼ メニュー開閉用のState
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -51,10 +51,6 @@ function Header() {
             <Link to="/mypage">MyPage</Link>
           )}
 
-          {/* 管理者用リンク (tokenあり & role===admin) */}
-          {token && userRole === 'admin' && (
-            <Link to="/admin">Admin</Link>
-          )}
         </nav>
       </div>
 
