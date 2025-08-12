@@ -226,16 +226,51 @@ function Home() {
   return (
     <>
       <Helmet>
-        <title>ゲームカフェ.Level | 行徳のボードゲーム＆麻雀スペース</title>
+        <title>ゲームカフェ.Level｜行徳のボードゲーム＆麻雀カフェ</title>
+        <link rel="canonical" href="https://gamecafe-level.com/" />
         <meta
           name="description"
-          content="千葉県市川市・行徳駅すぐ。1000種類以上のボードゲームと最新全自動雀卓を楽しめるコミュニティカフェです。"
+          content="千葉県市川市・行徳駅徒歩5分。ボードゲーム＆麻雀カフェ『ゲームカフェ.Level』公式サイト。営業時間・料金・設備、月間麻雀ランキングを掲載。公式LINEで予約受付中。"
         />
-        <meta property="og:type"        content="website" />
-        <meta property="og:title"       content="ゲームカフェ.Level" />
-        <meta property="og:description" content="行徳駅のボードゲームカフェ.Level。相席歓迎・貸切可！" />
-        <meta property="og:url"         content="https://gamecafe-level.com/" />
-        <meta property="og:image"       content="https://gamecafe-level.com/ogp/home.jpg" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="ゲームカフェ.Level｜行徳のボードゲーム＆麻雀カフェ" />
+        <meta property="og:description" content="行徳駅徒歩5分、1000種類以上のボードゲームと全自動麻雀卓。料金・設備・アクセス、最新の麻雀ランキングを掲載。" />
+        <meta property="og:url" content="https://gamecafe-level.com/" />
+        <meta property="og:image" content="https://gamecafe-level.com/ogp/home.jpg" />
+        <meta property="og:locale" content="ja_JP" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="ゲームカフェ.Level｜行徳のボードゲーム＆麻雀カフェ" />
+        <meta name="twitter:description" content="行徳駅徒歩5分、1000種類以上のボードゲームと全自動麻雀卓。料金・設備・アクセス、最新の麻雀ランキングを掲載。" />
+        <meta name="twitter:image" content="https://gamecafe-level.com/ogp/home.jpg" />
+
+        {/* LocalBusiness structured data */}
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: "ゲームカフェ.Level",
+          image: "https://gamecafe-level.com/ogp/home.jpg",
+          url: "https://gamecafe-level.com/",
+          telephone: "+81-50-5449-3088",
+          address: {
+            "@type": "PostalAddress",
+            postalCode: "272-0132",
+            addressCountry: "JP",
+            addressRegion: "千葉県",
+            addressLocality: "市川市",
+            streetAddress: "湊新田2-1-18 ビアメゾンロジェール101"
+          },
+          openingHoursSpecification: [
+            { "@type": "OpeningHoursSpecification", dayOfWeek: ["Tuesday","Wednesday","Thursday","Friday"], opens: "15:00", closes: "23:59" },
+            { "@type": "OpeningHoursSpecification", dayOfWeek: ["Saturday","Sunday","PublicHolidays"], opens: "13:00", closes: "23:59" }
+          ],
+          sameAs: [
+            "https://lin.ee/CWJf4Ui",
+            "https://x.com/GamecafeLevel",
+            "https://note.com/gamecafe_level"
+          ],
+          geo: { "@type": "GeoCoordinates", latitude: 35.68025783, longitude: 139.909141276 },
+          hasMap: "https://www.google.com/maps?cid=0x42dc8c85cafabf51"
+        })}</script>
       </Helmet>
 
       {/* ---------- Hero ---------- */}
@@ -345,7 +380,7 @@ function Home() {
             アクセス
           </Typography>
           <Typography variant="body1">
-            千葉県市川市湊新田2−1−18 ビアメゾンロジェール101
+            〒272-0132 千葉県市川市湊新田2−1−18 ビアメゾンロジェール101
           </Typography>
           <Box sx={{ mt: 2 }} ref={mapRef}>
             {mapInView && (

@@ -109,13 +109,40 @@ function App() {
       <ThemeProvider theme={theme}>
         <AuthContext.Provider value={{ token, setToken, userRole, userInfo, setUserInfo, handleLogout }}>
           {/* ---------- 共通メタ ---------- */}
-          <Helmet>
-            <title>ゲームカフェ.Level | 行徳のボードゲームカフェ</title>
-            <meta name="description"
-                  content="千葉県行徳駅徒歩5分、1000種類以上のボードゲームが遊べる『ゲームカフェ.Level』公式サイト。営業時間・設備・料金はこちら。" />
-            <meta property="og:type"        content="website" />
-            <meta property="og:title"       content="ゲームカフェ.Level" />
-            <meta property="og:description" content="行徳駅徒歩5分、1000種類以上のボードゲーム！ ボドゲ・麻雀・ポーカーまで遊べるカフェ" />
+          <Helmet defaultTitle="ゲームカフェ.Level｜行徳のボードゲーム＆麻雀カフェ" titleTemplate="%s｜ゲームカフェ.Level">
+            <html lang="ja" />
+            <meta name="description" content="千葉県市川市・行徳駅徒歩5分、ボードゲーム＆麻雀カフェ『ゲームカフェ.Level』公式サイト。営業時間・料金・設備、月間麻雀ランキングを掲載。公式LINEで予約受付中。" />
+            <meta name="format-detection" content="telephone=no" />
+
+            {/* OGP / Twitter Card (site-wide defaults) */}
+            <meta property="og:type" content="website" />
+            <meta property="og:site_name" content="ゲームカフェ.Level" />
+            <meta property="og:title" content="ゲームカフェ.Level" />
+            <meta property="og:description" content="行徳駅徒歩5分、1000種類以上のボードゲーム＆麻雀。料金・設備・アクセス、最新の麻雀ランキングを掲載。" />
+            <meta property="og:url" content="https://gamecafe-level.com/" />
+            <meta property="og:image" content="https://gamecafe-level.com/ogp/home.jpg" />
+            <meta property="og:locale" content="ja_JP" />
+
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content="ゲームカフェ.Level" />
+            <meta name="twitter:description" content="行徳駅徒歩5分、1000種類以上のボードゲーム＆麻雀カフェ。最新情報とランキングはこちら。" />
+            <meta name="twitter:image" content="https://gamecafe-level.com/ogp/home.jpg" />
+
+            {/* hreflang（日本語のみ） */}
+            <link rel="alternate" hrefLang="ja" href="https://gamecafe-level.com/" />
+            <link rel="alternate" hrefLang="x-default" href="https://gamecafe-level.com/" />
+
+            {/* WebSite 構造化データ（サイト全体） */}
+            <script type="application/ld+json">{JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "ゲームカフェ.Level",
+              "url": "https://gamecafe-level.com/",
+              "inLanguage": "ja",
+              "sameAs": [
+                "https://lin.ee/CWJf4Ui"
+              ]
+            })}</script>
           </Helmet>
 
           <div style={appStyle}>

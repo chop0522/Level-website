@@ -1511,6 +1511,70 @@ app.delete('/api/reservations/:id', authenticateToken, authenticateAdmin, (_req,
 });
 
 // -----------------------------
+// SEO: robots.txt / sitemap.xml / noindex for /mypage
+// -----------------------------
+// robots.txt（/admin と /mypage を除外、Sitemap を案内）
+app.get('/robots.txt', (req, res) => {
+  const robots = [
+    'User-agent: *',
+    'Disallow: /admin',
+    'Disallow: /mypage',
+    'Sitemap: https://gamecafe-level.com/sitemap.xml'
+  ].join('\n');
+  res.type('text/plain').send(robots);
+});
+
+// /mypage はインデックスさせない（ヘッダで noindex を返す）
+app.get(['/mypage', '/mypage/*'], (req, res) => {
+  res.set('X-Robots-Tag', 'noindex, nofollow');
+  // SPA のエントリをそのまま返す
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+// sitemap.xml（主要ページ + 直近12ヶ月の麻雀ランキング）
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const base = 'https://gamecafe-level.com';
+    const urls = [
+      { loc: `${base}/`,           changefreq: 'weekly',  priority: '1.0' },
+      { loc: `${base}/mahjong`,    changefreq: 'daily',   priority: '0.9' },
+      { loc: `${base}/menu`,       changefreq: 'monthly', priority: '0.7' },
+      { loc: `${base}/equipment`,  changefreq: 'monthly', priority: '0.6' },
+    ];
+
+    // 直近12ヶ月分の月別ランキング（?month=YYYY-MM）を追加
+    for (let i = 0; i < 12; i++) {
+      const m = dayjs().startOf('month').subtract(i, 'month');
+      urls.push({
+        loc: `${base}/mahjong?month=${m.format('YYYY-MM')}`,
+        lastmod: m.endOf('month').format('YYYY-MM-DD'),
+        changefreq: 'monthly',
+        priority: '0.6'
+      });
+    }
+
+    const xmlItems = urls.map(u => (
+      [
+        '<url>',
+          `<loc>${u.loc}</loc>`,
+          u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : '',
+          `<changefreq>${u.changefreq}</changefreq>`,
+          `<priority>${u.priority}</priority>`,
+        '</url>'
+      ].filter(Boolean).join('')
+    )).join('');
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>` +
+                `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
+                xmlItems +
+                `</urlset>`;
+    res.type('application/xml').send(xml);
+  } catch (err) {
+    console.error(err);
+    res.status(500).type('text/plain').send('sitemap error');
+  }
+});
+// -----------------------------
 // フロントエンドのビルド成果物 (本番用)
 // -----------------------------
 app.use(express.static(path.join(__dirname, 'build')));

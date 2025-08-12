@@ -26,6 +26,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { AuthContext } from '../contexts/TokenContext';
 import GameEntryForm from '../components/mahjong/GameEntryForm';
 import AdminGameList from '../components/mahjong/AdminGameList';
+import { Helmet } from 'react-helmet-async';
 
 export default function MahjongPage() {
   const { token, userInfo: user } = useContext(AuthContext); // 認証情報
@@ -57,6 +58,88 @@ export default function MahjongPage() {
 
   return (
     <Box sx={{ p: 3 }}>
+      <Helmet>
+        <title>今月の麻雀ランキング</title>
+        <link rel="canonical" href="https://gamecafe-level.com/mahjong" />
+        <meta
+          name="description"
+          content="ゲームカフェ.Levelの月間麻雀ランキング。今月と先月の成績を掲載。テスト対局は集計に含めません。名前変更は現行名で表示されます。"
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="今月の麻雀ランキング｜ゲームカフェ.Level" />
+        <meta property="og:description" content="今月と先月の月間麻雀ランキング。対局登録のテストは集計対象外です。" />
+        <meta property="og:url" content="https://gamecafe-level.com/mahjong" />
+        <meta property="og:image" content="https://gamecafe-level.com/ogp/home.jpg" />
+        <meta property="og:locale" content="ja_JP" />
+
+        {/* FAQ 構造化データ（ランキングの仕様） */}
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "どの期間の成績ですか？",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "日本時間（JST）の月単位で集計しています。画面のタブで今月・先月を切り替えて表示できます。"
+              }
+            },
+            {
+              "@type": "Question",
+              name: "点数計算はどうやっていますか？",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "4人の持ち点合計が100,000点になるように入力し、終局持ち点と順位から店内の換算ルールでポイントに自動換算しています。"
+              }
+            },
+            {
+              "@type": "Question",
+              name: "テスト対局はランキングに含まれますか？",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "含まれません。テスト登録（is_test=true）の対局は集計から除外しています。"
+              }
+            },
+            {
+              "@type": "Question",
+              name: "名前を変更した場合の扱いは？",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "同じアカウント（同一ユーザーID）の成績は現行の表示名で統一して表示します。"
+              }
+            },
+            {
+              "@type": "Question",
+              name: "同点のときはどうなりますか？",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "順位は入力の1〜4を各1回割り当てます（同点でも順位は入力に従います）。"
+              }
+            }
+          ]
+        })}</script>
+
+        {/* パンくず（任意） */}
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            {
+              "@type": "ListItem",
+              position: 1,
+              name: "ホーム",
+              item: "https://gamecafe-level.com/"
+            },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: "麻雀ランキング",
+              item: "https://gamecafe-level.com/mahjong"
+            }
+          ]
+        })}</script>
+      </Helmet>
       <Typography variant="h5" gutterBottom>
         麻雀月間ランキング
       </Typography>
