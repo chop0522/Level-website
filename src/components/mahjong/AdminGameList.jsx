@@ -32,9 +32,9 @@ export default function AdminGameList({ open, onClose }) {
   const [testFilter, setTestFilter] = useState('all'); // all | true | false
 
   const monthOptions = useMemo(() => {
-    const now = dayjs();
-    // 直近6ヶ月を候補に
-    return Array.from({ length: 6 }, (_, i) => now.subtract(i, 'month').format('YYYY-MM'));
+    const now = dayjs().startOf('month');
+    // 直近12ヶ月を候補に
+    return Array.from({ length: 12 }, (_, i) => now.subtract(i, 'month').format('YYYY-MM'));
   }, []);
 
   const fetchRows = async () => {
@@ -188,10 +188,18 @@ export default function AdminGameList({ open, onClose }) {
           <Stack direction="row" spacing={1} alignItems="center">
             <TextField
               select size="small" label="月"
-              value={month} onChange={(e) => setMonth(e.target.value)}
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              SelectProps={{
+                MenuProps: { PaperProps: { style: { maxHeight: 36 * 8 } } }
+              }}
             >
-              {monthOptions.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}
+              {monthOptions.map(m => (
+                <MenuItem key={m} value={m}>{m}</MenuItem>
+              ))}
             </TextField>
+            <Button size="small" onClick={() => setMonth(dayjs().format('YYYY-MM'))}>今月</Button>
+            <Button size="small" onClick={() => setMonth(dayjs(month + '-01').subtract(1, 'month').format('YYYY-MM'))}>先月</Button>
             <TextField
               select size="small" label="テスト"
               value={testFilter} onChange={(e) => setTestFilter(e.target.value)}
