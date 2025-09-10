@@ -843,6 +843,33 @@ app.get('/api/userinfo', authenticateToken, async (req, res) => {
       mahjong_rank:    userRow.mahjong_rank,
       mahjong_subrank: userRow.mahjong_subrank,
     };
+
+    // --- 麻雀統計（最高得点と順位別回数）を付加 ---
+    try {
+      const { rows: [mjStats] } = await pool.query(
+        `SELECT 
+            COALESCE(MAX(final_score), 0) AS highest_score,
+            COALESCE(COUNT(*) FILTER (WHERE rank = 1), 0) AS rank1_count,
+            COALESCE(COUNT(*) FILTER (WHERE rank = 2), 0) AS rank2_count,
+            COALESCE(COUNT(*) FILTER (WHERE rank = 3), 0) AS rank3_count,
+            COALESCE(COUNT(*) FILTER (WHERE rank = 4), 0) AS rank4_count
+         FROM public.mahjong_games
+         WHERE user_id = $1 AND (is_test IS NOT TRUE)`,
+        [userId]
+      );
+      userData.highest_score = Number(mjStats?.highest_score ?? 0);
+      userData.rank1_count   = Number(mjStats?.rank1_count   ?? 0);
+      userData.rank2_count   = Number(mjStats?.rank2_count   ?? 0);
+      userData.rank3_count   = Number(mjStats?.rank3_count   ?? 0);
+      userData.rank4_count   = Number(mjStats?.rank4_count   ?? 0);
+    } catch (e) {
+      console.warn('failed to fetch mahjong stats for userinfo:', e?.message || e);
+      userData.highest_score = 0;
+      userData.rank1_count = 0;
+      userData.rank2_count = 0;
+      userData.rank3_count = 0;
+      userData.rank4_count = 0;
+    }
     return res.json(userData);
   } catch (err) {
     console.error(err);

@@ -21,6 +21,7 @@ import { Link as RouterLink } from 'react-router-dom';
 
 import { AuthContext } from '../contexts/TokenContext';
 import MyPageNav from '../components/MyPageNav';
+import { Helmet } from 'react-helmet-async';
 
 // 開発判定（Vite でも Node でも安全に動く）
 const isDev =
@@ -244,6 +245,10 @@ function MyPage() {
 
   return (
     <Container sx={{ mt: 4 }}>
+      <Helmet>
+        <title>マイページ</title>
+        <meta name="robots" content="noindex,nofollow" />
+      </Helmet>
       <Typography variant="h5" gutterBottom>
         My Page
       </Typography>
