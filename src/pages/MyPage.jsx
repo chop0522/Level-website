@@ -3,6 +3,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Container, Typography, Button } from '@mui/material';
 import { Avatar, Stack, Box, Card, Snackbar, Alert } from '@mui/material';
 import { Grid } from '@mui/material';
+import { Tooltip as MuiTooltip } from '@mui/material';
 import Chip from '@mui/material/Chip';
 import { getRankFromPoint } from '../utils/mahjongRank';
 import XPCard from '../components/xp/XPCard';
@@ -318,6 +319,17 @@ function MyPage() {
                       size="small"
                       color="success"
                     />
+                  </Stack>
+
+                  {/* 追加: 麻雀 最高得点 + 順位回数（/api/userinfo に同梱された値を表示。未取得でも0で表示） */}
+                  <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }} data-testid="mahjong-stats">
+                    <MuiTooltip title="これまでの最終持ち点の最高値">
+                      <Chip label={`最高得点 ${userInfo?.highest_score ?? 0}`} size="small" color="secondary" />
+                    </MuiTooltip>
+                    <Chip label={`1位 ${(userInfo?.rank1_count ?? 0)}回`} size="small" variant="outlined" />
+                    <Chip label={`2位 ${(userInfo?.rank2_count ?? 0)}回`} size="small" variant="outlined" />
+                    <Chip label={`3位 ${(userInfo?.rank3_count ?? 0)}回`} size="small" variant="outlined" />
+                    <Chip label={`4位 ${(userInfo?.rank4_count ?? 0)}回`} size="small" variant="outlined" />
                   </Stack>
 
                   {profile.bio && (

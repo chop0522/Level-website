@@ -349,7 +349,16 @@ export async function getRecentHighfives(token, limit = 10) {
     const res = await fetch(`${SERVER_URL}/api/highfives/recent?limit=${limit}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    return await res.json();
+    if (!res.ok) {
+      return { success: false, error: `HTTP ${res.status}` };
+    }
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.warn('getRecentHighfives: non-JSON response', text?.slice(0, 120));
+      return { success: false, error: 'non_json_response' };
+    }
   } catch (err) {
     console.error('Error in getRecentHighfives:', err);
     return { success: false, error: err.message };
@@ -367,7 +376,16 @@ export async function getUnreadHighfives(token, limit = 20) {
     const res = await fetch(`${SERVER_URL}/api/highfives/unread?limit=${limit}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    return await res.json();
+    if (!res.ok) {
+      return { success: false, error: `HTTP ${res.status}` };
+    }
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.warn('getUnreadHighfives: non-JSON response', text?.slice(0, 120));
+      return { success: false, error: 'non_json_response' };
+    }
   } catch (err) {
     console.error('Error in getUnreadHighfives:', err);
     return { success: false, error: err.message };
