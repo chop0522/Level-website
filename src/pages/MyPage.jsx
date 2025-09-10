@@ -321,8 +321,14 @@ function MyPage() {
                     />
                   </Stack>
 
-                  {/* 追加: 麻雀 最高得点 + 順位回数（/api/userinfo に同梱された値を表示。未取得でも0で表示） */}
-                  <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }} data-testid="mahjong-stats">
+                  {/* 追加: 麻雀 最高得点 & 順位回数（レスポンシブ表示） */}
+                  {/* sm以上（従来の横並び） */}
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ mt: 1, flexWrap: 'wrap', display: { xs: 'none', sm: 'flex' } }}
+                    data-testid="mahjong-stats-desktop"
+                  >
                     <MuiTooltip title="これまでの最終持ち点の最高値">
                       <Chip label={`最高得点 ${userInfo?.highest_score ?? 0}`} size="small" color="secondary" />
                     </MuiTooltip>
@@ -331,6 +337,30 @@ function MyPage() {
                     <Chip label={`3位 ${(userInfo?.rank3_count ?? 0)}回`} size="small" variant="outlined" />
                     <Chip label={`4位 ${(userInfo?.rank4_count ?? 0)}回`} size="small" variant="outlined" />
                   </Stack>
+
+                  {/* xs（スマホ）：左に最高得点、右の余白に順位を縦並びで配置 */}
+                  <Box
+                    sx={{
+                      mt: 1,
+                      display: { xs: 'grid', sm: 'none' },
+                      gridTemplateColumns: '1fr auto',
+                      columnGap: 1,
+                      alignItems: 'start'
+                    }}
+                    data-testid="mahjong-stats-mobile"
+                  >
+                    <Box>
+                      <MuiTooltip title="これまでの最終持ち点の最高値">
+                        <Chip label={`最高得点 ${userInfo?.highest_score ?? 0}`} size="small" color="secondary" />
+                      </MuiTooltip>
+                    </Box>
+                    <Stack spacing={0.5} sx={{ alignItems: 'flex-end' }}>
+                      <Chip label={`1位 ${(userInfo?.rank1_count ?? 0)}回`} size="small" variant="outlined" />
+                      <Chip label={`2位 ${(userInfo?.rank2_count ?? 0)}回`} size="small" variant="outlined" />
+                      <Chip label={`3位 ${(userInfo?.rank3_count ?? 0)}回`} size="small" variant="outlined" />
+                      <Chip label={`4位 ${(userInfo?.rank4_count ?? 0)}回`} size="small" variant="outlined" />
+                    </Stack>
+                  </Box>
 
                   {profile.bio && (
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
