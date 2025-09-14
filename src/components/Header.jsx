@@ -32,8 +32,8 @@ function Header() {
               <span className={styles.logoJP}>ゲームカフェ</span>
             </span>
             <span className={styles.logoRowBottom}>
-              <span className={styles.logoDot}>.</span>
-              <span className={styles.logoEN}>Level</span>
+              <span className={styles.logoDot}></span>
+              <span className={styles.logoEN}>.Level</span>
             </span>
           </Link>
         </h1>
