@@ -48,9 +48,19 @@
 /* クリック可能なブランド一体リンク */
 .brandLink {
   display: inline-flex;
-  align-items: flex-end; /* ベースライン合わせで整える */
-  gap: 6px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   text-decoration: none;
+  line-height: 1;
+  color: var(--logo);
+}
+
+.logoRowTop { line-height: 1; }
+.logoRowBottom {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 4px;
   line-height: 1;
 }
 
@@ -58,7 +68,7 @@
   font-family: 'Noto Sans JP', 'Noto Sans', system-ui, -apple-system, 'Segoe UI',
     'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif !important;
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1.2rem; /* 少し大きく */
   color: var(--logo);
   letter-spacing: 0.04em;
 }
@@ -71,7 +81,7 @@
 
 .logoEN {
   font-family: 'Press Start 2P', sans-serif !important;
-  font-size: 1.25rem;
+  font-size: 1.4rem; /* 少し大きく */
   color: var(--logo);
   letter-spacing: 0.5px;
 }
@@ -165,9 +175,9 @@
     display: flex;
   }
 
-  .brandLink { gap: 4px; }
-  .logoJP { font-size: 0.95rem; }
-  .logoEN { font-size: 1.05rem; }
+  .brandLink { gap: 2px; }
+  .logoJP { font-size: 1.05rem; }
+  .logoEN { font-size: 1.2rem; }
 }
 
 /* メディアクエリ: さらに狭い幅 (400px以下) での文字サイズ例 */

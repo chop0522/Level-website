@@ -28,9 +28,13 @@ function Header() {
       <div className={styles.navLeft}>
         <h1 className={styles.logo}>
           <Link to="/" className={styles.brandLink} aria-label="トップへ">
-            <span className={styles.logoJP}>ゲームカフェ</span>
-            <span className={styles.logoDot}>.</span>
-            <span className={styles.logoEN}>Level</span>
+            <span className={styles.logoRowTop}>
+              <span className={styles.logoJP}>ゲームカフェ</span>
+            </span>
+            <span className={styles.logoRowBottom}>
+              <span className={styles.logoDot}>.</span>
+              <span className={styles.logoEN}>Level</span>
+            </span>
           </Link>
         </h1>
 
