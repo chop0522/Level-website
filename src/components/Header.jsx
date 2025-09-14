@@ -26,7 +26,7 @@ function Header() {
     >
       {/* 左側: ロゴ + ナビ */}
       <div className={styles.navLeft}>
-        <h1 className={styles.logo}>Board Game Cafe</h1>
+        <h1 className={styles.logo}>ゲームカフェ.Level</h1>
 
         {/* PC時に横並び表示、スマホ時は隠れてハンバーガーボタンで開閉 */}
         <nav
