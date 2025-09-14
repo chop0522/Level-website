@@ -26,7 +26,13 @@ function Header() {
     >
       {/* 左側: ロゴ + ナビ */}
       <div className={styles.navLeft}>
-        <h1 className={styles.logo}>ゲームカフェ.Level</h1>
+        <h1 className={styles.logo}>
+          <Link to="/" className={styles.brandLink} aria-label="トップへ">
+            <span className={styles.logoJP}>ゲームカフェ</span>
+            <span className={styles.logoDot}>.</span>
+            <span className={styles.logoEN}>Level</span>
+          </Link>
+        </h1>
 
         {/* PC時に横並び表示、スマホ時は隠れてハンバーガーボタンで開閉 */}
         <nav

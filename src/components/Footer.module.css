@@ -5,4 +5,10 @@
     text-align: center;
     font-size: 0.9rem;
     color: #666;
+    /* 日本語とローマ字を同じ書体に統一 */
+    font-family: 'Noto Sans JP', 'Noto Sans', system-ui, -apple-system, 'Segoe UI',
+      'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif !important;
+    letter-spacing: 0.02em;
   }
+
+.footer p { margin: 0; }
