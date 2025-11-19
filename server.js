@@ -388,7 +388,8 @@ app.get('/api/mahjong/monthly', async (req, res) => {
       SELECT
         u.id,
         u.name,
-        m.total_points AS monthly_pt
+        m.total_points AS monthly_pt,
+        COALESCE(u.total_pt, 0) AS total_pt
       FROM public.mahjong_monthly m
       JOIN public.users u ON u.id = m.user_id
       WHERE m.month = COALESCE(
@@ -413,10 +414,14 @@ app.get('/api/mahjong/lifetime', async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit || '100', 10), 200);
     const sql = `
-      SELECT id, name, total_pt
-        FROM users
-       WHERE role <> 'admin'               -- 管理者は除外
-         AND total_pt IS NOT NULL
+      SELECT u.id, u.name, COALESCE(u.total_pt, 0) AS total_pt
+        FROM public.users u
+       WHERE u.role <> 'admin'               -- 管理者は除外
+         AND EXISTS (
+               SELECT 1 FROM public.mahjong_games g
+                WHERE g.user_id = u.id
+                  AND (g.is_test IS NOT TRUE)
+             )
     ORDER BY total_pt DESC
        LIMIT $1
     `;
@@ -849,26 +854,35 @@ app.get('/api/userinfo', authenticateToken, async (req, res) => {
       const { rows: [mjStats] } = await pool.query(
         `SELECT 
             COALESCE(MAX(final_score), 0) AS highest_score,
+            COALESCE(AVG(final_score), 0) AS average_score,
+            COALESCE(AVG(rank), 0) AS average_rank,
             COALESCE(COUNT(*) FILTER (WHERE rank = 1), 0) AS rank1_count,
             COALESCE(COUNT(*) FILTER (WHERE rank = 2), 0) AS rank2_count,
             COALESCE(COUNT(*) FILTER (WHERE rank = 3), 0) AS rank3_count,
-            COALESCE(COUNT(*) FILTER (WHERE rank = 4), 0) AS rank4_count
+            COALESCE(COUNT(*) FILTER (WHERE rank = 4), 0) AS rank4_count,
+            COALESCE(COUNT(*), 0) AS game_count
          FROM public.mahjong_games
          WHERE user_id = $1 AND (is_test IS NOT TRUE)`,
         [userId]
       );
       userData.highest_score = Number(mjStats?.highest_score ?? 0);
+      userData.average_score = Number(mjStats?.average_score ?? 0);
+      userData.average_rank  = Number(mjStats?.average_rank ?? 0);
       userData.rank1_count   = Number(mjStats?.rank1_count   ?? 0);
       userData.rank2_count   = Number(mjStats?.rank2_count   ?? 0);
       userData.rank3_count   = Number(mjStats?.rank3_count   ?? 0);
       userData.rank4_count   = Number(mjStats?.rank4_count   ?? 0);
+      userData.game_count    = Number(mjStats?.game_count    ?? 0);
     } catch (e) {
       console.warn('failed to fetch mahjong stats for userinfo:', e?.message || e);
       userData.highest_score = 0;
+      userData.average_score = 0;
+      userData.average_rank = 0;
       userData.rank1_count = 0;
       userData.rank2_count = 0;
       userData.rank3_count = 0;
       userData.rank4_count = 0;
+      userData.game_count = 0;
     }
     return res.json(userData);
   } catch (err) {

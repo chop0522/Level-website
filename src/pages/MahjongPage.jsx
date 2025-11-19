@@ -197,33 +197,36 @@ export default function MahjongPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((r, i) => (
-                <TableRow
-                  key={r.id}
-                  sx={{
-                    bgcolor:
-                      user && r.id === user.id ? 'rgba(255,215,0,0.15)' : undefined
-                  }}
-                >
-                  <TableCell>{i + 1}</TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <UserAvatar id={r.id} size={28} sx={{ mr: 1 }} />
-                      <Typography component="span">{r.name}</Typography>
-                      <Chip
-                        label={getRankFromPoint(r.monthly_pt).label}
-                        size="small"
-                        sx={{
-                          bgcolor: getRankFromPoint(r.monthly_pt).color,
-                          color: '#fff',
-                          ml: 1
-                        }}
-                      />
-                    </Box>
-                  </TableCell>
-                  <TableCell align="right">{r.monthly_pt}</TableCell>
-                </TableRow>
-              ))}
+              {rows.map((r, i) => {
+                const lifetimeRank = getRankFromPoint(r.total_pt ?? 0);
+                return (
+                  <TableRow
+                    key={r.id}
+                    sx={{
+                      bgcolor:
+                        user && r.id === user.id ? 'rgba(255,215,0,0.15)' : undefined
+                    }}
+                  >
+                    <TableCell>{i + 1}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <UserAvatar id={r.id} size={28} sx={{ mr: 1 }} />
+                        <Typography component="span">{r.name}</Typography>
+                        <Chip
+                          label={lifetimeRank.label}
+                          size="small"
+                          sx={{
+                            bgcolor: lifetimeRank.color,
+                            color: '#fff',
+                            ml: 1
+                          }}
+                        />
+                      </Box>
+                    </TableCell>
+                    <TableCell align="right">{r.monthly_pt}</TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </Paper>

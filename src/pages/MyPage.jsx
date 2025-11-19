@@ -57,6 +57,18 @@ function formatDate(isoStr) {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
+const formatAverageScore = (value) => {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '0';
+  return Math.round(num).toLocaleString('ja-JP');
+};
+
+const formatAverageRank = (value) => {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '0.00';
+  return num.toFixed(2);
+};
+
 function MyPage() {
   // コンテキストからダイレクトに取得（名前変更後に即再レンダ）
   const { token, userInfo, setUserInfo } = useContext(AuthContext);
@@ -73,6 +85,13 @@ function MyPage() {
   const [avatarVer, setAvatarVer] = useState(Date.now());
   // 累積ポイントで段位を計算
   const rankInfo = getRankFromPoint(userInfo?.total_pt || 0);
+  const hasMahjongGames = (userInfo?.game_count ?? 0) > 0;
+  const averageScoreLabel = hasMahjongGames
+    ? formatAverageScore(userInfo?.average_score)
+    : '-';
+  const averageRankLabel = hasMahjongGames
+    ? formatAverageRank(userInfo?.average_rank)
+    : '-';
 
   // カテゴリ定義とランクテーブル
   const categories = [
@@ -332,6 +351,20 @@ function MyPage() {
                     <MuiTooltip title="これまでの最終持ち点の最高値">
                       <Chip label={`最高得点 ${userInfo?.highest_score ?? 0}`} size="small" color="secondary" />
                     </MuiTooltip>
+                    <MuiTooltip title="これまでの最終持ち点の平均値">
+                      <Chip
+                        label={`平均得点 ${averageScoreLabel}`}
+                        size="small"
+                        color="info"
+                      />
+                    </MuiTooltip>
+                    <MuiTooltip title="これまでの平均順位 (低いほど良い)">
+                      <Chip
+                        label={`平均順位 ${averageRankLabel}`}
+                        size="small"
+                        variant="outlined"
+                      />
+                    </MuiTooltip>
                     <Chip label={`1位 ${(userInfo?.rank1_count ?? 0)}回`} size="small" variant="outlined" />
                     <Chip label={`2位 ${(userInfo?.rank2_count ?? 0)}回`} size="small" variant="outlined" />
                     <Chip label={`3位 ${(userInfo?.rank3_count ?? 0)}回`} size="small" variant="outlined" />
@@ -350,9 +383,17 @@ function MyPage() {
                     data-testid="mahjong-stats-mobile"
                   >
                     <Box>
-                      <MuiTooltip title="これまでの最終持ち点の最高値">
-                        <Chip label={`最高得点 ${userInfo?.highest_score ?? 0}`} size="small" color="secondary" />
-                      </MuiTooltip>
+                      <Stack spacing={0.5}>
+                        <MuiTooltip title="これまでの最終持ち点の最高値">
+                          <Chip label={`最高得点 ${userInfo?.highest_score ?? 0}`} size="small" color="secondary" />
+                        </MuiTooltip>
+                        <MuiTooltip title="これまでの最終持ち点の平均値">
+                          <Chip label={`平均得点 ${averageScoreLabel}`} size="small" color="info" />
+                        </MuiTooltip>
+                        <MuiTooltip title="これまでの平均順位 (低いほど良い)">
+                          <Chip label={`平均順位 ${averageRankLabel}`} size="small" variant="outlined" />
+                        </MuiTooltip>
+                      </Stack>
                     </Box>
                     <Stack spacing={0.5} sx={{ alignItems: 'flex-end' }}>
                       <Chip label={`1位 ${(userInfo?.rank1_count ?? 0)}回`} size="small" variant="outlined" />
