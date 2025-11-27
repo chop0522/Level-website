@@ -49,7 +49,7 @@ function FAQ() {
             ホットペッパーでご予約が可能です。
           </Typography>
           <Typography variant="body1" paragraph>
-            ・当日の飛び込み来店もOKですが、席が埋まっている場合はお待ちいただくことがあります。
+            ・当日の飛び込み来店も可能です、席が埋まっている場合はお待ちいただくことがあります。
           </Typography>
           <Typography variant="body1" paragraph>
             ・貸切予約の注意点：
@@ -68,7 +68,7 @@ function FAQ() {
             ・食べ物は持ち込み可能ですが、飲み物の持ち込みはNGです。
           </Typography>
           <Typography variant="body1" paragraph>
-            ・アルコール提供あり / フードメニューはなし。隣のインドカレー屋さんや
+            ・アルコール提供あり / フードメニューはなし。お持ち込みや隣のインドカレー屋さんや
             Uber Eats等をご利用ください。
           </Typography>
         </AccordionDetails>
