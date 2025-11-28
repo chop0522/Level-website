@@ -322,6 +322,14 @@ function Home() {
             月曜祝日も営業しております。
             貸切でのご利用も可能ですので、FAQをご覧の上、お気軽にお問い合わせください。
           </Typography>
+          <Typography variant="body2" sx={{ mt: 2, fontWeight: 'bold' }}>
+            『お知らせ』
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 0.5 }}>
+            開業以来ずっと料金を据え置いておりましたが、12月6日土曜日から土日祝日の料金を値上げさせていただきます。
+            30分300円→30分400円　4時間パック1200円→1600円　1日パック2400円→2800円　
+            オープンチャットにて割引情報などをお知らせさせていただいております、気になる方はご確認ださい。
+          </Typography>
         </Paper>
       </Container>
 

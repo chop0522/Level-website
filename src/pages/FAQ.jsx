@@ -23,7 +23,7 @@ function FAQ() {
         </AccordionSummary>
         <AccordionDetails>
           <Typography variant="body1" paragraph>
-            ・30分300円／4時間パック1200円／1日パック2400円
+            ・平日30分300円　土日祝日30分400円／平日4時間パック1200円　土日祝日1600円／平日1日パック2400円　土日祝日2800円
           </Typography>
           <Typography variant="body1" paragraph>
             ・ワンドリンク制とは、入店時にソフトドリンク（300円）かアルコール（500円）を
