@@ -1,43 +1,45 @@
 // src/pages/Register.jsx
-import React, { useState } from 'react';
-import { TextField, Button, Container, Typography } from '@mui/material';
-import { registerUser } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react'
+import { TextField, Button, Container, Typography } from '@mui/material'
+import { registerUser } from '../services/api'
+import { useNavigate } from 'react-router-dom'
 
 function Register({ setToken }) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
 
   const handleRegister = async () => {
     // simple client‑side validation
     if (!name || !email || !password) {
-      return setError('全フィールド必須です');
+      return setError('全フィールド必須です')
     }
     if (password !== confirm) {
-      return setError('パスワードが一致しません');
+      return setError('パスワードが一致しません')
     }
     try {
-      const res = await registerUser({ name, email, password });
+      const res = await registerUser({ name, email, password })
       if (res.success) {
-        localStorage.setItem('token', res.token);
-        setToken(res.token);
-        navigate('/mypage');
+        localStorage.setItem('token', res.token)
+        setToken(res.token)
+        navigate('/mypage')
       } else {
-        setError(res.error || 'Register failed');
+        setError(res.error || 'Register failed')
       }
     } catch (err) {
-      console.error(err);
-      setError('Register error');
+      console.error(err)
+      setError('Register error')
     }
-  };
+  }
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h5" gutterBottom>Register</Typography>
+      <Typography variant="h5" gutterBottom>
+        Register
+      </Typography>
       <TextField
         label="Name"
         fullWidth
@@ -78,7 +80,7 @@ function Register({ setToken }) {
         Register
       </Button>
     </Container>
-  );
+  )
 }
 
-export default Register;
+export default Register

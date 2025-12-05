@@ -3,26 +3,25 @@
 /* ----- PCなど広い画面（デフォルト） ----- */
 .rbc-event-content,
 .rbc-event-label {
-  white-space: normal !important;       /* 複数行表示を許可 */
+  white-space: normal !important; /* 複数行表示を許可 */
   overflow-wrap: break-word !important; /* 単語折り返し */
-  word-wrap: break-word !important;     /* 古いブラウザ対策 */
-  text-overflow: clip !important;       /* 省略を使わず全文表示 */
-  line-height: 1.2 !important;          /* 行間をやや詰める (好みで調整) */
-  font-size: 0.9rem !important;         /* PC時の文字サイズ (お好みで) */
+  word-wrap: break-word !important; /* 古いブラウザ対策 */
+  text-overflow: clip !important; /* 省略を使わず全文表示 */
+  line-height: 1.2 !important; /* 行間をやや詰める (好みで調整) */
+  font-size: 0.9rem !important; /* PC時の文字サイズ (お好みで) */
 }
 
 /* ----- スマホ幅（768px以下） ----- */
 @media (max-width: 768px) {
-
   .rbc-event-content,
   .rbc-event-label {
     /* さらに小さい文字＆詰めた行間で改行数を抑え、かつ省略(...)は使わない */
-    font-size: 0.65rem !important;      /* 小さめの文字 */
-    line-height: 1.1 !important;        /* 行間をより詰めて改行を減らす */
+    font-size: 0.65rem !important; /* 小さめの文字 */
+    line-height: 1.1 !important; /* 行間をより詰めて改行を減らす */
 
-    white-space: normal !important;     /* 改行を許可 */
+    white-space: normal !important; /* 改行を許可 */
     overflow-wrap: break-word !important;
     word-wrap: break-word !important;
-    text-overflow: clip !important;     /* ...は付けず全文表示 */
+    text-overflow: clip !important; /* ...は付けず全文表示 */
   }
 }

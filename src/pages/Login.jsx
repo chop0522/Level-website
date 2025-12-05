@@ -1,50 +1,53 @@
 // src/pages/Login.jsx
-import React, { useState } from 'react';
-import { 
-  TextField, 
-  Button, 
-  Container, 
-  Typography,
-  Box 
-} from '@mui/material';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { loginUser } from '../services/api';
+import React, { useState } from 'react'
+import { TextField, Button, Container, Typography, Box } from '@mui/material'
+import { useNavigate, Link as RouterLink } from 'react-router-dom'
+import { loginUser } from '../services/api'
+import { Helmet } from 'react-helmet-async'
 
 // もし Header, Footer を使うなら import
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import Header from '../components/Header'
+import Footer from '../components/Footer'
 
 function Login({ setToken }) {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleLogin = async () => {
     if (!email || !password) {
-      return setError('メールとパスワードを入力してください');
+      return setError('メールとパスワードを入力してください')
     }
     try {
-      setLoading(true);
-      const res = await loginUser(email, password);
+      setLoading(true)
+      const res = await loginUser(email, password)
       if (res.success) {
-        localStorage.setItem('token', res.token);
-        setToken(res.token);
-        navigate('/mypage');
+        localStorage.setItem('token', res.token)
+        setToken(res.token)
+        navigate('/mypage')
       } else {
-        setError(res.error || 'ログインに失敗しました');
+        setError(res.error || 'ログインに失敗しました')
       }
     } catch (err) {
-      console.error(err);
-      setError('サーバーエラーが発生しました');
+      console.error(err)
+      setError('サーバーエラーが発生しました')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <>
+      <Helmet>
+        <title>ログイン</title>
+        <meta name="robots" content="noindex,nofollow" />
+        <meta
+          name="description"
+          content="ゲームカフェ.Levelの会員向けログインページです。登録済みメールアドレスとパスワードでサインインしてください。"
+        />
+      </Helmet>
       {/*
         // Header, Footerを使う場合はコメントアウト解除
         // ただしApp.jsxで表示しているなら二重表示を防ぐためにコメントアウトのまま
@@ -66,11 +69,11 @@ function Login({ setToken }) {
           sx={{
             '& .MuiOutlinedInput-root': {
               backgroundColor: '#ffffff', // 白背景
-              color: '#000000'            // 黒文字
+              color: '#000000', // 黒文字
             },
             '& .MuiFormLabel-root': {
-              color: '#000000'            // ラベルも黒に
-            }
+              color: '#000000', // ラベルも黒に
+            },
           }}
         />
 
@@ -85,11 +88,11 @@ function Login({ setToken }) {
           sx={{
             '& .MuiOutlinedInput-root': {
               backgroundColor: '#ffffff',
-              color: '#000000'
+              color: '#000000',
             },
             '& .MuiFormLabel-root': {
-              color: '#000000'
-            }
+              color: '#000000',
+            },
           }}
         />
 
@@ -105,11 +108,7 @@ function Login({ setToken }) {
           </Button>
 
           {/* 新規登録への導線 */}
-          <Button
-            variant="outlined"
-            component={RouterLink}
-            to="/register"
-          >
+          <Button variant="outlined" component={RouterLink} to="/signup">
             Register
           </Button>
         </Box>
@@ -119,7 +118,7 @@ function Login({ setToken }) {
         // <Footer />
       */}
     </>
-  );
+  )
 }
 
-export default Login;
+export default Login

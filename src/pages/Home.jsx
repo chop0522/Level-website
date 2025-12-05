@@ -1,5 +1,5 @@
 // src/pages/Home.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   Container,
   Box,
@@ -11,52 +11,50 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
-} from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
-import { styled } from '@mui/material/styles';
-import { Helmet } from 'react-helmet-async';
+  DialogActions,
+} from '@mui/material'
+import { Link as RouterLink } from 'react-router-dom'
+import { styled } from '@mui/material/styles'
+import { Helmet } from 'react-helmet-async'
 
 /* ▼ Big-Calendar */
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar'
+import { format, parse, startOfWeek, getDay } from 'date-fns'
+import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 /* ▼ カスタム CSS */
-import '../styles/CalendarOverride.css';
+import '../styles/CalendarOverride.css'
 
 /* ▼ 画像遅延読み込み */
-import { LazyLoadImage } from 'react-lazy-load-image-component';
-import 'react-lazy-load-image-component/src/effects/blur.css';
-import { useInView } from 'react-intersection-observer';
+import { LazyLoadImage } from 'react-lazy-load-image-component'
+import 'react-lazy-load-image-component/src/effects/blur.css'
+import { useInView } from 'react-intersection-observer'
 
 /* ▼ Hero 画像（犬＋棚） */
-import heroDogWebp from '../assets/images/heroDog.webp';
-import heroDogJpg  from '../assets/images/heroDog.jpg';
+import heroDogWebp from '../assets/images/heroDog.webp'
+import heroDogJpg from '../assets/images/heroDog.jpg'
 
 /* ▼ SNSアイコン画像 */
-import xIcon    from '../assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif';
-import lineIcon from '../assets/images/icons8-line-48-2.png';
-import noteIcon from '../assets/images/icon.png';
+import xIcon from '../assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif'
+import lineIcon from '../assets/images/icons8-line-48-2.png'
+import noteIcon from '../assets/images/icon.png'
 
 /* ▼ SNSアイコン（遅延表示） */
-const XIcon = () => (
-  <LazyLoadImage src={xIcon} alt="X" width="24" height="24" effect="opacity" />
-);
+const XIcon = () => <LazyLoadImage src={xIcon} alt="X" width="24" height="24" effect="opacity" />
 const LineIcon = () => (
   <LazyLoadImage src={lineIcon} alt="LINE" width="24" height="24" effect="opacity" />
-);
+)
 const NoteIcon = () => (
   <LazyLoadImage src={noteIcon} alt="Note" width="24" height="24" effect="opacity" />
-);
+)
 
 /* ▼ Hero ラッパー */
 const HeroWrapper = styled(Box)({
   width: '100%',
   height: 400,
   position: 'relative',
-  overflow: 'hidden'
-});
+  overflow: 'hidden',
+})
 const HeroOverlay = styled(Box)({
   position: 'absolute',
   inset: 0,
@@ -67,166 +65,166 @@ const HeroOverlay = styled(Box)({
   alignItems: 'center',
   color: '#fff',
   textAlign: 'center',
-  padding: '0 1rem'
-});
+  padding: '0 1rem',
+})
 
 /* ▼ Big-Calendar ローカライザ */
-import ja from 'date-fns/locale/ja';
-const locales = { ja };
-const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
+import ja from 'date-fns/locale/ja'
+const locales = { ja }
+const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
 
 function Home() {
-  const [events, setEvents] = useState([]);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [events, setEvents] = useState([])
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState(null)
 
   // IntersectionObserver for lazy‑loading the Google Map iframe
   const { ref: mapRef, inView: mapInView } = useInView({
     triggerOnce: true,
-    rootMargin: '200px'
-  });
+    rootMargin: '200px',
+  })
 
   /* ① 起動時：イベント取得 */
   useEffect(() => {
     fetch('/api/events')
-      .then(res => res.json())
-      .then(data =>
+      .then((res) => res.json())
+      .then((data) =>
         setEvents(
-          data.map(evt => ({
+          data.map((evt) => ({
             ...evt,
             start: new Date(evt.start),
-            end: new Date(evt.end)
+            end: new Date(evt.end),
           }))
         )
       )
-      .catch(console.error);
-  }, []);
+      .catch(console.error)
+  }, [])
 
   /* ② 新規イベント追加 */
   const handleSelectSlot = async (slotInfo) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token')
     if (!token) {
-      alert('ログインが必要です (管理者のみ編集可能)');
-      return;
+      alert('ログインが必要です (管理者のみ編集可能)')
+      return
     }
-    const title = window.prompt('新しいイベントのタイトルは？');
-    if (!title) return;
+    const title = window.prompt('新しいイベントのタイトルは？')
+    if (!title) return
 
     const newEvent = {
       title,
       start: slotInfo.start.toISOString(),
       end: slotInfo.end.toISOString(),
-      allDay: false
-    };
+      allDay: false,
+    }
 
     try {
       const res = await fetch('/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(newEvent)
-      });
-      const created = await res.json();
+        body: JSON.stringify(newEvent),
+      })
+      const created = await res.json()
       if (!res.ok) {
-        alert(created.error || 'イベント追加に失敗しました');
-        return;
+        alert(created.error || 'イベント追加に失敗しました')
+        return
       }
-      setEvents(prev => [
+      setEvents((prev) => [
         ...prev,
-        { ...created, start: new Date(created.start), end: new Date(created.end) }
-      ]);
+        { ...created, start: new Date(created.start), end: new Date(created.end) },
+      ])
     } catch (err) {
-      console.error(err);
-      alert('イベント追加中にエラー発生');
+      console.error(err)
+      alert('イベント追加中にエラー発生')
     }
-  };
+  }
 
   /* ③ クリック → 削除モーダル */
   const handleSelectEvent = (event) => {
-    setSelectedEvent(event);
-    setShowDeleteModal(true);
-  };
+    setSelectedEvent(event)
+    setShowDeleteModal(true)
+  }
 
   /* ④ 削除実行 */
   const handleDeleteEvent = async () => {
-    if (!selectedEvent) return;
-    const token = localStorage.getItem('token');
+    if (!selectedEvent) return
+    const token = localStorage.getItem('token')
     if (!token) {
-      alert('ログインが必要です (管理者のみ編集可能)');
-      return;
+      alert('ログインが必要です (管理者のみ編集可能)')
+      return
     }
     try {
       const res = await fetch(`/api/events/${selectedEvent.id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json()
       if (!res.ok) {
-        alert(data.error || '削除に失敗');
-        return;
+        alert(data.error || '削除に失敗')
+        return
       }
-      setEvents(prev => prev.filter(e => e.id !== selectedEvent.id));
+      setEvents((prev) => prev.filter((e) => e.id !== selectedEvent.id))
     } catch (err) {
-      console.error(err);
-      alert('削除中にエラーが発生');
+      console.error(err)
+      alert('削除中にエラーが発生')
     }
-    setShowDeleteModal(false);
-    setSelectedEvent(null);
-  };
+    setShowDeleteModal(false)
+    setSelectedEvent(null)
+  }
 
   /* ⑤ ドラッグ移動／リサイズ */
   const handleEventDropOrResize = async ({ event, start, end, allDay }) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token')
     if (!token) {
-      alert('ログインが必要です (管理者のみ編集可能)');
-      return;
+      alert('ログインが必要です (管理者のみ編集可能)')
+      return
     }
     const updated = {
       title: event.title,
       start: start.toISOString(),
       end: end.toISOString(),
-      allDay: !!allDay
-    };
+      allDay: !!allDay,
+    }
     try {
       const res = await fetch(`/api/events/${event.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(updated)
-      });
-      const data = await res.json();
+        body: JSON.stringify(updated),
+      })
+      const data = await res.json()
       if (!res.ok) {
-        alert(data.error || '移動/リサイズに失敗');
-        return;
+        alert(data.error || '移動/リサイズに失敗')
+        return
       }
-      setEvents(prev =>
-        prev.map(e =>
+      setEvents((prev) =>
+        prev.map((e) =>
           e.id === data.id
             ? {
                 ...e,
                 title: data.title,
                 start: new Date(data.start),
                 end: new Date(data.end),
-                allDay: data.all_day
+                allDay: data.all_day,
               }
             : e
         )
-      );
+      )
     } catch (err) {
-      console.error(err);
-      alert('移動/リサイズ中にエラー');
+      console.error(err)
+      alert('移動/リサイズ中にエラー')
     }
-  };
+  }
 
   /* ---------------------------- JSX ---------------------------- */
   return (
     <>
       <Helmet>
-        <title>ゲームカフェ.Level｜行徳のボードゲーム＆麻雀カフェ</title>
+        <title>行徳のボードゲーム＆麻雀カフェ</title>
         <link rel="canonical" href="https://gamecafe-level.com/" />
         <meta
           name="description"
@@ -234,43 +232,61 @@ function Home() {
         />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="ゲームカフェ.Level｜行徳のボードゲーム＆麻雀カフェ" />
-        <meta property="og:description" content="行徳駅徒歩5分、1000種類以上のボードゲームと全自動麻雀卓。料金・設備・アクセス、最新の麻雀ランキングを掲載。" />
+        <meta
+          property="og:description"
+          content="行徳駅徒歩5分、1000種類以上のボードゲームと全自動麻雀卓。料金・設備・アクセス、最新の麻雀ランキングを掲載。"
+        />
         <meta property="og:url" content="https://gamecafe-level.com/" />
         <meta property="og:image" content="https://gamecafe-level.com/ogp/home.jpg" />
         <meta property="og:locale" content="ja_JP" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="ゲームカフェ.Level｜行徳のボードゲーム＆麻雀カフェ" />
-        <meta name="twitter:description" content="行徳駅徒歩5分、1000種類以上のボードゲームと全自動麻雀卓。料金・設備・アクセス、最新の麻雀ランキングを掲載。" />
+        <meta
+          name="twitter:description"
+          content="行徳駅徒歩5分、1000種類以上のボードゲームと全自動麻雀卓。料金・設備・アクセス、最新の麻雀ランキングを掲載。"
+        />
         <meta name="twitter:image" content="https://gamecafe-level.com/ogp/home.jpg" />
 
         {/* LocalBusiness structured data */}
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "LocalBusiness",
-          name: "ゲームカフェ.Level",
-          image: "https://gamecafe-level.com/ogp/home.jpg",
-          url: "https://gamecafe-level.com/",
-          telephone: "+81-50-5449-3088",
-          address: {
-            "@type": "PostalAddress",
-            postalCode: "272-0132",
-            addressCountry: "JP",
-            addressRegion: "千葉県",
-            addressLocality: "市川市",
-            streetAddress: "湊新田2-1-18 ビアメゾンロジェール101"
-          },
-          openingHoursSpecification: [
-            { "@type": "OpeningHoursSpecification", dayOfWeek: ["Tuesday","Wednesday","Thursday","Friday"], opens: "15:00", closes: "23:59" },
-            { "@type": "OpeningHoursSpecification", dayOfWeek: ["Saturday","Sunday","PublicHolidays"], opens: "13:00", closes: "23:59" }
-          ],
-          sameAs: [
-            "https://lin.ee/CWJf4Ui",
-            "https://x.com/GamecafeLevel",
-            "https://note.com/gamecafe_level"
-          ],
-          geo: { "@type": "GeoCoordinates", latitude: 35.68025783, longitude: 139.909141276 },
-          hasMap: "https://www.google.com/maps?cid=0x42dc8c85cafabf51"
-        })}</script>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'LocalBusiness',
+            name: 'ゲームカフェ.Level',
+            image: 'https://gamecafe-level.com/ogp/home.jpg',
+            url: 'https://gamecafe-level.com/',
+            telephone: '+81-50-5449-3088',
+            address: {
+              '@type': 'PostalAddress',
+              postalCode: '272-0132',
+              addressCountry: 'JP',
+              addressRegion: '千葉県',
+              addressLocality: '市川市',
+              streetAddress: '湊新田2-1-18 ビアメゾンロジェール101',
+            },
+            openingHoursSpecification: [
+              {
+                '@type': 'OpeningHoursSpecification',
+                dayOfWeek: ['Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+                opens: '15:00',
+                closes: '23:59',
+              },
+              {
+                '@type': 'OpeningHoursSpecification',
+                dayOfWeek: ['Saturday', 'Sunday', 'PublicHolidays'],
+                opens: '13:00',
+                closes: '23:59',
+              },
+            ],
+            sameAs: [
+              'https://lin.ee/CWJf4Ui',
+              'https://x.com/GamecafeLevel',
+              'https://note.com/gamecafe_level',
+            ],
+            geo: { '@type': 'GeoCoordinates', latitude: 35.68025783, longitude: 139.909141276 },
+            hasMap: 'https://www.google.com/maps?cid=0x42dc8c85cafabf51',
+          })}
+        </script>
       </Helmet>
 
       {/* ---------- Hero ---------- */}
@@ -283,7 +299,7 @@ function Home() {
             sizes="100vw"
             alt="店内ボードゲーム棚"
             loading="eager"
-            fetchpriority="high"
+            fetchPriority="high"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </picture>
@@ -453,7 +469,7 @@ function Home() {
         </DialogActions>
       </Dialog>
     </>
-  );
+  )
 }
 
-export default Home;
+export default Home

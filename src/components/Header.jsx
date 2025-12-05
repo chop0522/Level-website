@@ -1,29 +1,28 @@
 // src/components/Header.jsx
-import React, { useState, Suspense, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import { IconButton } from '@mui/material';
+import React, { useState, Suspense, useContext } from 'react'
+import { Link, NavLink } from 'react-router-dom'
+import { IconButton } from '@mui/material'
 // ---- MUI Icons (lazy loaded to keep the main bundle small) ----
-const MenuIcon  = React.lazy(() => import('@mui/icons-material/Menu'));
-const CloseIcon = React.lazy(() => import('@mui/icons-material/Close'));
-import styles from './Header.module.css';
+const MenuIcon = React.lazy(() => import('@mui/icons-material/Menu'))
+const CloseIcon = React.lazy(() => import('@mui/icons-material/Close'))
+import styles from './Header.module.css'
 
-import { AuthContext } from '../contexts/TokenContext';
+import { AuthContext } from '../contexts/TokenContext'
 
 function Header() {
-  const { token = '', handleLogout } = useContext(AuthContext);
+  const { token = '', handleLogout } = useContext(AuthContext)
   // ▼ メニュー開閉用のState
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const toggleMenu = () => {
-    setMenuOpen((prev) => !prev);
-  };
+    setMenuOpen((prev) => !prev)
+  }
 
-    return (
-    <header
-      className={styles.header}
-      role="banner"
-      style={{ position: 'relative', zIndex: 3000 }}
-    >
+  const navLinkClass = ({ isActive }) =>
+    isActive ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
+
+  return (
+    <header className={styles.header} role="banner" style={{ position: 'relative', zIndex: 3000 }}>
       {/* 左側: ロゴ + ナビ */}
       <div className={styles.navLeft}>
         <h1 className={styles.logo}>
@@ -45,22 +44,37 @@ function Header() {
           onClick={() => setMenuOpen(false)}
           // ↑ メニュー内のリンククリック後に自動でメニューを閉じる
         >
-          <Link to="/">Home</Link>
-          <Link to="/menu">Menu</Link>
-          <Link to="/equipment">Equipment</Link>
-          <Link to="/reservation">Reservation</Link>
-          <Link to="/faq">FAQ</Link>
+          <NavLink to="/" end className={navLinkClass}>
+            Home
+          </NavLink>
+          <NavLink to="/menu" className={navLinkClass}>
+            Menu
+          </NavLink>
+          <NavLink to="/equipment" className={navLinkClass}>
+            Equipment
+          </NavLink>
+          <NavLink to="/reservation" className={navLinkClass}>
+            Reservation
+          </NavLink>
+          <NavLink to="/faq" className={navLinkClass}>
+            FAQ
+          </NavLink>
 
           {/* 未ログイン時は Sign Up & Login、ログイン後は MyPage */}
           {!token ? (
             <>
-              <Link to="/signup">Sign&nbsp;Up</Link>
-              <Link to="/login">Login</Link>
+              <NavLink to="/signup" className={navLinkClass}>
+                Sign&nbsp;Up
+              </NavLink>
+              <NavLink to="/login" className={navLinkClass}>
+                Login
+              </NavLink>
             </>
           ) : (
-            <Link to="/mypage">MyPage</Link>
+            <NavLink to="/mypage" className={navLinkClass}>
+              MyPage
+            </NavLink>
           )}
-
         </nav>
       </div>
 
@@ -68,11 +82,7 @@ function Header() {
       <div className={styles.navRight}>
         {/* Logoutボタン (tokenがある & handleLogoutが存在する時だけ表示) */}
         {token && handleLogout && (
-          <button
-            onClick={handleLogout}
-            type="button"
-            className={styles.logoutButton}
-          >
+          <button onClick={handleLogout} type="button" className={styles.logoutButton}>
             Logout
           </button>
         )}
@@ -84,13 +94,11 @@ function Header() {
           aria-label={menuOpen ? 'メニューを閉じる' : 'メニューを開く'}
           size="large"
         >
-          <Suspense fallback={null}>
-            {menuOpen ? <CloseIcon /> : <MenuIcon />}
-          </Suspense>
+          <Suspense fallback={null}>{menuOpen ? <CloseIcon /> : <MenuIcon />}</Suspense>
         </IconButton>
       </div>
     </header>
-  );
+  )
 }
 
-export default Header;
+export default Header

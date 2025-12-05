@@ -7,8 +7,10 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "build": "react-scripts build",
-    "postinstall": "npm run build"
-    
+    "postinstall": "npm run build",
+    "lint": "eslint src --ext .js,.jsx",
+    "lint:fix": "eslint src --ext .js,.jsx --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx,css,md,ts,tsx}\""
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -19,14 +21,13 @@
     "bcrypt": "^5.1.0",
     "browser-image-compression": "^2.0.2",
     "chart.js": "^4.4.8",
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-   
     "jsonwebtoken": "^9.0.2",
-    
     "multer": "^1.4.5-lts.1",
     "pg": "^8.14.0",
     "qrcode": "^1.5.4",
@@ -42,7 +43,13 @@
     "react-scripts": "5.0.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.20"
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "nodemon": "^2.0.20",
+    "prettier": "^3.7.4"
   },
   "license": "ISC",
   "browserslist": {
