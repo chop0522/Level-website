@@ -80,7 +80,7 @@ function Equipment() {
             <Typography variant="body1" paragraph>
               ・ボードゲームは1000種類以上！
               <br />
-              ・ボードゲーム以外にも、麻雀、ポーカー、クイズ、謎解き、マーダーミステリーなど多彩に遊べる
+              ・ボードゲーム以外にも、麻雀、ポーカー、クイズ、謎解き、マーダーミステリーなど多彩に遊べます。
               <br />
             </Typography>
 
@@ -121,7 +121,7 @@ function Equipment() {
             <Typography variant="body1" paragraph>
               ・最寄り駅：東京メトロ東西線「行徳駅」
               <br />
-              ・近隣の駐車場：コインパーキングを利用可
+              ・近隣の駐車場：コインパーキングをご利用ください。
             </Typography>
 
             {/* アクセス写真(外観,看板など) */}
