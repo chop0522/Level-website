@@ -1,14 +1,14 @@
 /* src/components/Header.module.css */
 
-:root{
-  --logo:#00b7ff;           /* 明るいシアン (ロゴ&リンク) */
-  --link:#00b7ff;
-  --link-hover:#004c7f;     /* 濃いめシアン（ホバー時） */
+:root {
+  --logo: #0083cc; /* コントラストを高めたシアン (ロゴ&リンク) */
+  --link: #0083cc;
+  --link-hover: #005b8c; /* 濃いめシアン（ホバー時） */
 }
 
 /* 全体ヘッダー */
 .header {
-  padding: 10px 16px;   /* 左右を 16px に統一 */
+  padding: 10px 16px; /* 左右を 16px に統一 */
   border-bottom: 1px solid #ccc;
   display: flex;
   justify-content: space-between;
@@ -56,7 +56,9 @@
   color: var(--logo);
 }
 
-.logoRowTop { line-height: 1; }
+.logoRowTop {
+  line-height: 1;
+}
 .logoRowBottom {
   display: inline-flex;
   align-items: flex-end;
@@ -65,8 +67,16 @@
 }
 
 .logoJP {
-  font-family: 'Noto Sans JP', 'Noto Sans', system-ui, -apple-system, 'Segoe UI',
-    'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif !important;
+  font-family:
+    'Noto Sans JP',
+    'Noto Sans',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    'Hiragino Sans',
+    'Hiragino Kaku Gothic ProN',
+    Meiryo,
+    sans-serif !important;
   font-weight: 700;
   font-size: 1.2rem; /* 少し大きく */
   color: var(--logo);
@@ -94,14 +104,21 @@
 }
 
 /* 各リンク */
-.navLinks a {
+.navLink {
   text-decoration: none;
   color: var(--link);
-  font-weight: 500; /* 若干太字にして視認性向上（任意） */
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
 }
 
-.navLinks a:hover{
+.navLink:hover,
+.navLink:focus-visible {
   color: var(--link-hover);
+}
+
+.navLinkActive {
+  border-bottom: 2px solid var(--link);
+  color: var(--link);
 }
 
 /* Logoutボタンの見た目 */
@@ -142,7 +159,7 @@
   /* navLinksはデフォルト非表示にして、.showMenu時だけ表示 */
   .navLinks {
     position: absolute;
-    top: 60px; 
+    top: 60px;
     right: 20px;
     background-color: #fff;
     flex-direction: column;
@@ -151,12 +168,12 @@
     padding: 10px;
     border: 1px solid #ccc;
     display: none; /* 初期は非表示 */
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2); /* ▼ ドロップダウンに影を追加 */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* ▼ ドロップダウンに影を追加 */
     z-index: 9999; /* メニューが他要素の背面に隠れないように */
   }
 
   /* スマホ表示時にリンク文字を少し小さく */
-  .navLinks a {
+  .navLink {
     font-size: 0.9rem;
   }
 
@@ -175,14 +192,20 @@
     display: flex;
   }
 
-  .brandLink { gap: 2px; }
-  .logoJP { font-size: 1.05rem; }
-  .logoEN { font-size: 1.2rem; }
+  .brandLink {
+    gap: 2px;
+  }
+  .logoJP {
+    font-size: 1.05rem;
+  }
+  .logoEN {
+    font-size: 1.2rem;
+  }
 }
 
 /* メディアクエリ: さらに狭い幅 (400px以下) での文字サイズ例 */
 @media (max-width: 400px) {
-  .navLinks a {
+  .navLink {
     font-size: 0.85rem;
   }
   .logo {

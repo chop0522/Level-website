@@ -1,15 +1,26 @@
-
-
-import React, { useEffect, useMemo, useState, useContext } from 'react';
+import React, { useEffect, useMemo, useState, useContext } from 'react'
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, Stack, Alert, TextField, MenuItem,
-  Table, TableHead, TableRow, TableCell, TableBody,
-  CircularProgress, Switch, Snackbar
-} from '@mui/material';
-import dayjs from 'dayjs';
-import { AuthContext } from '../../contexts/TokenContext';
-import { apiFetch } from '../../services/api';
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Stack,
+  Alert,
+  TextField,
+  MenuItem,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  CircularProgress,
+  Switch,
+  Snackbar,
+} from '@mui/material'
+import dayjs from 'dayjs'
+import { AuthContext } from '../../contexts/TokenContext'
+import { apiFetch } from '../../services/api'
 
 /**
  * 管理者用: 対局履歴を直接編集するダイアログ
@@ -18,158 +29,160 @@ import { apiFetch } from '../../services/api';
  * - テスト行はランキング/合計Ptに影響しない。通常行は保存後にMVが更新される
  */
 export default function AdminGameList({ open, onClose }) {
-  const { userInfo } = useContext(AuthContext);
-  const isAdmin = userInfo?.role === 'admin';
+  const { userInfo } = useContext(AuthContext)
+  const isAdmin = userInfo?.role === 'admin'
 
-  const [rows, setRows] = useState([]);
-  const [err, setErr] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [savingId, setSavingId] = useState(null);
-  const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
-  const [rebuilding, setRebuilding] = useState(false);
+  const [rows, setRows] = useState([])
+  const [err, setErr] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [savingId, setSavingId] = useState(null)
+  const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' })
+  const [rebuilding, setRebuilding] = useState(false)
 
-  const [month, setMonth] = useState(dayjs().format('YYYY-MM'));
-  const [testFilter, setTestFilter] = useState('all'); // all | true | false
+  const [month, setMonth] = useState(dayjs().format('YYYY-MM'))
+  const [testFilter, setTestFilter] = useState('all') // all | true | false
 
   const monthOptions = useMemo(() => {
-    const now = dayjs().startOf('month');
+    const now = dayjs().startOf('month')
     // 直近12ヶ月を候補に
-    return Array.from({ length: 12 }, (_, i) => now.subtract(i, 'month').format('YYYY-MM'));
-  }, []);
+    return Array.from({ length: 12 }, (_, i) => now.subtract(i, 'month').format('YYYY-MM'))
+  }, [])
 
   const fetchRows = async () => {
-    setLoading(true);
-    setErr('');
+    setLoading(true)
+    setErr('')
     try {
-      const q = new URLSearchParams();
-      if (month) q.set('month', month);
-      if (testFilter !== 'all') q.set('test', testFilter);
-      const res = await apiFetch(`/api/mahjong/games?${q.toString()}`);
-      const data = res?.rows ?? [];
-      setRows(data.map(r => ({
-        ...r,
-        _origRank: r.rank,
-        _origFinalScore: r.final_score,
-        _origIsTest: !!r.is_test,
-      })));
+      const q = new URLSearchParams()
+      if (month) q.set('month', month)
+      if (testFilter !== 'all') q.set('test', testFilter)
+      const res = await apiFetch(`/api/mahjong/games?${q.toString()}`)
+      const data = res?.rows ?? []
+      setRows(
+        data.map((r) => ({
+          ...r,
+          _origRank: r.rank,
+          _origFinalScore: r.final_score,
+          _origIsTest: !!r.is_test,
+        }))
+      )
     } catch (e) {
-      const msg = e.message || '読み込みに失敗しました';
-      setErr(msg);
-      setSnack({ open: true, message: msg, severity: 'error' });
+      const msg = e.message || '読み込みに失敗しました'
+      setErr(msg)
+      setSnack({ open: true, message: msg, severity: 'error' })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    if (open) fetchRows();
-  }, [open, month, testFilter]);
+    if (open) fetchRows()
+  }, [open, month, testFilter])
 
   const updateField = (idx, key, val) => {
-    setRows(prev => {
-      const next = [...prev];
-      next[idx] = { ...next[idx], [key]: val };
-      return next;
-    });
-  };
+    setRows((prev) => {
+      const next = [...prev]
+      next[idx] = { ...next[idx], [key]: val }
+      return next
+    })
+  }
 
   const openSnack = (message, severity = 'success') => {
-    setSnack({ open: true, message, severity });
-  };
-  const closeSnack = () => setSnack(s => ({ ...s, open: false }));
+    setSnack({ open: true, message, severity })
+  }
+  const closeSnack = () => setSnack((s) => ({ ...s, open: false }))
 
   const handleScoreKeyDown = (idx, e) => {
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      const step = e.shiftKey ? 1000 : 100;
-      const delta = e.key === 'ArrowUp' ? step : -step;
-      setRows(prev => {
-        const next = [...prev];
-        const current = Number(next[idx].final_score) || 0;
-        next[idx] = { ...next[idx], final_score: current + delta };
-        return next;
-      });
+      e.preventDefault()
+      const step = e.shiftKey ? 1000 : 100
+      const delta = e.key === 'ArrowUp' ? step : -step
+      setRows((prev) => {
+        const next = [...prev]
+        const current = Number(next[idx].final_score) || 0
+        next[idx] = { ...next[idx], final_score: current + delta }
+        return next
+      })
     }
-  };
+  }
 
   const toggleTest = async (r, idx, checked) => {
-    setErr('');
-    setSavingId(r.id);
+    setErr('')
+    setSavingId(r.id)
     try {
-      await apiFetch(`/api/mahjong/games/${r.id}` , {
+      await apiFetch(`/api/mahjong/games/${r.id}`, {
         method: 'PATCH',
-        body: JSON.stringify({ is_test: !!checked })
-      });
-      await fetchRows();
-      openSnack(checked ? 'テストに切り替えました' : '通常に戻しました', 'success');
+        body: JSON.stringify({ is_test: !!checked }),
+      })
+      await fetchRows()
+      openSnack(checked ? 'テストに切り替えました' : '通常に戻しました', 'success')
     } catch (e) {
-      const msg = e.message || 'テスト切替に失敗しました';
-      setErr(msg);
-      openSnack(msg, 'error');
+      const msg = e.message || 'テスト切替に失敗しました'
+      setErr(msg)
+      openSnack(msg, 'error')
       // 失敗時は元に戻す
-      updateField(idx, 'is_test', r.is_test);
+      updateField(idx, 'is_test', r.is_test)
     } finally {
-      setSavingId(null);
+      setSavingId(null)
     }
-  };
+  }
 
   const deleteRow = async (r) => {
-    if (!window.confirm('この対局を削除します。よろしいですか？')) return;
-    setErr('');
-    setSavingId(r.id);
+    if (!window.confirm('この対局を削除します。よろしいですか？')) return
+    setErr('')
+    setSavingId(r.id)
     try {
-      await apiFetch(`/api/mahjong/games/${r.id}` , { method: 'DELETE' });
-      await fetchRows();
-      openSnack('削除しました', 'success');
+      await apiFetch(`/api/mahjong/games/${r.id}`, { method: 'DELETE' })
+      await fetchRows()
+      openSnack('削除しました', 'success')
     } catch (e) {
-      const msg = e.message || '削除に失敗しました';
-      setErr(msg);
-      openSnack(msg, 'error');
+      const msg = e.message || '削除に失敗しました'
+      setErr(msg)
+      openSnack(msg, 'error')
     } finally {
-      setSavingId(null);
+      setSavingId(null)
     }
-  };
+  }
 
   const rebuildMonthly = async () => {
-    if (!window.confirm('月次ランキングを再構築します。よろしいですか？')) return;
-    setErr('');
-    setRebuilding(true);
+    if (!window.confirm('月次ランキングを再構築します。よろしいですか？')) return
+    setErr('')
+    setRebuilding(true)
     try {
-      await apiFetch('/api/admin/mahjong/rebuild-monthly', { method: 'POST' });
-      openSnack('月次ランキングを再構築しました', 'success');
-      await fetchRows();
+      await apiFetch('/api/admin/mahjong/rebuild-monthly', { method: 'POST' })
+      openSnack('月次ランキングを再構築しました', 'success')
+      await fetchRows()
     } catch (e) {
-      const msg = e.message || '再構築に失敗しました';
-      setErr(msg);
-      openSnack(msg, 'error');
+      const msg = e.message || '再構築に失敗しました'
+      setErr(msg)
+      openSnack(msg, 'error')
     } finally {
-      setRebuilding(false);
+      setRebuilding(false)
     }
-  };
+  }
 
   const saveRow = async (r, idx) => {
-    setErr('');
-    setSavingId(r.id);
+    setErr('')
+    setSavingId(r.id)
     try {
-      await apiFetch(`/api/mahjong/games/${r.id}` , {
+      await apiFetch(`/api/mahjong/games/${r.id}`, {
         method: 'PATCH',
         body: JSON.stringify({
           finalScore: Number(r.final_score),
           rank: Number(r.rank),
         }),
-      });
-      await fetchRows(); // ポイント再計算＆MV更新があるので再取得
-      openSnack('保存しました', 'success');
+      })
+      await fetchRows() // ポイント再計算＆MV更新があるので再取得
+      openSnack('保存しました', 'success')
     } catch (e) {
-      const msg = e.message || '保存に失敗しました';
-      setErr(msg);
-      openSnack(msg, 'error');
+      const msg = e.message || '保存に失敗しました'
+      setErr(msg)
+      openSnack(msg, 'error')
     } finally {
-      setSavingId(null);
+      setSavingId(null)
     }
-  };
+  }
 
-  if (!isAdmin) return null;
+  if (!isAdmin) return null
 
   return (
     <Dialog
@@ -187,29 +200,53 @@ export default function AdminGameList({ open, onClose }) {
           {err && <Alert severity="error">{err}</Alert>}
           <Stack direction="row" spacing={1} alignItems="center">
             <TextField
-              select size="small" label="月"
+              select
+              size="small"
+              label="月"
               value={month}
               onChange={(e) => setMonth(e.target.value)}
               SelectProps={{
-                MenuProps: { PaperProps: { style: { maxHeight: 36 * 8 } } }
+                MenuProps: { PaperProps: { style: { maxHeight: 36 * 8 } } },
               }}
             >
-              {monthOptions.map(m => (
-                <MenuItem key={m} value={m}>{m}</MenuItem>
+              {monthOptions.map((m) => (
+                <MenuItem key={m} value={m}>
+                  {m}
+                </MenuItem>
               ))}
             </TextField>
-            <Button size="small" onClick={() => setMonth(dayjs().format('YYYY-MM'))}>今月</Button>
-            <Button size="small" onClick={() => setMonth(dayjs(month + '-01').subtract(1, 'month').format('YYYY-MM'))}>先月</Button>
+            <Button size="small" onClick={() => setMonth(dayjs().format('YYYY-MM'))}>
+              今月
+            </Button>
+            <Button
+              size="small"
+              onClick={() =>
+                setMonth(
+                  dayjs(month + '-01')
+                    .subtract(1, 'month')
+                    .format('YYYY-MM')
+                )
+              }
+            >
+              先月
+            </Button>
             <TextField
-              select size="small" label="テスト"
-              value={testFilter} onChange={(e) => setTestFilter(e.target.value)}
+              select
+              size="small"
+              label="テスト"
+              value={testFilter}
+              onChange={(e) => setTestFilter(e.target.value)}
             >
               <MenuItem value="all">すべて</MenuItem>
               <MenuItem value="false">通常のみ</MenuItem>
               <MenuItem value="true">テストのみ</MenuItem>
             </TextField>
-            <Button onClick={fetchRows} disabled={loading || rebuilding}>再読み込み</Button>
-            <Button onClick={rebuildMonthly} disabled={loading || rebuilding}>ランキング再構築</Button>
+            <Button onClick={fetchRows} disabled={loading || rebuilding}>
+              再読み込み
+            </Button>
+            <Button onClick={rebuildMonthly} disabled={loading || rebuilding}>
+              ランキング再構築
+            </Button>
             {(loading || rebuilding) && <CircularProgress size={18} />}
           </Stack>
         </Stack>
@@ -232,9 +269,17 @@ export default function AdminGameList({ open, onClose }) {
                 <TableCell>{dayjs(r.played_at_jst).format('MM/DD HH:mm')}</TableCell>
                 <TableCell>{r.name}</TableCell>
                 <TableCell>
-                  <TextField select size="small" value={r.rank}
-                    onChange={(e) => updateField(idx, 'rank', Number(e.target.value))}>
-                    {[1,2,3,4].map(v => <MenuItem key={v} value={v}>{v}</MenuItem>)}
+                  <TextField
+                    select
+                    size="small"
+                    value={r.rank}
+                    onChange={(e) => updateField(idx, 'rank', Number(e.target.value))}
+                  >
+                    {[1, 2, 3, 4].map((v) => (
+                      <MenuItem key={v} value={v}>
+                        {v}
+                      </MenuItem>
+                    ))}
                   </TextField>
                 </TableCell>
                 <TableCell>
@@ -253,9 +298,9 @@ export default function AdminGameList({ open, onClose }) {
                     size="small"
                     checked={!!r.is_test}
                     onChange={(e) => {
-                      const ck = e.target.checked;
-                      updateField(idx, 'is_test', ck);
-                      toggleTest(r, idx, ck);
+                      const ck = e.target.checked
+                      updateField(idx, 'is_test', ck)
+                      toggleTest(r, idx, ck)
                     }}
                     disabled={savingId === r.id}
                   />
@@ -267,7 +312,9 @@ export default function AdminGameList({ open, onClose }) {
                       size="small"
                       onClick={() => saveRow(r, idx)}
                       disabled={
-                        savingId === r.id || (r.rank === r._origRank && Number(r.final_score) === Number(r._origFinalScore))
+                        savingId === r.id ||
+                        (r.rank === r._origRank &&
+                          Number(r.final_score) === Number(r._origFinalScore))
                       }
                     >
                       {savingId === r.id ? '保存中…' : '保存'}
@@ -307,5 +354,5 @@ export default function AdminGameList({ open, onClose }) {
         <Button onClick={onClose}>閉じる</Button>
       </DialogActions>
     </Dialog>
-  );
+  )
 }

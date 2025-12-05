@@ -1,6 +1,6 @@
 // src/services/api.js
 
-const SERVER_URL = ''; 
+const SERVER_URL = ''
 /**
  * 汎用 fetch ラッパー
  * Usage:
@@ -13,25 +13,26 @@ const SERVER_URL = '';
  * - 失敗時は throw Error
  */
 export async function apiFetch(path, opts = {}) {
-  const token = localStorage.getItem('token') || '';
-  const headers = opts.body instanceof FormData
-    ? { ...(opts.headers || {}), Authorization: token ? `Bearer ${token}` : undefined }
-    : {
-        'Content-Type': 'application/json',
-        ...(opts.headers || {}),
-        ...(token && { Authorization: `Bearer ${token}` })
-      };
+  const token = localStorage.getItem('token') || ''
+  const headers =
+    opts.body instanceof FormData
+      ? { ...(opts.headers || {}), Authorization: token ? `Bearer ${token}` : undefined }
+      : {
+          'Content-Type': 'application/json',
+          ...(opts.headers || {}),
+          ...(token && { Authorization: `Bearer ${token}` }),
+        }
 
-  const res = await fetch(`${SERVER_URL}${path}`, { ...opts, headers });
+  const res = await fetch(`${SERVER_URL}${path}`, { ...opts, headers })
   if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg || res.statusText);
+    const msg = await res.text()
+    throw new Error(msg || res.statusText)
   }
-  return res.status === 204 ? null : res.json();
+  return res.status === 204 ? null : res.json()
 }
 
 // 既存モジュールとの互換のため default でも輸出
-export default apiFetch;
+export default apiFetch
 // 同じサーバーで運用なら ""
 // 分ける場合は "http://localhost:3001" 等を指定
 
@@ -45,23 +46,23 @@ export async function registerUser({ name, email, password }) {
     const res = await fetch(`${SERVER_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
-    });
-    const data = await res.json();
+      body: JSON.stringify({ name, email, password }),
+    })
+    const data = await res.json()
     if (!res.ok) {
-      return { success: false, error: data.error || '登録に失敗しました' };
+      return { success: false, error: data.error || '登録に失敗しました' }
     }
-    return data; // { success: true, token, user }
+    return data // { success: true, token, user }
   } catch (err) {
-    console.error("Error in registerUser:", err);
-    return { success: false, error: err.message };
+    console.error('Error in registerUser:', err)
+    return { success: false, error: err.message }
   }
 }
 
 /**
  * ログイン (既存ユーザー)
- * @param {string} email 
- * @param {string} password 
+ * @param {string} email
+ * @param {string} password
  * @returns {object} { success: boolean, token?: string, user?: object, error?: string }
  */
 export async function loginUser(email, password) {
@@ -69,12 +70,12 @@ export async function loginUser(email, password) {
     const res = await fetch(`${SERVER_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    return await res.json();
+      body: JSON.stringify({ email, password }),
+    })
+    return await res.json()
   } catch (err) {
-    console.error("Error in loginUser:", err);
-    return { success: false, error: err.message };
+    console.error('Error in loginUser:', err)
+    return { success: false, error: err.message }
   }
 }
 
@@ -87,13 +88,13 @@ export async function getUserInfo(token) {
   try {
     const res = await fetch(`${SERVER_URL}/api/userinfo`, {
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    return await res.json();
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    return await res.json()
   } catch (err) {
-    console.error("Error in getUserInfo:", err);
-    return { success: false, error: err.message };
+    console.error('Error in getUserInfo:', err)
+    return { success: false, error: err.message }
   }
 }
 
@@ -103,24 +104,24 @@ export async function getUserInfo(token) {
  * 呼び出された場合は即座にエラーを返します。
  */
 export async function createReservation() {
-  console.warn('[deprecated] createReservation: 予約機能は廃止されました');
-  return { success: false, error: '予約フォームは廃止しました。公式LINEからご予約ください。' };
+  console.warn('[deprecated] createReservation: 予約機能は廃止されました')
+  return { success: false, error: '予約フォームは廃止しました。公式LINEからご予約ください。' }
 }
 
 /**
  * 予約一覧取得 (管理者) [廃止]
  */
 export async function getAllReservations() {
-  console.warn('[deprecated] getAllReservations: 予約機能は廃止されました');
-  return { error: '予約管理は廃止しました（/admin も非表示）' };
+  console.warn('[deprecated] getAllReservations: 予約機能は廃止されました')
+  return { error: '予約管理は廃止しました（/admin も非表示）' }
 }
 
 /**
  * 予約削除 (管理者) [廃止]
  */
 export async function deleteReservation() {
-  console.warn('[deprecated] deleteReservation: 予約機能は廃止されました');
-  return { success: false, error: '予約管理は廃止しました' };
+  console.warn('[deprecated] deleteReservation: 予約機能は廃止されました')
+  return { success: false, error: '予約管理は廃止しました' }
 }
 // -----------------------------
 // Profile (avatar & bio)
@@ -135,12 +136,12 @@ export async function deleteReservation() {
 export async function getProfile(token) {
   try {
     const res = await fetch(`${SERVER_URL}/api/profile`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return await res.json();
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    return await res.json()
   } catch (err) {
-    console.error('Error in getProfile:', err);
-    return { error: err.message };
+    console.error('Error in getProfile:', err)
+    return { error: err.message }
   }
 }
 
@@ -156,14 +157,14 @@ export async function updateProfile(token, body) {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body)
-    });
-    return await res.json();
+      body: JSON.stringify(body),
+    })
+    return await res.json()
   } catch (err) {
-    console.error('Error in updateProfile:', err);
-    return { error: err.message };
+    console.error('Error in updateProfile:', err)
+    return { error: err.message }
   }
 }
 
@@ -175,18 +176,18 @@ export async function updateProfile(token, body) {
  */
 export async function uploadAvatar(token, file) {
   try {
-    const formData = new FormData();
-    formData.append('avatar', file);
+    const formData = new FormData()
+    formData.append('avatar', file)
 
     const res = await fetch(`${SERVER_URL}/api/upload-avatar`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: formData
-    });
-    return await res.json();
+      body: formData,
+    })
+    return await res.json()
   } catch (err) {
-    console.error('Error in uploadAvatar:', err);
-    return { error: err.message };
+    console.error('Error in uploadAvatar:', err)
+    return { error: err.message }
   }
 }
 
@@ -212,14 +213,14 @@ export async function gainXP(token, category) {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ category })
-    });
-    return await res.json();
+      body: JSON.stringify({ category }),
+    })
+    return await res.json()
   } catch (err) {
-    console.error('Error in gainXP:', err);
-    return { success: false, error: err.message };
+    console.error('Error in gainXP:', err)
+    return { success: false, error: err.message }
   }
 }
 
@@ -236,14 +237,14 @@ export async function claimQR(token, qrToken) {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ token: qrToken })
-    });
-    return await res.json();
+      body: JSON.stringify({ token: qrToken }),
+    })
+    return await res.json()
   } catch (err) {
-    console.error('Error in claimQR:', err);
-    return { success: false, error: err.message };
+    console.error('Error in claimQR:', err)
+    return { success: false, error: err.message }
   }
 }
 
@@ -255,12 +256,12 @@ export async function claimQR(token, qrToken) {
 export async function getAchievements(token) {
   try {
     const res = await fetch(`${SERVER_URL}/api/achievements`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return await res.json();
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    return await res.json()
   } catch (err) {
-    console.error('Error in getAchievements:', err);
-    return { success: false, error: err.message };
+    console.error('Error in getAchievements:', err)
+    return { success: false, error: err.message }
   }
 }
 
@@ -272,11 +273,11 @@ export async function getAchievements(token) {
  */
 export async function getUsers(sort = 'total', limit = 50) {
   try {
-    const res = await fetch(`${SERVER_URL}/api/users?sort=${sort}&limit=${limit}`);
-    return await res.json();
+    const res = await fetch(`${SERVER_URL}/api/users?sort=${sort}&limit=${limit}`)
+    return await res.json()
   } catch (err) {
-    console.error('Error in getUsers:', err);
-    return { success: false, error: err.message };
+    console.error('Error in getUsers:', err)
+    return { success: false, error: err.message }
   }
 }
 
@@ -288,12 +289,12 @@ export async function getUsers(sort = 'total', limit = 50) {
  */
 export async function getPublicProfile(userId, token = '') {
   try {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const res = await fetch(`${SERVER_URL}/api/profile/${userId}`, { headers });
-    return await res.json();
+    const headers = token ? { Authorization: `Bearer ${token}` } : {}
+    const res = await fetch(`${SERVER_URL}/api/profile/${userId}`, { headers })
+    return await res.json()
   } catch (err) {
-    console.error('Error in getPublicProfile:', err);
-    return { success: false, error: err.message };
+    console.error('Error in getPublicProfile:', err)
+    return { success: false, error: err.message }
   }
 }
 
@@ -306,12 +307,12 @@ export async function getPublicProfile(userId, token = '') {
 export async function getFriendship(targetId, token) {
   try {
     const res = await fetch(`${SERVER_URL}/api/friendship/${targetId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return await res.json();
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    return await res.json()
   } catch (err) {
-    console.error('Error in getFriendship:', err);
-    return { success: false, error: err.message };
+    console.error('Error in getFriendship:', err)
+    return { success: false, error: err.message }
   }
 }
 
@@ -327,14 +328,14 @@ export async function highfive(targetId, token) {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ target_id: targetId })
-    });
-    return await res.json();
+      body: JSON.stringify({ target_id: targetId }),
+    })
+    return await res.json()
   } catch (err) {
-    console.error('Error in highfive:', err);
-    return { success: false, error: err.message };
+    console.error('Error in highfive:', err)
+    return { success: false, error: err.message }
   }
 }
 
@@ -347,21 +348,21 @@ export async function highfive(targetId, token) {
 export async function getRecentHighfives(token, limit = 10) {
   try {
     const res = await fetch(`${SERVER_URL}/api/highfives/recent?limit=${limit}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+      headers: { Authorization: `Bearer ${token}` },
+    })
     if (!res.ok) {
-      return { success: false, error: `HTTP ${res.status}` };
+      return { success: false, error: `HTTP ${res.status}` }
     }
-    const text = await res.text();
+    const text = await res.text()
     try {
-      return JSON.parse(text);
+      return JSON.parse(text)
     } catch (e) {
-      console.warn('getRecentHighfives: non-JSON response', text?.slice(0, 120));
-      return { success: false, error: 'non_json_response' };
+      console.warn('getRecentHighfives: non-JSON response', text?.slice(0, 120))
+      return { success: false, error: 'non_json_response' }
     }
   } catch (err) {
-    console.error('Error in getRecentHighfives:', err);
-    return { success: false, error: err.message };
+    console.error('Error in getRecentHighfives:', err)
+    return { success: false, error: err.message }
   }
 }
 
@@ -374,21 +375,21 @@ export async function getRecentHighfives(token, limit = 10) {
 export async function getUnreadHighfives(token, limit = 20) {
   try {
     const res = await fetch(`${SERVER_URL}/api/highfives/unread?limit=${limit}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+      headers: { Authorization: `Bearer ${token}` },
+    })
     if (!res.ok) {
-      return { success: false, error: `HTTP ${res.status}` };
+      return { success: false, error: `HTTP ${res.status}` }
     }
-    const text = await res.text();
+    const text = await res.text()
     try {
-      return JSON.parse(text);
+      return JSON.parse(text)
     } catch (e) {
-      console.warn('getUnreadHighfives: non-JSON response', text?.slice(0, 120));
-      return { success: false, error: 'non_json_response' };
+      console.warn('getUnreadHighfives: non-JSON response', text?.slice(0, 120))
+      return { success: false, error: 'non_json_response' }
     }
   } catch (err) {
-    console.error('Error in getUnreadHighfives:', err);
-    return { success: false, error: err.message };
+    console.error('Error in getUnreadHighfives:', err)
+    return { success: false, error: err.message }
   }
 }
 
@@ -405,14 +406,14 @@ export async function changePassword(oldPassword, newPassword, token) {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ oldPassword, newPassword })
-    });
-    return await res.json();
+      body: JSON.stringify({ oldPassword, newPassword }),
+    })
+    return await res.json()
   } catch (err) {
-    console.error('Error in changePassword:', err);
-    return { success: false, error: err.message };
+    console.error('Error in changePassword:', err)
+    return { success: false, error: err.message }
   }
 }
 
@@ -425,12 +426,12 @@ export async function deleteAccount(token) {
   try {
     const res = await fetch(`${SERVER_URL}/api/account`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return await res.json();
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    return await res.json()
   } catch (err) {
-    console.error('Error in deleteAccount:', err);
-    return { success: false, error: err.message };
+    console.error('Error in deleteAccount:', err)
+    return { success: false, error: err.message }
   }
 }
 
@@ -444,11 +445,11 @@ export async function adminDeleteUser(userId, token) {
   try {
     const res = await fetch(`${SERVER_URL}/api/admin/users/${userId}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return await res.json();
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    return await res.json()
   } catch (err) {
-    console.error('Error in adminDeleteUser:', err);
-    return { success: false, error: err.message };
+    console.error('Error in adminDeleteUser:', err)
+    return { success: false, error: err.message }
   }
 }

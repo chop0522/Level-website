@@ -1,6 +1,7 @@
 // server.js
 require('dotenv').config();
 const express = require('express');
+const compression = require('compression');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
@@ -12,6 +13,7 @@ const { calcMahjongPoint } = require('./utils/mahjong');
 // ---------------------------------
 // Express initialization (moved up so routes can be declared safely)
 const app = express();
+app.use(compression());
 app.use(express.json());
 app.use(cors());
 // ---------------------------------
@@ -1618,7 +1620,11 @@ app.get('/sitemap.xml', async (req, res) => {
 // -----------------------------
 // フロントエンドのビルド成果物 (本番用)
 // -----------------------------
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(
+  express.static(path.join(__dirname, 'build'), {
+    maxAge: '7d',
+  })
+);
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));

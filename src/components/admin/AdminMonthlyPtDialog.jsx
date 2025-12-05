@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -8,9 +8,9 @@ import {
   TextField,
   MenuItem,
   Stack,
-  Alert
-} from '@mui/material';
-import apiFetch from '../../services/api';
+  Alert,
+} from '@mui/material'
+import apiFetch from '../../services/api'
 
 /**
  * 管理者専用: 指定ユーザーの月間ポイントを調整するダイアログ
@@ -21,51 +21,51 @@ import apiFetch from '../../services/api';
  *   onSuccess    () => void   (成功後に呼ばれるコールバック)
  */
 export default function AdminMonthlyPtDialog({ open, onClose, onSuccess }) {
-  const [users, setUsers] = useState([]);
-  const [userId, setUserId] = useState('');
+  const [users, setUsers] = useState([])
+  const [userId, setUserId] = useState('')
   const [yearMonth, setYearMonth] = useState(() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-  });
-  const [pt, setPt] = useState(0);
-  const [err, setErr] = useState('');
-  const [loading, setLoading] = useState(false);
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  })
+  const [pt, setPt] = useState(0)
+  const [err, setErr] = useState('')
+  const [loading, setLoading] = useState(false)
 
   // ユーザー一覧を取得
   useEffect(() => {
-    if (!open) return;
+    if (!open) return
     apiFetch('/api/admin/users/list')
       .then((list) => {
         // list = [{ id, name }]
-        setUsers(list);
-        if (!userId && list.length) setUserId(list[0].id);
+        setUsers(list)
+        if (!userId && list.length) setUserId(list[0].id)
       })
-      .catch(() => setUsers([]));
-  }, [open]);
+      .catch(() => setUsers([]))
+  }, [open])
 
   const handleSubmit = async () => {
     if (!userId || !yearMonth) {
-      setErr('ユーザーと年月を選択してください');
-      return;
+      setErr('ユーザーと年月を選択してください')
+      return
     }
     try {
-      setLoading(true);
+      setLoading(true)
       await apiFetch('/api/admin/monthlyPt', {
         method: 'POST',
         body: JSON.stringify({
           user_id: userId,
           year_month: yearMonth,
-          pt: Number(pt)
-        })
-      });
-      onSuccess?.();
-      onClose();
+          pt: Number(pt),
+        }),
+      })
+      onSuccess?.()
+      onClose()
     } catch (e) {
-      setErr(e.message);
+      setErr(e.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -107,14 +107,10 @@ export default function AdminMonthlyPtDialog({ open, onClose, onSuccess }) {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>キャンセル</Button>
-        <Button
-          variant="contained"
-          disabled={loading}
-          onClick={handleSubmit}
-        >
+        <Button variant="contained" disabled={loading} onClick={handleSubmit}>
           反映
         </Button>
       </DialogActions>
     </Dialog>
-  );
+  )
 }

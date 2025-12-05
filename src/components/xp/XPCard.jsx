@@ -1,6 +1,6 @@
-import React from 'react';
-import { Card, Avatar, Box, Typography, LinearProgress, Stack, alpha } from '@mui/material';
-import { keyframes } from '@mui/system';
+import React from 'react'
+import { Card, Avatar, Box, Typography, LinearProgress, Stack, alpha } from '@mui/material'
+import { keyframes } from '@mui/system'
 
 // glow + shake animation
 const rankUpAnim = (color) => keyframes`
@@ -9,7 +9,7 @@ const rankUpAnim = (color) => keyframes`
   50%  { filter: drop-shadow(0 0 10px ${color}); transform: translateY(2px); }
   75%  { filter: drop-shadow(0 0 6px ${color}); transform: translateY(-2px); }
   100% { filter: drop-shadow(0 0 0 ${color}); transform: translateY(0); }
-`;
+`
 
 /**
  * XP カード
@@ -21,26 +21,29 @@ const rankUpAnim = (color) => keyframes`
  *  - badgeUrl
  *  - nextXP     次ランク閾値 (null の場合は MAX)
  */
-export default function XPCard({ category, currentXP, rankLabel, badgeUrl, nextXP, color = '#1976d2', animate = false }) {
-  const percent = nextXP ? (currentXP / nextXP) * 100 : 100;
+export default function XPCard({
+  category,
+  currentXP,
+  rankLabel,
+  badgeUrl,
+  nextXP,
+  color = '#1976d2',
+  animate = false,
+}) {
+  const percent = nextXP ? (currentXP / nextXP) * 100 : 100
 
   return (
     <Card
       sx={(theme) => ({
         p: 2,
-        backgroundColor: alpha(
-          color,
-          theme.palette.mode === 'dark' ? 0.10 : 0.12
-        ),
+        backgroundColor: alpha(color, theme.palette.mode === 'dark' ? 0.1 : 0.12),
         transition: '0.3s',
         boxShadow: theme.palette.mode === 'dark' ? 1 : 2,
-        animation: animate
-          ? `${rankUpAnim(color)} 1.2s ease-in-out`
-          : 'none',
+        animation: animate ? `${rankUpAnim(color)} 1.2s ease-in-out` : 'none',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: theme.palette.mode === 'dark' ? 2 : 4
-        }
+          boxShadow: theme.palette.mode === 'dark' ? 2 : 4,
+        },
       })}
     >
       <Stack direction="row" spacing={2} alignItems="center">
@@ -55,11 +58,11 @@ export default function XPCard({ category, currentXP, rankLabel, badgeUrl, nextX
             value={percent}
             sx={{
               mt: 1,
-              '& .MuiLinearProgress-bar': { backgroundColor: color }
+              '& .MuiLinearProgress-bar': { backgroundColor: color },
             }}
           />
         </Box>
       </Stack>
     </Card>
-  );
+  )
 }

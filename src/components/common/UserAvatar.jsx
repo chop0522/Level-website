@@ -1,7 +1,5 @@
-
-
-import React from 'react';
-import { Avatar } from '@mui/material';
+import React from 'react'
+import { Avatar } from '@mui/material'
 
 /**
  * 汎用アバターコンポーネント
@@ -16,20 +14,8 @@ import { Avatar } from '@mui/material';
  * @param {number} ver  キャッシュバスター デフォルト Date.now()
  * @param {object} sx   MUI sx 追加スタイル
  */
-export default function UserAvatar({
-  id,
-  size = 40,
-  ver = Date.now(),
-  sx = {},
-  ...props
-}) {
-  const src = id ? `/api/users/${id}/avatar?${ver}` : undefined;
+export default function UserAvatar({ id, size = 40, ver = Date.now(), sx = {}, ...props }) {
+  const src = id ? `/api/users/${id}/avatar?${ver}` : undefined
 
-  return (
-    <Avatar
-      src={src}
-      sx={{ width: size, height: size, ...sx }}
-      {...props}
-    />
-  );
+  return <Avatar src={src} sx={{ width: size, height: size, ...sx }} {...props} />
 }

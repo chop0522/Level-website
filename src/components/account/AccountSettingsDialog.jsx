@@ -1,5 +1,5 @@
 // src/components/account/AccountSettingsDialog.jsx
-import React, { useEffect, useMemo, useState, useContext } from 'react';
+import React, { useEffect, useMemo, useState, useContext } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -13,12 +13,12 @@ import {
   Divider,
   Snackbar,
   Alert,
-  Box
-} from '@mui/material';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { changePassword, deleteAccount, updateProfile } from '../../services/api';
-import { AuthContext } from '../../contexts/TokenContext';
+  Box,
+} from '@mui/material'
+import Visibility from '@mui/icons-material/Visibility'
+import VisibilityOff from '@mui/icons-material/VisibilityOff'
+import { changePassword, deleteAccount, updateProfile } from '../../services/api'
+import { AuthContext } from '../../contexts/TokenContext'
 
 /**
  * アカウント設定ダイアログ（改良版）
@@ -27,94 +27,96 @@ import { AuthContext } from '../../contexts/TokenContext';
  * - 退会（確認画面）
  */
 export default function AccountSettingsDialog({ open, onClose, onLogout }) {
-  const { token, setUserInfo, userInfo } = useContext(AuthContext);
+  const { token, setUserInfo, userInfo } = useContext(AuthContext)
 
-  const [mode, setMode] = useState('settings'); // settings | confirmDelete
-  const [newName, setNewName] = useState('');
-  const [oldPw, setOldPw] = useState('');
-  const [newPw, setNewPw] = useState('');
-  const [confirmPw, setConfirmPw] = useState('');
-  const [newEmail, setNewEmail] = useState('');
+  const [mode, setMode] = useState('settings') // settings | confirmDelete
+  const [newName, setNewName] = useState('')
+  const [oldPw, setOldPw] = useState('')
+  const [newPw, setNewPw] = useState('')
+  const [confirmPw, setConfirmPw] = useState('')
+  const [newEmail, setNewEmail] = useState('')
 
-  const [showOld, setShowOld] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [showConf, setShowConf] = useState(false);
+  const [showOld, setShowOld] = useState(false)
+  const [showNew, setShowNew] = useState(false)
+  const [showConf, setShowConf] = useState(false)
 
-  const [error, setError] = useState('');
-  const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
+  const [error, setError] = useState('')
+  const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' })
 
-  const normalizeName = (s) => (s || '').replace(/\s+/g, ' ').trim();
-  const originalName = userInfo?.name || '';
-  const originalEmail = userInfo?.email || '';
+  const normalizeName = (s) => (s || '').replace(/\s+/g, ' ').trim()
+  const originalName = userInfo?.name || ''
+  const originalEmail = userInfo?.email || ''
 
   useEffect(() => {
     if (open) {
-      setMode('settings');
-      setNewName(originalName);
-      setNewEmail(originalEmail);
-      setOldPw('');
-      setNewPw('');
-      setConfirmPw('');
-      setError('');
-      setSnack({ open: false, message: '', severity: 'success' });
+      setMode('settings')
+      setNewName(originalName)
+      setNewEmail(originalEmail)
+      setOldPw('')
+      setNewPw('')
+      setConfirmPw('')
+      setError('')
+      setSnack({ open: false, message: '', severity: 'success' })
     }
-  }, [open, originalName, originalEmail]);
+  }, [open, originalName, originalEmail])
 
-  const cleanName = normalizeName(newName);
-  const canSaveName = !!cleanName && cleanName !== originalName && cleanName.length <= 32;
-  const cleanEmail = (newEmail || '').trim();
-  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail);
-  const canSaveEmail = emailValid && cleanEmail.toLowerCase() !== (originalEmail || '').toLowerCase();
+  const cleanName = normalizeName(newName)
+  const canSaveName = !!cleanName && cleanName !== originalName && cleanName.length <= 32
+  const cleanEmail = (newEmail || '').trim()
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)
+  const canSaveEmail =
+    emailValid && cleanEmail.toLowerCase() !== (originalEmail || '').toLowerCase()
 
-  const pwMatch = newPw === confirmPw;
+  const pwMatch = newPw === confirmPw
   const pwScore = useMemo(() => {
-    const p = newPw || '';
-    let s = 0;
-    if (p.length >= 8) s++;
-    if (/[A-Z]/.test(p)) s++;
-    if (/[a-z]/.test(p)) s++;
-    if (/\d/.test(p)) s++;
-    if (/[^A-Za-z0-9]/.test(p)) s++;
-    const label = s >= 4 ? '強い' : s >= 3 ? '普通' : '弱い';
-    const color = s >= 4 ? 'success.main' : s >= 3 ? 'warning.main' : 'error.main';
-    return { s, label, color };
-  }, [newPw]);
-  const canSavePw = !!oldPw && !!newPw && !!confirmPw && pwMatch && newPw.length >= 8 && newPw !== oldPw;
+    const p = newPw || ''
+    let s = 0
+    if (p.length >= 8) s++
+    if (/[A-Z]/.test(p)) s++
+    if (/[a-z]/.test(p)) s++
+    if (/\d/.test(p)) s++
+    if (/[^A-Za-z0-9]/.test(p)) s++
+    const label = s >= 4 ? '強い' : s >= 3 ? '普通' : '弱い'
+    const color = s >= 4 ? 'success.main' : s >= 3 ? 'warning.main' : 'error.main'
+    return { s, label, color }
+  }, [newPw])
+  const canSavePw =
+    !!oldPw && !!newPw && !!confirmPw && pwMatch && newPw.length >= 8 && newPw !== oldPw
 
-  const openSnack = (message, severity = 'success') => setSnack({ open: true, message, severity });
-  const closeSnack = () => setSnack((v) => ({ ...v, open: false }));
+  const openSnack = (message, severity = 'success') => setSnack({ open: true, message, severity })
+  const closeSnack = () => setSnack((v) => ({ ...v, open: false }))
 
   const handleClose = () => {
-    setMode('settings');
-    onClose();
-  };
+    setMode('settings')
+    onClose()
+  }
 
   // ユーザー名変更
   const handleChangeName = async () => {
-    setError('');
-    if (!canSaveName) return;
+    setError('')
+    if (!canSaveName) return
     try {
-      const res = await updateProfile(token, { name: cleanName });
+      const res = await updateProfile(token, { name: cleanName })
       if (res.success) {
-        if (setUserInfo) setUserInfo((prev) => ({ ...prev, name: cleanName }));
-        openSnack('表示名を変更しました', 'success');
-        handleClose();
+        if (setUserInfo) setUserInfo((prev) => ({ ...prev, name: cleanName }))
+        openSnack('表示名を変更しました', 'success')
+        handleClose()
       } else {
-        const msg = res.error || '変更に失敗しました';
-        setError(msg);
-        openSnack(msg, 'error');
+        const msg = res.error || '変更に失敗しました'
+        setError(msg)
+        openSnack(msg, 'error')
       }
     } catch (e) {
-      const msg = e.message || '変更に失敗しました';
-      setError(msg);
-      openSnack(msg, 'error');
+      const msg = e.message || '変更に失敗しました'
+      setError(msg)
+      openSnack(msg, 'error')
     }
-  };
+  }
 
   // メールアドレス変更（トークンのみで認証・重複チェックあり）
   const handleChangeEmail = async () => {
-    setError('');
-    if (!canSaveEmail) return;
+    setError('')
+    if (!canSaveEmail) return
     try {
       const res = await fetch('/api/me/email', {
         method: 'PATCH',
@@ -123,58 +125,58 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ email: cleanEmail }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data?.error) throw new Error(data?.error || '変更に失敗しました');
-      if (setUserInfo) setUserInfo((prev) => ({ ...prev, email: cleanEmail }));
-      openSnack('メールアドレスを変更しました', 'success');
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || data?.error) throw new Error(data?.error || '変更に失敗しました')
+      if (setUserInfo) setUserInfo((prev) => ({ ...prev, email: cleanEmail }))
+      openSnack('メールアドレスを変更しました', 'success')
     } catch (e) {
-      const msg = e.message || '変更に失敗しました';
-      setError(msg);
-      openSnack(msg, 'error');
+      const msg = e.message || '変更に失敗しました'
+      setError(msg)
+      openSnack(msg, 'error')
     }
-  };
+  }
 
   // パスワード変更
   const handleChangePw = async () => {
-    setError('');
-    if (!canSavePw) return;
+    setError('')
+    if (!canSavePw) return
     try {
-      const res = await changePassword(oldPw, newPw, token);
+      const res = await changePassword(oldPw, newPw, token)
       if (res.success) {
-        setOldPw('');
-        setNewPw('');
-        setConfirmPw('');
-        openSnack('パスワードを変更しました', 'success');
+        setOldPw('')
+        setNewPw('')
+        setConfirmPw('')
+        openSnack('パスワードを変更しました', 'success')
       } else {
-        const msg = res.error || '変更に失敗しました';
-        setError(msg);
-        openSnack(msg, 'error');
+        const msg = res.error || '変更に失敗しました'
+        setError(msg)
+        openSnack(msg, 'error')
       }
     } catch (e) {
-      const msg = e.message || '変更に失敗しました';
-      setError(msg);
-      openSnack(msg, 'error');
+      const msg = e.message || '変更に失敗しました'
+      setError(msg)
+      openSnack(msg, 'error')
     }
-  };
+  }
 
   // 退会
   const handleDelete = async () => {
     try {
-      const res = await deleteAccount(token);
+      const res = await deleteAccount(token)
       if (res.success) {
-        onLogout();
+        onLogout()
       } else {
-        const msg = res.error || '退会に失敗しました';
-        setError(msg);
-        openSnack(msg, 'error');
+        const msg = res.error || '退会に失敗しました'
+        setError(msg)
+        openSnack(msg, 'error')
       }
     } catch (e) {
-      const msg = e.message || '退会に失敗しました';
-      setError(msg);
-      openSnack(msg, 'error');
+      const msg = e.message || '退会に失敗しました'
+      setError(msg)
+      openSnack(msg, 'error')
     }
-  };
+  }
 
   return (
     <Dialog
@@ -208,7 +210,7 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && canSaveName) handleChangeName();
+                  if (e.key === 'Enter' && canSaveName) handleChangeName()
                 }}
                 helperText={`${cleanName.length}/32  — スペースは1つに整形されます`}
                 inputProps={{ maxLength: 64 }}
@@ -229,7 +231,7 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
                 helperText={emailValid ? '有効なメール形式です' : '例: user@example.com'}
                 error={!!newEmail && !emailValid}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && canSaveEmail) handleChangeEmail();
+                  if (e.key === 'Enter' && canSaveEmail) handleChangeEmail()
                 }}
               />
               <TextField
@@ -242,7 +244,11 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => setShowOld((v) => !v)} edge="end" aria-label="toggle current password">
+                      <IconButton
+                        onClick={() => setShowOld((v) => !v)}
+                        edge="end"
+                        aria-label="toggle current password"
+                      >
                         {showOld ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
@@ -256,11 +262,23 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
                 margin="dense"
                 value={newPw}
                 onChange={(e) => setNewPw(e.target.value)}
-                helperText={<span style={{ color: `var(--mui-palette-${pwScore.s >= 4 ? 'success' : pwScore.s >= 3 ? 'warning' : 'error'}-main, ${pwScore.color})` }}>強度: {pwScore.label}</span>}
+                helperText={
+                  <span
+                    style={{
+                      color: `var(--mui-palette-${pwScore.s >= 4 ? 'success' : pwScore.s >= 3 ? 'warning' : 'error'}-main, ${pwScore.color})`,
+                    }}
+                  >
+                    強度: {pwScore.label}
+                  </span>
+                }
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => setShowNew((v) => !v)} edge="end" aria-label="toggle new password">
+                      <IconButton
+                        onClick={() => setShowNew((v) => !v)}
+                        edge="end"
+                        aria-label="toggle new password"
+                      >
                         {showNew ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
@@ -275,14 +293,22 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
                 value={confirmPw}
                 onChange={(e) => setConfirmPw(e.target.value)}
                 error={!!confirmPw && !pwMatch}
-                helperText={confirmPw && !pwMatch ? 'パスワードが一致しません' : '8文字以上推奨／英大小・数字・記号の組み合わせが強力です'}
+                helperText={
+                  confirmPw && !pwMatch
+                    ? 'パスワードが一致しません'
+                    : '8文字以上推奨／英大小・数字・記号の組み合わせが強力です'
+                }
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && canSavePw) handleChangePw();
+                  if (e.key === 'Enter' && canSavePw) handleChangePw()
                 }}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => setShowConf((v) => !v)} edge="end" aria-label="toggle confirm password">
+                      <IconButton
+                        onClick={() => setShowConf((v) => !v)}
+                        edge="end"
+                        aria-label="toggle confirm password"
+                      >
                         {showConf ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
@@ -292,27 +318,17 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
             </Box>
           </DialogContent>
           <DialogActions>
-            <Button color="error" onClick={() => setMode('confirmDelete')}>退会する</Button>
-            <Button
-              variant="outlined"
-              onClick={handleChangeName}
-              disabled={!canSaveName}
-            >
+            <Button color="error" onClick={() => setMode('confirmDelete')}>
+              退会する
+            </Button>
+            <Button variant="outlined" onClick={handleChangeName} disabled={!canSaveName}>
               名前を変更
             </Button>
-            <Button
-              variant="outlined"
-              onClick={handleChangeEmail}
-              disabled={!canSaveEmail}
-            >
+            <Button variant="outlined" onClick={handleChangeEmail} disabled={!canSaveEmail}>
               メールを変更
             </Button>
             <Button onClick={handleClose}>閉じる</Button>
-            <Button
-              variant="contained"
-              onClick={handleChangePw}
-              disabled={!canSavePw}
-            >
+            <Button variant="contained" onClick={handleChangePw} disabled={!canSavePw}>
               パスワード変更
             </Button>
           </DialogActions>
@@ -322,11 +338,17 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
           <DialogTitle>本当に退会しますか？</DialogTitle>
           <DialogContent dividers>
             <Typography>この操作は取り消せません。データは削除されます。</Typography>
-            {error && <Typography color="error" sx={{ mt: 1 }}>{error}</Typography>}
+            {error && (
+              <Typography color="error" sx={{ mt: 1 }}>
+                {error}
+              </Typography>
+            )}
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setMode('settings')}>キャンセル</Button>
-            <Button variant="contained" color="error" onClick={handleDelete}>退会する</Button>
+            <Button variant="contained" color="error" onClick={handleDelete}>
+              退会する
+            </Button>
           </DialogActions>
         </>
       )}
@@ -342,5 +364,5 @@ export default function AccountSettingsDialog({ open, onClose, onLogout }) {
         </Alert>
       </Snackbar>
     </Dialog>
-  );
+  )
 }

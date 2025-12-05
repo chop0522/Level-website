@@ -18,12 +18,15 @@ a {
 }
 
 /* レトロな見た目の見出し */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   text-shadow: 2px 2px 0px #999;
 }
 
 /* ヘッダーとフッターの背景 */
-.header, .footer {
+.header,
+.footer {
   /* もしレンガ壁を全体にするなら bodyで設定済み→ここで別の色が要るか?
      とりあえず #222 背景を残す  */
   background-color: #ffffff;
