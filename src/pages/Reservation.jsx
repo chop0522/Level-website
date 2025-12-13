@@ -16,7 +16,7 @@ function Reservation() {
       </Helmet>
       <Container sx={{ mt: 4, mb: 4 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h4" component="h1" gutterBottom>
             予約案内
           </Typography>
           <Typography variant="body1" paragraph>

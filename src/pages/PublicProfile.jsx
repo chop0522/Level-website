@@ -17,6 +17,7 @@ import { getPublicProfile, getFriendship, highfive } from '../services/api'
 import XPCard from '../components/xp/XPCard'
 import MyPageNav from '../components/MyPageNav'
 import { Helmet } from 'react-helmet-async'
+import { XP_CATEGORIES, getRankByXP, getBadgeAsset } from '../utils/rankConfig'
 
 /**
  * 公開プロフィールページ（閲覧専用 + ハイタッチ）
@@ -89,16 +90,6 @@ export default function PublicProfile() {
     )
   }
 
-  // Build categories for XPCard (readonly)
-  const cats = [
-    { key: 'stealth', label: '正体隠匿', color: '#3f51b5' },
-    { key: 'heavy', label: '重量級', color: '#795548' },
-    { key: 'light', label: '軽量級', color: '#009688' },
-    { key: 'party', label: 'パーティ', color: '#ff9800' },
-    { key: 'gamble', label: 'ギャンブル', color: '#9c27b0' },
-    { key: 'quiz', label: 'クイズ', color: '#e91e63' },
-  ]
-
   return (
     <Container sx={{ mt: 4 }}>
       <Helmet>
@@ -120,7 +111,9 @@ export default function PublicProfile() {
             animation: anim ? `${highfiveKF} 0.7s ease-in-out` : 'none',
           }}
         />
-        <Typography variant="h5">{profile.name || `User ${id}`}</Typography>
+        <Typography variant="h5" component="h1">
+          {profile.name || `User ${id}`}
+        </Typography>
         {profile.bio && (
           <Typography variant="body2" sx={{ mt: 1 }}>
             {profile.bio}
@@ -144,25 +137,16 @@ export default function PublicProfile() {
 
       {/* XP Cards */}
       <Grid container spacing={2} sx={{ mt: 2 }}>
-        {cats.map((c) => {
+        {XP_CATEGORIES.map((c) => {
           const xp = profile[`xp_${c.key}`] ?? 0
-          const rank =
-            xp >= 800
-              ? 'Master'
-              : xp >= 400
-                ? 'Gold'
-                : xp >= 150
-                  ? 'Silver'
-                  : xp >= 50
-                    ? 'Bronze'
-                    : 'Rookie'
-          const badgeUrl = `/badges/${c.key}_${rank.toLowerCase()}.png`
+          const { current } = getRankByXP(xp)
+          const badgeUrl = getBadgeAsset(c.key, current.key)
           return (
             <Grid item xs={6} sm={4} md={2} key={c.key}>
               <XPCard
                 category={c.label}
                 currentXP={xp}
-                rankLabel={rank}
+                rankLabel={current.label}
                 badgeUrl={badgeUrl}
                 color={c.color}
                 nextXP={null}

@@ -38,7 +38,7 @@ export default function AdminMonthlyPtDialog({ open, onClose, onSuccess }) {
       .then((list) => {
         // list = [{ id, name }]
         setUsers(list)
-        if (!userId && list.length) setUserId(list[0].id)
+        setUserId((prev) => prev || (list[0]?.id ?? ''))
       })
       .catch(() => setUsers([]))
   }, [open])

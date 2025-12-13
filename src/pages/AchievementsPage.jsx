@@ -5,16 +5,7 @@ import { AuthContext } from '../contexts/TokenContext'
 import { getAchievements } from '../services/api'
 import MyPageNav from '../components/MyPageNav'
 import { Helmet } from 'react-helmet-async'
-
-const CAT_KEYS = [
-  { key: 'stealth', label: '正体隠匿' },
-  { key: 'heavy', label: '重量級' },
-  { key: 'light', label: '軽量級' },
-  { key: 'party', label: 'パーティ' },
-  { key: 'gamble', label: 'ギャンブル' },
-  { key: 'quiz', label: 'クイズ' },
-]
-const RANK_LABELS = ['rookie', 'bronze', 'silver', 'gold', 'diamond']
+import { XP_CATEGORIES, getRankByXP, getBadgeAsset } from '../utils/rankConfig'
 
 export default function AchievementsPage() {
   const { token } = useContext(AuthContext)
@@ -43,7 +34,7 @@ export default function AchievementsPage() {
       </Helmet>
       <Container sx={{ mt: 4 }}>
         <MyPageNav />
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h4" component="h1" gutterBottom>
           Achievements
         </Typography>
 
@@ -56,10 +47,10 @@ export default function AchievementsPage() {
 
         {/* カテゴリ別バッジ */}
         <Grid container spacing={2}>
-          {CAT_KEYS.map(({ key, label }) => {
+          {XP_CATEGORIES.map(({ key, label }) => {
             const xp = user[`xp_${key}`] ?? 0
-            const rank = xp >= 800 ? 4 : xp >= 400 ? 3 : xp >= 150 ? 2 : xp >= 50 ? 1 : 0
-            const url = `/badges/${key}_${RANK_LABELS[rank]}.png`
+            const { current } = getRankByXP(xp)
+            const url = getBadgeAsset(key, current.key)
 
             return (
               <Grid item xs={6} sm={4} md={2} key={key}>

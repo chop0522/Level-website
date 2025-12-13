@@ -53,7 +53,7 @@ export default function LifetimeRankingPage() {
         />
       </Helmet>
       <Box sx={{ p: 3 }}>
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h5" component="h1" gutterBottom>
           麻雀 通算ランキング
         </Typography>
 

@@ -36,7 +36,6 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
   // ===== 非管理者（単票）用の既存ステート =====
   const [rank, setRank] = useState(1)
   const [score, setScore] = useState(25000)
-  const [username, setUsername] = useState('')
 
   // ===== 共通 =====
   const [err, setErr] = useState('')
@@ -117,7 +116,13 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
     const ranked = scored.map((r, idx) => ({ ...r, rank: idx + 1 }))
     // 元の並び順で戻す
     ranked.sort((a, b) => a._i - b._i)
-    setRows(ranked.map(({ _i, ...rest }) => rest))
+    setRows(
+      ranked.map((row) => {
+        const next = { ...row }
+        delete next._i
+        return next
+      })
+    )
   }
 
   const validateAdmin = () => {
@@ -183,7 +188,6 @@ export default function GameEntryForm({ open, onClose, onSubmitted }) {
         body: JSON.stringify({
           rank,
           finalScore: Number(score),
-          username: username || undefined,
         }),
       })
       onSubmitted?.()

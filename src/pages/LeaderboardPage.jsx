@@ -56,7 +56,6 @@ const CAT_COLORS = {
 export default function LeaderboardPage() {
   const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
-  const [users, setUsers] = useState([])
   const [normUsers, setNormUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -69,7 +68,6 @@ export default function LeaderboardPage() {
     ;(async () => {
       const res = await getUsers(sortKey, 50)
       if (res.success) {
-        setUsers(res.users)
         setNormUsers(
           res.users.map((u) => ({
             ...u,
@@ -101,7 +99,7 @@ export default function LeaderboardPage() {
       </Helmet>
       <Container sx={{ mt: 4 }}>
         <MyPageNav />
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h4" component="h1" gutterBottom>
           Leaderboard
         </Typography>
 

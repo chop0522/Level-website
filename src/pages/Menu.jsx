@@ -16,7 +16,7 @@ function Menu() {
       </Helmet>
       <Container sx={{ mt: 4, mb: 4 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h4" component="h1" gutterBottom>
             メニュー
           </Typography>
           <Typography variant="body1" paragraph>
@@ -26,7 +26,7 @@ function Menu() {
 
         <Box sx={{ mt: 4 }}>
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h5" gutterBottom>
+            <Typography variant="h5" component="h2" gutterBottom>
               プレイ料金
             </Typography>
             <Typography variant="body1">
@@ -39,11 +39,11 @@ function Menu() {
 
         <Box sx={{ mt: 4 }}>
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h5" gutterBottom>
+            <Typography variant="h5" component="h2" gutterBottom>
               ドリンクメニュー
             </Typography>
 
-            <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+            <Typography variant="h6" component="h3" gutterBottom sx={{ mt: 2 }}>
               ALL 500円 (アルコール系)
             </Typography>
             <Typography variant="body1">
@@ -79,7 +79,7 @@ function Menu() {
               ・ロック / ソーダ
             </Typography>
 
-            <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+            <Typography variant="h6" component="h3" gutterBottom sx={{ mt: 2 }}>
               ALL 300円 (ソフトドリンク)
             </Typography>
             <Typography variant="body1">

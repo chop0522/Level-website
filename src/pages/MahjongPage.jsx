@@ -29,7 +29,7 @@ import AdminGameList from '../components/mahjong/AdminGameList'
 import { Helmet } from 'react-helmet-async'
 
 export default function MahjongPage() {
-  const { token, userInfo: user } = useContext(AuthContext) // 認証情報
+  const { userInfo: user } = useContext(AuthContext) // 認証情報
   const [tab, setTab] = useState(0) // 0=今月, 1=先月
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
@@ -146,7 +146,7 @@ export default function MahjongPage() {
           })}
         </script>
       </Helmet>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h5" component="h1" gutterBottom>
         麻雀月間ランキング
       </Typography>
 

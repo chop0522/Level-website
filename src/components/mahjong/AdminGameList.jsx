@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useContext } from 'react'
+import React, { useEffect, useMemo, useState, useContext, useCallback } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -48,7 +48,7 @@ export default function AdminGameList({ open, onClose }) {
     return Array.from({ length: 12 }, (_, i) => now.subtract(i, 'month').format('YYYY-MM'))
   }, [])
 
-  const fetchRows = async () => {
+  const fetchRows = useCallback(async () => {
     setLoading(true)
     setErr('')
     try {
@@ -72,11 +72,11 @@ export default function AdminGameList({ open, onClose }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [month, testFilter])
 
   useEffect(() => {
     if (open) fetchRows()
-  }, [open, month, testFilter])
+  }, [fetchRows, open])
 
   const updateField = (idx, key, val) => {
     setRows((prev) => {
@@ -160,7 +160,7 @@ export default function AdminGameList({ open, onClose }) {
     }
   }
 
-  const saveRow = async (r, idx) => {
+  const saveRow = async (r) => {
     setErr('')
     setSavingId(r.id)
     try {
@@ -310,7 +310,7 @@ export default function AdminGameList({ open, onClose }) {
                     <Button
                       variant="outlined"
                       size="small"
-                      onClick={() => saveRow(r, idx)}
+                      onClick={() => saveRow(r)}
                       disabled={
                         savingId === r.id ||
                         (r.rank === r._origRank &&
