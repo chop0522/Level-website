@@ -27,9 +27,13 @@ function Equipment() {
         />
       </Helmet>
       <Container sx={{ mt: 4, mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          設備紹介
+        </Typography>
+
         {/* --- 店内設備 --- */}
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h5" component="h2" gutterBottom>
             店内設備
           </Typography>
           <Typography variant="body1" paragraph>
@@ -48,13 +52,15 @@ function Equipment() {
               {/* 写真の説明をここに入れる */}
               テーブル・椅子のイメージ
             </Typography>
-            <ImageWithFallback
-              webp={mahjongWebp}
-              src={mahjongJpg}
-              alt="最新全自動雀卓 AMOS REX3"
-              style={{ width: '100%', height: 'auto', borderRadius: 8 }}
-            />
-          </Box>
+              <ImageWithFallback
+                webp={mahjongWebp}
+                src={mahjongJpg}
+                alt="最新全自動雀卓 AMOS REX3"
+                width={1536}
+                height={1152}
+                style={{ width: '100%', height: 'auto', borderRadius: 8 }}
+              />
+            </Box>
 
           {/* 大型モニターや雀卓の写真を追加するなら下記を複製 */}
           <Box sx={{ mt: 2 }}>
@@ -66,6 +72,8 @@ function Equipment() {
               webp={cafeInteriorWebp}
               src={cafeInteriorJpg}
               alt="店内レイアウトと大型モニター"
+              width={1536}
+              height={1152}
               style={{ width: '100%', height: 'auto', borderRadius: 8 }}
             />
           </Box>
@@ -74,7 +82,7 @@ function Equipment() {
         {/* --- 特徴・ウリ --- */}
         <Box sx={{ mt: 4 }}>
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h4" gutterBottom>
+            <Typography variant="h5" component="h2" gutterBottom>
               特徴
             </Typography>
             <Typography variant="body1" paragraph>
@@ -93,6 +101,8 @@ function Equipment() {
                 webp={shelfCloseWebp}
                 src={shelfCloseJpg}
                 alt="店内ボードゲーム棚"
+                width={1536}
+                height={1152}
                 style={{ width: '100%', height: 'auto', borderRadius: 8 }}
               />
             </Box>
@@ -106,6 +116,8 @@ function Equipment() {
                 webp={shelfAngleWebp}
                 src={shelfAngleJpg}
                 alt="店内ボードゲーム棚 別アングル"
+                width={1536}
+                height={1152}
                 style={{ width: '100%', height: 'auto', borderRadius: 8 }}
               />
             </Box>
@@ -115,7 +127,7 @@ function Equipment() {
         {/* --- アクセス・周辺情報 --- */}
         <Box sx={{ mt: 4 }}>
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h4" gutterBottom>
+            <Typography variant="h5" component="h2" gutterBottom>
               アクセス・周辺情報
             </Typography>
             <Typography variant="body1" paragraph>
@@ -133,6 +145,8 @@ function Equipment() {
                 webp={cafeExteriorWebp}
                 src={cafeExteriorJpg}
                 alt="店舗外観"
+                width={1536}
+                height={1152}
                 style={{ width: '100%', height: 'auto', borderRadius: 8 }}
               />
             </Box>
@@ -142,7 +156,7 @@ function Equipment() {
         {/* --- 貸切時の設備 --- */}
         <Box sx={{ mt: 4 }}>
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h4" gutterBottom>
+            <Typography variant="h5" component="h2" gutterBottom>
               貸切時の設備
             </Typography>
             <Typography variant="body1" paragraph>

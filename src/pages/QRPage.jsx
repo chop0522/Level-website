@@ -33,7 +33,7 @@ export default function QRPage() {
         setState({ status: 'error', msg: res.error || '本日は取得済みです' })
       }
     })()
-  }, [])
+  }, [params, token])
 
   // 画面サイズを取得（SSR 安全ガード）
   const width = typeof window !== 'undefined' ? window.innerWidth : 0
@@ -52,6 +52,9 @@ export default function QRPage() {
         />
       </Helmet>
       <Card sx={{ p: 4, textAlign: 'center' }}>
+        <Typography variant="h5" component="h1" gutterBottom>
+          QRボーナス取得
+        </Typography>
         {state.status === 'loading' && <Typography>読み込み中…</Typography>}
         {state.status === 'success' && (
           <>

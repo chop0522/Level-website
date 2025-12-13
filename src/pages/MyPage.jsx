@@ -1,5 +1,5 @@
 // src/pages/MyPage.jsx
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, useCallback } from 'react'
 import { Container, Typography, Button } from '@mui/material'
 import { Avatar, Stack, Box, Card, Snackbar, Alert } from '@mui/material'
 import { Grid } from '@mui/material'
@@ -23,6 +23,7 @@ import { Link as RouterLink } from 'react-router-dom'
 import { AuthContext } from '../contexts/TokenContext'
 import MyPageNav from '../components/MyPageNav'
 import { Helmet } from 'react-helmet-async'
+import { XP_CATEGORIES, getRankByXP, getBadgeAsset } from '../utils/rankConfig'
 
 // 開発判定（Vite でも Node でも安全に動く）
 const isDev =
@@ -82,36 +83,7 @@ function MyPage() {
   const averageScoreLabel = hasMahjongGames ? formatAverageScore(userInfo?.average_score) : '-'
   const averageRankLabel = hasMahjongGames ? formatAverageRank(userInfo?.average_rank) : '-'
 
-  // カテゴリ定義とランクテーブル
-  const categories = [
-    { key: 'stealth', ja: '正体隠匿', color: '#3f51b5' },
-    { key: 'heavy', ja: '重量級', color: '#795548' },
-    { key: 'light', ja: '軽量級', color: '#009688' },
-    { key: 'party', ja: 'パーティ', color: '#ff9800' },
-    { key: 'gamble', ja: 'ギャンブル', color: '#9c27b0' },
-    { key: 'quiz', ja: 'クイズ', color: '#e91e63' },
-  ]
-
-  const rankTable = [
-    { label: 'Rookie', xp: 0 },
-    { label: 'Bronze', xp: 50 },
-    { label: 'Silver', xp: 150 },
-    { label: 'Gold', xp: 400 },
-    { label: 'Master', xp: 800 },
-  ]
-
-  useEffect(() => {
-    // 未ログインならログインページへ
-    if (!token) {
-      navigate('/login', { replace: true })
-      return
-    }
-    // ログイン済みならユーザー情報を取得
-    fetchUserInfo()
-    fetchProfile()
-  }, [token])
-
-  const fetchUserInfo = async () => {
+  const fetchUserInfo = useCallback(async () => {
     try {
       const data = await getUserInfo(token)
       if (data.error || !data.id) {
@@ -152,9 +124,9 @@ function MyPage() {
       console.error(err)
       setError('ユーザー情報の取得に失敗しました')
     }
-  }
+  }, [navigate, setUserInfo, token])
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       const p = await getProfile(token)
       if (!p.error) {
@@ -165,7 +137,18 @@ function MyPage() {
     } catch (err) {
       console.error(err)
     }
-  }
+  }, [token])
+
+  useEffect(() => {
+    // 未ログインならログインページへ
+    if (!token) {
+      navigate('/login', { replace: true })
+      return
+    }
+    // ログイン済みならユーザー情報を取得
+    fetchUserInfo()
+    fetchProfile()
+  }, [fetchProfile, fetchUserInfo, navigate, token])
 
   // XP加算 & ランクアップ処理
   const handleGainXP = async (catKey) => {
@@ -188,7 +171,7 @@ function MyPage() {
       setTimeout(() => {
         setRankUpAnim((prev) => ({ ...prev, [catKey]: false }))
       }, 1200)
-      const ja = categories.find((c) => c.key === catKey)?.ja || catKey
+      const ja = XP_CATEGORIES.find((c) => c.key === catKey)?.label || catKey
       setToast(`${ja} が ${res.label} にランクアップ！`)
     } else {
       setToast(`+${res.xpGain} XP`)
@@ -248,8 +231,12 @@ function MyPage() {
       <Helmet>
         <title>マイページ</title>
         <meta name="robots" content="noindex,nofollow" />
+        <meta
+          name="description"
+          content="プロフィール編集やアバター変更、カテゴリ別XPと麻雀の成績を確認できる会員向けマイページです。"
+        />
       </Helmet>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h5" component="h1" gutterBottom>
         My Page
       </Typography>
       <MyPageNav />
@@ -477,21 +464,19 @@ function MyPage() {
 
           {/* カテゴリ別 XP カード */}
           <Grid container spacing={2} sx={{ mt: 4 }}>
-            {categories.map((cat) => {
+            {XP_CATEGORIES.map((cat) => {
               const xp = userInfo[`xp_${cat.key}`] ?? 0
-              const currentRank = [...rankTable].reverse().find((r) => xp >= r.xp) || rankTable[0]
-              const nextRank = rankTable.find((r) => r.xp > xp)
-              // すべて PNG で統一
-              const badgeUrl = `/badges/${cat.key}_${currentRank.label.toLowerCase()}.png`
+              const { current, next } = getRankByXP(xp)
+              const badgeUrl = getBadgeAsset(cat.key, current.key)
 
               return (
                 <Grid item xs={12} sm={6} key={cat.key}>
                   <XPCard
-                    category={cat.ja}
+                    category={cat.label}
                     currentXP={xp}
-                    rankLabel={currentRank.label}
+                    rankLabel={current.label}
                     badgeUrl={badgeUrl}
-                    nextXP={nextRank ? nextRank.xp : null}
+                    nextXP={next ? next.minXp : null}
                     color={cat.color}
                     animate={rankUpAnim[cat.key]}
                   />

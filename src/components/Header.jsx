@@ -13,6 +13,7 @@ function Header() {
   const { token = '', handleLogout } = useContext(AuthContext)
   // ▼ メニュー開閉用のState
   const [menuOpen, setMenuOpen] = useState(false)
+  const navId = 'global-nav'
 
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev)
@@ -25,7 +26,7 @@ function Header() {
     <header className={styles.header} role="banner" style={{ position: 'relative', zIndex: 3000 }}>
       {/* 左側: ロゴ + ナビ */}
       <div className={styles.navLeft}>
-        <h1 className={styles.logo}>
+        <div className={styles.logo} aria-label="ゲームカフェ.Level ロゴ">
           <Link to="/" className={styles.brandLink} aria-label="トップへ">
             <span className={styles.logoRowTop}>
               <span className={styles.logoJP}>ゲームカフェ</span>
@@ -35,10 +36,11 @@ function Header() {
               <span className={styles.logoEN}>.Level</span>
             </span>
           </Link>
-        </h1>
+        </div>
 
         {/* PC時に横並び表示、スマホ時は隠れてハンバーガーボタンで開閉 */}
         <nav
+          id={navId}
           className={`${styles.navLinks} ${menuOpen ? styles.showMenu : ''}`}
           aria-label="主要ナビゲーション"
           onClick={() => setMenuOpen(false)}
@@ -92,6 +94,8 @@ function Header() {
           className={styles.hamburgerBtn}
           onClick={toggleMenu}
           aria-label={menuOpen ? 'メニューを閉じる' : 'メニューを開く'}
+          aria-expanded={menuOpen}
+          aria-controls={navId}
           size="large"
         >
           <Suspense fallback={null}>{menuOpen ? <CloseIcon /> : <MenuIcon />}</Suspense>

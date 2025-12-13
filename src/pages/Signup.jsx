@@ -57,6 +57,7 @@ export default function Signup() {
       <Container maxWidth="sm" sx={{ mt: 6 }}>
         <Typography
           variant="h5"
+          component="h1"
           gutterBottom
           sx={{ fontFamily: '"Press Start 2P", monospace', textAlign: 'center' }}
         >

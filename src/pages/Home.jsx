@@ -58,7 +58,7 @@ const HeroWrapper = styled(Box)({
 const HeroOverlay = styled(Box)({
   position: 'absolute',
   inset: 0,
-  backgroundColor: 'rgba(0,0,0,0.4)',
+  backgroundColor: 'rgba(0,0,0,0.55)',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',
@@ -86,18 +86,29 @@ function Home() {
 
   /* ① 起動時：イベント取得 */
   useEffect(() => {
-    fetch('/api/events')
-      .then((res) => res.json())
-      .then((data) =>
+    const fetchEvents = async () => {
+      try {
+        const res = await fetch('/api/events')
+        if (!res.ok) {
+          console.warn('events fetch failed', res.status)
+          setEvents([])
+          return
+        }
+        const data = await res.json()
+        const list = Array.isArray(data) ? data : Array.isArray(data?.events) ? data.events : []
         setEvents(
-          data.map((evt) => ({
+          list.map((evt) => ({
             ...evt,
             start: new Date(evt.start),
             end: new Date(evt.end),
           }))
         )
-      )
-      .catch(console.error)
+      } catch (err) {
+        console.warn('events fetch error', err)
+        setEvents([])
+      }
+    }
+    fetchEvents()
   }, [])
 
   /* ② 新規イベント追加 */
@@ -226,6 +237,15 @@ function Home() {
       <Helmet>
         <title>行徳のボードゲーム＆麻雀カフェ</title>
         <link rel="canonical" href="https://gamecafe-level.com/" />
+        <link
+          rel="preload"
+          as="image"
+          href={heroDogWebp}
+          imageSrcSet={`${heroDogWebp} 1x`}
+          imageSizes="100vw"
+          type="image/webp"
+          fetchPriority="high"
+        />
         <meta
           name="description"
           content="千葉県市川市・行徳駅徒歩5分。ボードゲーム＆麻雀カフェ『ゲームカフェ.Level』公式サイト。営業時間・料金・設備、月間麻雀ランキングを掲載。公式LINEで予約受付中。"
@@ -316,7 +336,7 @@ function Home() {
       {/* ---------- 当店のコンセプト ---------- */}
       <Container sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h4" component="h2" gutterBottom>
             当店のコンセプト
           </Typography>
           <Typography variant="body1">
@@ -328,7 +348,7 @@ function Home() {
       {/* ---------- 営業情報 ---------- */}
       <Container sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h4" component="h2" gutterBottom>
             営業情報
           </Typography>
           <Typography variant="body2">
@@ -338,7 +358,7 @@ function Home() {
             月曜祝日も営業しております。
             貸切でのご利用も可能ですので、FAQをご覧の上、お気軽にお問い合わせください。
           </Typography>
-          <Typography variant="body2" sx={{ mt: 2, fontWeight: 'bold' }}>
+          <Typography variant="h6" component="h3" sx={{ mt: 2, fontWeight: 'bold' }}>
             『お知らせ』
           </Typography>
           <Typography variant="body2" sx={{ mt: 0.5 }}>
@@ -351,7 +371,7 @@ function Home() {
 
       {/* ---------- リンクボタン集 ---------- */}
       <Container sx={{ mt: 4 }}>
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h5" component="h2" gutterBottom>
           各種ページリンク
         </Typography>
         <Grid container spacing={2}>
@@ -375,32 +395,36 @@ function Home() {
 
       {/* ---------- カレンダー ---------- */}
       <Container sx={{ mt: 4 }}>
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h5" component="h2" gutterBottom>
           イベント&営業予定
         </Typography>
         <Paper sx={{ p: 2 }}>
-          <div style={{ height: '500px' }}>
-            <Calendar
-              localizer={localizer}
-              events={events}
-              startAccessor="start"
-              endAccessor="end"
-              style={{ height: '100%' }}
-              selectable
-              onSelectSlot={handleSelectSlot}
-              onSelectEvent={handleSelectEvent}
-              draggableAccessor={() => true}
-              onEventDrop={handleEventDropOrResize}
-              onEventResize={handleEventDropOrResize}
-            />
-          </div>
+          {events.length === 0 ? (
+            <Typography component="p">イベントは準備中です。</Typography>
+          ) : (
+            <div style={{ height: '500px' }}>
+              <Calendar
+                localizer={localizer}
+                events={events}
+                startAccessor="start"
+                endAccessor="end"
+                style={{ height: '100%' }}
+                selectable
+                onSelectSlot={handleSelectSlot}
+                onSelectEvent={handleSelectEvent}
+                draggableAccessor={() => true}
+                onEventDrop={handleEventDropOrResize}
+                onEventResize={handleEventDropOrResize}
+              />
+            </div>
+          )}
         </Paper>
       </Container>
 
       {/* ---------- アクセス ---------- */}
       <Container sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h4" component="h2" gutterBottom>
             アクセス
           </Typography>
           <Typography variant="body1">
@@ -424,7 +448,7 @@ function Home() {
 
       {/* ---------- SNS ---------- */}
       <Container sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h5" component="h2" gutterBottom>
           SNSをフォローしよう！
         </Typography>
         <Grid container spacing={2}>
@@ -432,6 +456,7 @@ function Home() {
             <IconButton
               onClick={() => window.open('https://x.com/GamecafeLevel', '_blank')}
               color="primary"
+              aria-label="Xを開く"
             >
               <XIcon />
             </IconButton>
@@ -440,6 +465,7 @@ function Home() {
             <IconButton
               onClick={() => window.open('https://lin.ee/pyc6UjM', '_blank')}
               color="primary"
+              aria-label="LINEを開く"
             >
               <LineIcon />
             </IconButton>
@@ -448,6 +474,7 @@ function Home() {
             <IconButton
               onClick={() => window.open('https://note.com/gamecafe_level', '_blank')}
               color="primary"
+              aria-label="noteを開く"
             >
               <NoteIcon />
             </IconButton>

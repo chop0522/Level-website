@@ -15,10 +15,10 @@ function NotFound() {
           content="お探しのページは削除されたかURLが変更されています。ゲームカフェ.Levelのトップへお戻りください。"
         />
       </Helmet>
-      <Typography variant="h2" gutterBottom>
+      <Typography variant="h2" component="p" gutterBottom>
         404
       </Typography>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h5" component="h1" gutterBottom>
         お探しのページは見つかりませんでした
       </Typography>
 

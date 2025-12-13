@@ -16,14 +16,16 @@ function FAQ() {
         />
       </Helmet>
       <Container sx={{ mt: 4, mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h4" component="h1" gutterBottom>
           よくあるご質問 (FAQ)
         </Typography>
 
         {/* 1) 料金関連 */}
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="h6">料金関連</Typography>
+            <Typography variant="h6" component="h2">
+              料金関連
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Typography variant="body1" paragraph>
@@ -48,7 +50,9 @@ function FAQ() {
         {/* 2) 予約方法 */}
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="h6">予約方法</Typography>
+            <Typography variant="h6" component="h2">
+              予約方法
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Typography variant="body1" paragraph>
@@ -69,7 +73,9 @@ function FAQ() {
         {/* 3) 飲食関連 */}
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="h6">飲食関連</Typography>
+            <Typography variant="h6" component="h2">
+              飲食関連
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Typography variant="body1" paragraph>
@@ -85,7 +91,9 @@ function FAQ() {
         {/* 4) 来店時の注意点 */}
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="h6">来店時の注意点</Typography>
+            <Typography variant="h6" component="h2">
+              来店時の注意点
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Typography variant="body1" paragraph>
@@ -100,7 +108,9 @@ function FAQ() {
         {/* 5) ゲーム関連 */}
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="h6">ゲーム関連</Typography>
+            <Typography variant="h6" component="h2">
+              ゲーム関連
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Typography variant="body1" paragraph>
@@ -118,7 +128,9 @@ function FAQ() {
         {/* 6) 支払い方法 */}
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="h6">支払い方法</Typography>
+            <Typography variant="h6" component="h2">
+              支払い方法
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Typography variant="body1" paragraph>
@@ -133,7 +145,9 @@ function FAQ() {
         {/* 7) 問い合わせ */}
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="h6">問い合わせ</Typography>
+            <Typography variant="h6" component="h2">
+              問い合わせ
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Typography variant="body1" paragraph>

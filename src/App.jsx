@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState, useEffect, lazy, Suspense } from 'react'
+import React, { useState, useEffect, lazy, Suspense, useCallback } from 'react'
 import { AuthContext } from './contexts/TokenContext'
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom'
 import Header from './components/Header'
@@ -38,6 +38,14 @@ function App() {
   const [userInfo, setUserInfo] = useState(null)
   const navigate = useNavigate()
 
+  /* ---- ログアウト ---- */
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem('token')
+    setToken('')
+    setUserRole('user')
+    navigate('/')
+  }, [navigate])
+
   /* ---- ユーザー情報取得 ---- */
   useEffect(() => {
     const stored = localStorage.getItem('token') || ''
@@ -61,15 +69,7 @@ function App() {
         }
       })
       .catch(() => setUserRole('user'))
-  }, [])
-
-  /* ---- ログアウト ---- */
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    setToken('')
-    setUserRole('user')
-    navigate('/')
-  }
+  }, [handleLogout])
 
   /* ---- 背景スタイル ---- */
   const appStyle = { minHeight: '100vh', backgroundColor: theme.palette.background.default }

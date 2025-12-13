@@ -5,10 +5,6 @@ import { useNavigate, Link as RouterLink } from 'react-router-dom'
 import { loginUser } from '../services/api'
 import { Helmet } from 'react-helmet-async'
 
-// もし Header, Footer を使うなら import
-import Header from '../components/Header'
-import Footer from '../components/Footer'
-
 function Login({ setToken }) {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -55,7 +51,7 @@ function Login({ setToken }) {
       */}
 
       <Container sx={{ mt: 4, mb: 4, maxWidth: 'sm' }}>
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h5" component="h1" gutterBottom>
           ログイン
         </Typography>
 
@@ -113,10 +109,6 @@ function Login({ setToken }) {
           </Button>
         </Box>
       </Container>
-
-      {/*
-        // <Footer />
-      */}
     </>
   )
 }
