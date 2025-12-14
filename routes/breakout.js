@@ -140,11 +140,12 @@ function createBreakoutRouter({ pool, authenticateToken }) {
       const totalXp = computeTotalXp(user)
       const playsPerDay = computePlaysPerDay(totalXp)
 
-      const { rows } = await client.query(
-        'SELECT COUNT(*) AS cnt FROM breakout_runs WHERE user_id = $1 AND play_date_jst = $2 FOR UPDATE',
+      // ロックを取りつつ件数確認（集約ではなく行ロックで回数競合を防ぐ）
+      const { rows: runRows } = await client.query(
+        'SELECT id FROM breakout_runs WHERE user_id = $1 AND play_date_jst = $2 FOR UPDATE',
         [req.user.id, today]
       )
-      const playsUsed = Number(rows[0]?.cnt || 0)
+      const playsUsed = runRows.length
       const playsRemaining = playsPerDay - playsUsed
 
       if (playsRemaining <= 0) {
