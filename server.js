@@ -33,6 +33,7 @@ const createXpRouter = require('./routes/xp')
 const createMahjongRouter = require('./routes/mahjong')
 const createEventsRouter = require('./routes/events')
 const createDeprecatedRouter = require('./routes/deprecated')
+const createBreakoutRouter = require('./routes/breakout')
 
 const userHelpers = createUserHelpers(pool)
 const { authenticateToken, authenticateAdmin } = createAuthMiddleware({
@@ -123,6 +124,15 @@ app.use(
   createDeprecatedRouter({
     authenticateToken,
     authenticateAdmin,
+  })
+)
+
+// --- Breakout ---
+app.use(
+  '/api/breakout',
+  createBreakoutRouter({
+    pool,
+    authenticateToken,
   })
 )
 

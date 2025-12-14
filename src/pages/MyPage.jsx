@@ -24,6 +24,7 @@ import { AuthContext } from '../contexts/TokenContext'
 import MyPageNav from '../components/MyPageNav'
 import { Helmet } from 'react-helmet-async'
 import { XP_CATEGORIES, getRankByXP, getBadgeAsset } from '../utils/rankConfig'
+import { getBreakoutStatus } from '../services/api'
 
 // 開発判定（Vite でも Node でも安全に動く）
 const isDev =
@@ -74,6 +75,7 @@ function MyPage() {
   const [rankUpAnim, setRankUpAnim] = useState({})
   const [recentHF, setRecentHF] = useState([])
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [breakout, setBreakout] = useState(null)
 
   // アバターのキャッシュバスター
   const [avatarVer, setAvatarVer] = useState(Date.now())
@@ -139,6 +141,11 @@ function MyPage() {
     }
   }, [token])
 
+  const fetchBreakoutStatus = useCallback(async () => {
+    const s = await getBreakoutStatus()
+    setBreakout(s)
+  }, [])
+
   useEffect(() => {
     // 未ログインならログインページへ
     if (!token) {
@@ -148,7 +155,8 @@ function MyPage() {
     // ログイン済みならユーザー情報を取得
     fetchUserInfo()
     fetchProfile()
-  }, [fetchProfile, fetchUserInfo, navigate, token])
+    fetchBreakoutStatus()
+  }, [fetchBreakoutStatus, fetchProfile, fetchUserInfo, navigate, token])
 
   // XP加算 & ランクアップ処理
   const handleGainXP = async (catKey) => {
@@ -260,6 +268,42 @@ function MyPage() {
           {userInfo.role === 'admin' && (
             <Typography sx={{ mt: 2, color: 'red' }}>※管理者モードで閲覧中</Typography>
           )}
+
+          {/* ブロック崩し ミニゲームカード */}
+          <Card sx={{ p: 2, mt: 3, maxWidth: 520 }}>
+            <Typography variant="h6" component="h2" gutterBottom>
+              ブロック崩し（ベータ）
+            </Typography>
+            {breakout ? (
+              <>
+                <Stack direction="row" spacing={2}>
+                  <Chip label={`残り ${breakout.playsRemaining ?? 0} 回`} color="primary" />
+                  <Chip label={`1日上限 ${breakout.playsPerDay ?? 1}`} />
+                </Stack>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  リセット: {breakout.resetAt || '-'}
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  ベスト: スコア {breakout.best?.bestScore ?? 0} / 到達{' '}
+                  {breakout.best?.bestStageReached ?? 1} / クリア{' '}
+                  {breakout.best?.bestStageCleared ?? 0}
+                </Typography>
+              </>
+            ) : (
+              <Typography variant="body2">ステータス取得中…</Typography>
+            )}
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 2 }}>
+              <Button variant="contained" component={RouterLink} to="/mypage/breakout">
+                プレイ
+              </Button>
+              <Button variant="outlined" component={RouterLink} to="/mypage/breakout/leaderboard">
+                ランキング
+              </Button>
+              <Button variant="outlined" component={RouterLink} to="/mypage/breakout/history">
+                戦績
+              </Button>
+            </Stack>
+          </Card>
 
           {/* プロフィールカード */}
           {profile && (
