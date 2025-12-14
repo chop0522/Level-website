@@ -191,6 +191,56 @@ export async function uploadAvatar(token, file) {
   }
 }
 
+// -----------------------------
+// Breakout mini game API
+// -----------------------------
+
+export async function getBreakoutStatus() {
+  try {
+    return await apiFetch('/api/breakout/status')
+  } catch (err) {
+    console.warn('getBreakoutStatus failed:', err?.message || err)
+    return null
+  }
+}
+
+export async function startBreakoutRun() {
+  try {
+    return await apiFetch('/api/breakout/start', { method: 'POST' })
+  } catch (err) {
+    return { error: err.message }
+  }
+}
+
+export async function submitBreakoutRun(payload) {
+  try {
+    return await apiFetch('/api/breakout/submit', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  } catch (err) {
+    return { error: err.message }
+  }
+}
+
+export async function getBreakoutLeaderboard(scope = 'all', limit = 50) {
+  try {
+    return await apiFetch(`/api/breakout/leaderboard?scope=${scope}&limit=${limit}`)
+  } catch (err) {
+    console.warn('getBreakoutLeaderboard failed:', err?.message || err)
+    return { items: [], scope, limit }
+  }
+}
+
+export async function getMyBreakoutHistory(limit = 20) {
+  try {
+    return await apiFetch(`/api/breakout/me?limit=${limit}`)
+  } catch (err) {
+    console.warn('getMyBreakoutHistory failed:', err?.message || err)
+    return { best: null, runs: [], playsRemaining: 0 }
+  }
+}
+
 /**
  * カテゴリXPを加算し、ランク/バッジ情報を取得
  * @param {string} token JWT

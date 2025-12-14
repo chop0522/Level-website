@@ -22,6 +22,9 @@ const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'))
 const PublicProfile = lazy(() => import('./pages/PublicProfile'))
 const Equipment = lazy(() => import('./pages/Equipment'))
 const Reservation = lazy(() => import('./pages/Reservation'))
+const BreakoutPage = lazy(() => import('./pages/BreakoutPage'))
+const BreakoutLeaderboardPage = lazy(() => import('./pages/BreakoutLeaderboardPage'))
+const BreakoutHistoryPage = lazy(() => import('./pages/BreakoutHistoryPage'))
 const QRPage = lazy(() => import('./pages/QRPage'))
 const AchievementsPage = lazy(() => import('./pages/AchievementsPage'))
 const NotFound = lazy(() => import('./pages/NotFound')) // “最後の砦”
@@ -166,6 +169,18 @@ function App() {
                 <Route
                   path="/mahjong/lifetime"
                   element={token ? <LifetimeRankingPage /> : <Navigate to="/login" replace />}
+                />
+                <Route
+                  path="/mypage/breakout"
+                  element={token ? <BreakoutPage /> : <Navigate to="/login" replace />}
+                />
+                <Route
+                  path="/mypage/breakout/leaderboard"
+                  element={token ? <BreakoutLeaderboardPage /> : <Navigate to="/login" replace />}
+                />
+                <Route
+                  path="/mypage/breakout/history"
+                  element={token ? <BreakoutHistoryPage /> : <Navigate to="/login" replace />}
                 />
 
                 {/* 404 */}
