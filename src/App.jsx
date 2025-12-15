@@ -1,7 +1,7 @@
 // src/App.jsx
 import React, { useState, useEffect, lazy, Suspense, useCallback } from 'react'
 import { AuthContext } from './contexts/TokenContext'
-import { Routes, Route, useNavigate, Navigate } from 'react-router-dom'
+import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Loader from './components/Loader'
 import Footer from './components/Footer'
@@ -25,6 +25,7 @@ const Reservation = lazy(() => import('./pages/Reservation'))
 const BreakoutPage = lazy(() => import('./pages/BreakoutPage'))
 const BreakoutLeaderboardPage = lazy(() => import('./pages/BreakoutLeaderboardPage'))
 const BreakoutHistoryPage = lazy(() => import('./pages/BreakoutHistoryPage'))
+const BreakoutPlayPage = lazy(() => import('./pages/BreakoutPlayPage'))
 const QRPage = lazy(() => import('./pages/QRPage'))
 const AchievementsPage = lazy(() => import('./pages/AchievementsPage'))
 const NotFound = lazy(() => import('./pages/NotFound')) // “最後の砦”
@@ -40,6 +41,9 @@ function App() {
   const [userRole, setUserRole] = useState(null) // null = 取得前
   const [userInfo, setUserInfo] = useState(null)
   const navigate = useNavigate()
+  const location = useLocation()
+  const isBreakoutPlay = location.pathname.startsWith('/mypage/breakout/play')
+  const showChrome = !isBreakoutPlay
 
   /* ---- ログアウト ---- */
   const handleLogout = useCallback(() => {
@@ -75,7 +79,10 @@ function App() {
   }, [handleLogout])
 
   /* ---- 背景スタイル ---- */
-  const appStyle = { minHeight: '100vh', backgroundColor: theme.palette.background.default }
+  const appStyle = {
+    minHeight: '100vh',
+    backgroundColor: isBreakoutPlay ? '#000' : theme.palette.background.default,
+  }
 
   return (
     <HelmetProvider>
@@ -132,10 +139,14 @@ function App() {
         </Helmet>
 
         <div style={appStyle}>
-          <a href="#main-content" className="skip-link">
-            メインコンテンツへスキップ
-          </a>
-          <Header />
+          {showChrome && (
+            <>
+              <a href="#main-content" className="skip-link">
+                メインコンテンツへスキップ
+              </a>
+              <Header />
+            </>
+          )}
 
           <main id="main-content">
             {/* ---------- ルーティング ---------- */}
@@ -175,6 +186,10 @@ function App() {
                   element={token ? <BreakoutPage /> : <Navigate to="/login" replace />}
                 />
                 <Route
+                  path="/mypage/breakout/play"
+                  element={token ? <BreakoutPlayPage /> : <Navigate to="/login" replace />}
+                />
+                <Route
                   path="/mypage/breakout/leaderboard"
                   element={token ? <BreakoutLeaderboardPage /> : <Navigate to="/login" replace />}
                 />
@@ -189,7 +204,7 @@ function App() {
             </Suspense>
           </main>
 
-          <Footer />
+          {showChrome && <Footer />}
         </div>
       </AuthContext.Provider>
     </HelmetProvider>
