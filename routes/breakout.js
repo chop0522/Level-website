@@ -2,6 +2,19 @@ const express = require('express')
 
 const MAX_PLAYS_PER_DAY = 3
 const JST_OFFSET_MS = 9 * 60 * 60 * 1000
+const TESTER_PLAYS_PER_DAY = 9999
+
+const testerIdSet = new Set(
+  (process.env.BREAKOUT_TEST_USER_IDS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+)
+
+function isTester(userId) {
+  if (!userId) return false
+  return testerIdSet.has(String(userId))
+}
 
 function getJstNow() {
   return new Date(Date.now() + JST_OFFSET_MS)
@@ -61,11 +74,12 @@ function createBreakoutRouter({ pool, authenticateToken }) {
   router.get('/status', authenticateToken, async (req, res) => {
     const resetAt = getNextJstMidnightIso()
     const today = getJstDateString()
+    const tester = isTester(req.user.id)
 
     try {
       const user = await fetchUserRow(pool, req.user.id)
       const totalXp = computeTotalXp(user)
-      const playsPerDay = computePlaysPerDay(totalXp)
+      const playsPerDay = tester ? TESTER_PLAYS_PER_DAY : computePlaysPerDay(totalXp)
 
       let playsUsed = 0
       if (pool) {
@@ -105,6 +119,7 @@ function createBreakoutRouter({ pool, authenticateToken }) {
         playsUsedToday: playsUsed,
         playsRemaining,
         resetAt,
+        isTester: tester,
         best,
       })
     } catch (err) {
@@ -128,6 +143,7 @@ function createBreakoutRouter({ pool, authenticateToken }) {
   router.post('/start', authenticateToken, async (req, res) => {
     const resetAt = getNextJstMidnightIso()
     const today = getJstDateString()
+    const tester = isTester(req.user.id)
 
     if (!pool) {
       return res.status(503).json({ error: 'breakout storage unavailable', resetAt })
@@ -138,7 +154,7 @@ function createBreakoutRouter({ pool, authenticateToken }) {
       await client.query('BEGIN')
       const user = await fetchUserRow(pool, req.user.id)
       const totalXp = computeTotalXp(user)
-      const playsPerDay = computePlaysPerDay(totalXp)
+      const playsPerDay = tester ? TESTER_PLAYS_PER_DAY : computePlaysPerDay(totalXp)
 
       // ロックを取りつつ件数確認（集約ではなく行ロックで回数競合を防ぐ）
       const { rows: runRows } = await client.query(
@@ -148,7 +164,7 @@ function createBreakoutRouter({ pool, authenticateToken }) {
       const playsUsed = runRows.length
       const playsRemaining = playsPerDay - playsUsed
 
-      if (playsRemaining <= 0) {
+      if (!tester && playsRemaining <= 0) {
         await client.query('ROLLBACK')
         return res.status(429).json({ error: 'daily limit reached', resetAt, playsRemaining: 0 })
       }
@@ -166,6 +182,7 @@ function createBreakoutRouter({ pool, authenticateToken }) {
         playsRemaining: playsRemaining - 1,
         startedAt: insert.rows[0].started_at,
         resetAt,
+        isTester: tester,
       })
     } catch (err) {
       await client.query('ROLLBACK')
@@ -301,6 +318,7 @@ function createBreakoutRouter({ pool, authenticateToken }) {
   router.get('/me', authenticateToken, async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit || '20', 10), 100)
     const today = getJstDateString()
+    const tester = isTester(req.user.id)
 
     if (!pool) {
       return res.json({
@@ -345,7 +363,7 @@ function createBreakoutRouter({ pool, authenticateToken }) {
 
       const user = await fetchUserRow(pool, req.user.id)
       const totalXp = computeTotalXp(user)
-      const playsPerDay = computePlaysPerDay(totalXp)
+      const playsPerDay = tester ? TESTER_PLAYS_PER_DAY : computePlaysPerDay(totalXp)
       const { rows: countRows } = await pool.query(
         'SELECT COUNT(*) AS cnt FROM breakout_runs WHERE user_id = $1 AND play_date_jst = $2',
         [req.user.id, today]
@@ -356,6 +374,7 @@ function createBreakoutRouter({ pool, authenticateToken }) {
         best,
         runs: runRes.rows,
         playsRemaining: Math.max(playsPerDay - playsUsedToday, 0),
+        isTester: tester,
       })
     } catch (err) {
       console.error('breakout me error:', err)
