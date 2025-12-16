@@ -138,7 +138,7 @@ export default function BreakoutPage() {
             </Button>
           </Stack>
           <Typography variant="body2">
-            操作: ← → / A D で移動、Spaceで発射、Shiftでフォーカス。モバイルはドラッグで移動、タップで発射、右下ボタンでフォーカス。
+            操作: ← → / A D で移動、Spaceで発射、Shift/FOCUSボタンで「短時間スロー（ゲージ消費）」。モバイルはドラッグで移動、タップで発射、右下FOCUSをタップで短時間スロー。
           </Typography>
         </Grid>
 

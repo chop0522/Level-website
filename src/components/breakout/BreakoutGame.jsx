@@ -7,6 +7,9 @@ import {
   BALL_SPEED_BASE,
   BALL_SPEED_MAX,
   BALL_SPEED_PER_STAGE,
+  FOCUS_BURST_SEC,
+  FOCUS_TAP_COOLDOWN_SEC,
+  FOCUS_TIMESCALE,
 } from '../../games/breakout/breakoutConfig'
 import { submitBreakoutRun } from '../../services/api'
 
@@ -86,6 +89,8 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
   const [lives, setLives] = useState(stats.startLives)
   const [shadowSaves, setShadowSaves] = useState(stats.shadowSaves)
   const [focusGauge, setFocusGauge] = useState(stats.focusMax)
+  const [focusBurst, setFocusBurst] = useState(0)
+  const [focusCooldown, setFocusCooldown] = useState(0)
   const [focusActive, setFocusActive] = useState(false)
   const [balls, setBalls] = useState([])
   const [blocks, setBlocks] = useState([])
@@ -98,7 +103,6 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
   const scaleRef = useRef(1)
   const pointerX = useRef(BASE_CONFIG.canvas.width / 2)
   const pointerActive = useRef(false)
-  const focusHeld = useRef(false)
 
   const resetStage = useCallback(
     (stageNum, keepScore = true) => {
@@ -107,6 +111,9 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       setBalls([createBall(stageNum)])
       setShadowSaves(stats.shadowSaves)
       setFocusGauge(stats.focusMax)
+      setFocusBurst(0)
+      setFocusCooldown(0)
+      setFocusActive(false)
       setEffects({})
       setItems([])
       setLastTs(0)
@@ -122,8 +129,9 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
 
   useEffect(() => {
     const handleBlur = () => {
-      focusHeld.current = false
+      setFocusBurst(0)
       setFocusActive(false)
+      setFocusCooldown(0)
     }
     window.addEventListener('blur', handleBlur)
     return () => window.removeEventListener('blur', handleBlur)
@@ -153,10 +161,11 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
     setLives((prev) => prev - 1)
     setBalls([createBall(stage)])
     setFocusGauge(stats.focusMax)
+    setFocusBurst(0)
+    setFocusCooldown(0)
+    setFocusActive(false)
     setEffects({})
     setItems([])
-    setFocusActive(false)
-    focusHeld.current = false
   }, [stage, stats.focusMax])
 
   const updateBalls = useCallback(
@@ -354,19 +363,18 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       const clampedMs = Math.min(dtMs, BASE_CONFIG.dtClampMs)
       const dtSec = clampedMs / 1000
 
-      const wantFocus = focusHeld.current
-      const canFocus = wantFocus && focusGauge > 0
+      const nextCooldown = Math.max(0, focusCooldown - dtSec)
+      let nextBurst = focusBurst
       let nextGauge = focusGauge
       let timeScale = 1
+      let active = false
 
-      if (canFocus) {
-        timeScale = stats.focusTimeScale
-        nextGauge = Math.max(0, focusGauge - dtSec)
-        if (nextGauge === 0) {
-          focusHeld.current = false
-        }
-      } else {
-        nextGauge = Math.min(stats.focusMax, focusGauge + dtSec * 0.5)
+      if (nextBurst > 0 && nextGauge > 0) {
+        const consume = Math.min(dtSec, nextBurst, nextGauge)
+        nextBurst = Math.max(0, nextBurst - consume)
+        nextGauge = Math.max(0, nextGauge - consume)
+        timeScale = FOCUS_TIMESCALE
+        active = true
       }
 
       const simDt = dtSec * timeScale
@@ -375,8 +383,10 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       updateItems(simDt)
       clearEffects()
 
-      if (focusActive !== canFocus) setFocusActive(canFocus)
+      if (focusActive !== active) setFocusActive(active)
       if (nextGauge !== focusGauge) setFocusGauge(nextGauge)
+      if (nextBurst !== focusBurst) setFocusBurst(nextBurst)
+      if (nextCooldown !== focusCooldown) setFocusCooldown(nextCooldown)
 
       setLastTs(ts)
 
@@ -472,8 +482,9 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
   useEffect(() => {
     const handleKey = (e) => {
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
-        const active = e.type === 'keydown'
-        handleFocusToggle(active)
+        if (e.type === 'keydown') {
+          triggerFocusBurst()
+        }
       }
       if (e.code === 'Space' && e.type === 'keydown') {
         if (balls.length === 0) {
@@ -519,7 +530,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       window.removeEventListener('keydown', handleKey)
       window.removeEventListener('keyup', handleKey)
     }
-  }, [balls.length, handleFocusToggle, stage, stats.paddleSpeed, stats.paddleWidth])
+  }, [balls.length, stage, stats.paddleSpeed, stats.paddleWidth, triggerFocusBurst])
 
   useEffect(() => {
     if (gameState === GAME_STATE.RUNNING && lives <= 0) {
@@ -551,23 +562,13 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
     }
   }
 
-  const handleFocusToggle = useCallback(
-    (active) => {
-      if (!active) {
-        focusHeld.current = false
-        setFocusActive(false)
-        return
-      }
-      if (focusGauge <= 0) {
-        focusHeld.current = false
-        setFocusActive(false)
-        return
-      }
-      focusHeld.current = true
-      setFocusActive(true)
-    },
-    [focusGauge]
-  )
+  const triggerFocusBurst = useCallback(() => {
+    if (focusCooldown > 0) return
+    if (focusGauge <= 0) return
+    const use = Math.min(FOCUS_BURST_SEC, focusGauge)
+    setFocusBurst((prev) => Math.max(prev, use))
+    setFocusCooldown(FOCUS_TAP_COOLDOWN_SEC)
+  }, [focusCooldown, focusGauge])
 
   return (
     <Box
@@ -612,19 +613,11 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
           variant={focusActive ? 'contained' : 'outlined'}
           onPointerDown={(e) => {
             e.preventDefault()
-            handleFocusToggle(true)
+            triggerFocusBurst()
           }}
-          onPointerUp={(e) => {
+          onClick={(e) => {
             e.preventDefault()
-            handleFocusToggle(false)
-          }}
-          onPointerCancel={(e) => {
-            e.preventDefault()
-            handleFocusToggle(false)
-          }}
-          onPointerLeave={(e) => {
-            e.preventDefault()
-            handleFocusToggle(false)
+            triggerFocusBurst()
           }}
           disabled={focusGauge <= 0 || gameState !== GAME_STATE.RUNNING}
         >
