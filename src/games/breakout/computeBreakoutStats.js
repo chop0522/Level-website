@@ -26,7 +26,7 @@ export function computeBreakoutStats(userInfo = {}) {
   const pGamble = norm(xp.gamble)
   const pQuiz = norm(xp.quiz)
 
-  const paddleSpeed = 650 + 300 * pLight
+  const paddleSpeed = 520 + 220 * pLight
   const paddleWidth = 120 + 80 * pParty
   const startLives = 3 + (pParty >= 0.55 ? 1 : 0) + (pParty >= 0.85 ? 1 : 0)
 

@@ -10,6 +10,8 @@ import {
   FOCUS_BURST_SEC,
   FOCUS_TAP_COOLDOWN_SEC,
   FOCUS_TIMESCALE,
+  TOUCH_SENSITIVITY,
+  TOUCH_SPEED_MULT,
 } from '../../games/breakout/breakoutConfig'
 import { submitBreakoutRun } from '../../services/api'
 
@@ -103,6 +105,11 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
   const scaleRef = useRef(1)
   const pointerX = useRef(BASE_CONFIG.canvas.width / 2)
   const pointerActive = useRef(false)
+  const paddleTargetX = useRef(BASE_CONFIG.canvas.width / 2)
+  const isDragging = useRef(false)
+  const dragPointerId = useRef(null)
+  const dragStartX = useRef(0)
+  const paddleStartX = useRef(BASE_CONFIG.canvas.width / 2)
 
   const resetStage = useCallback(
     (stageNum, keepScore = true) => {
@@ -174,10 +181,21 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       const paddleEffectWide = effects.WIDE
       const paddleWidth = stats.paddleWidth * (paddleEffectWide ? 1.4 : 1)
       const paddleY = BASE_CONFIG.canvas.height - 40
-      const paddleX = Math.max(
-        paddleWidth / 2,
-        Math.min(pointerX.current, BASE_CONFIG.canvas.width - paddleWidth / 2)
-      )
+      const maxX = BASE_CONFIG.canvas.width - paddleWidth / 2
+      const minX = paddleWidth / 2
+      const targetX = Math.max(minX, Math.min(paddleTargetX.current, maxX))
+      const currentX = Math.max(minX, Math.min(pointerX.current, maxX))
+      let nextPaddleX = currentX
+
+      if (isDragging.current) {
+        const maxStep = stats.paddleSpeed * TOUCH_SPEED_MULT * dt
+        const diff = targetX - currentX
+        const step = Math.max(-maxStep, Math.min(maxStep, diff))
+        nextPaddleX = currentX + step
+      }
+
+      pointerX.current = nextPaddleX
+      const paddleX = nextPaddleX
       const speedScale = effects.SLOW ? 0.7 : 1
       const ballRadius = BASE_CONFIG.ballRadius
       const newItems = []
@@ -438,10 +456,8 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
 
     const paddleEffectWide = effects.WIDE
     const paddleWidth = stats.paddleWidth * (paddleEffectWide ? 1.4 : 1)
-    const paddleX = Math.max(
-      paddleWidth / 2,
-      Math.min(pointerX.current, BASE_CONFIG.canvas.width - paddleWidth / 2)
-    )
+    const rawPaddleX = pointerX.current
+    const paddleX = Math.max(paddleWidth / 2, Math.min(rawPaddleX, BASE_CONFIG.canvas.width - paddleWidth / 2))
     const paddleY = BASE_CONFIG.canvas.height - 40
     ctx.fillStyle = COLORS.paddle
     ctx.fillRect(paddleX - paddleWidth / 2, paddleY, paddleWidth, 14)
@@ -501,6 +517,10 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       }
       if (['ArrowLeft', 'KeyA'].includes(e.code)) {
         if (e.type === 'keydown') pointerActive.current = true
+        if (e.type === 'keyup') {
+          pointerActive.current = false
+          return
+        }
         const dir = e.type === 'keydown' ? -1 : 0
         const move = () => {
           if (dir === 0) return
@@ -517,6 +537,10 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       }
       if (['ArrowRight', 'KeyD'].includes(e.code)) {
         if (e.type === 'keydown') pointerActive.current = true
+        if (e.type === 'keyup') {
+          pointerActive.current = false
+          return
+        }
         const dir = e.type === 'keydown' ? 1 : 0
         const move = () => {
           if (dir === 0) return
@@ -546,21 +570,87 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
     }
   }, [gameState, handleGameOver, lives])
 
-  const handlePointer = (clientX) => {
+  const toLogicalX = useCallback((clientX) => {
     const rect = canvasRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const x = ((clientX - rect.left) * BASE_CONFIG.canvas.width) / rect.width
-    pointerX.current = Math.max(stats.paddleWidth / 2, Math.min(x, BASE_CONFIG.canvas.width - stats.paddleWidth / 2))
+    if (!rect) return pointerX.current
+    return ((clientX - rect.left) * BASE_CONFIG.canvas.width) / rect.width
+  }, [])
+
+  const clampPaddleX = useCallback((x, paddleWidth) => {
+    return Math.max(paddleWidth / 2, Math.min(x, BASE_CONFIG.canvas.width - paddleWidth / 2))
+  }, [])
+
+  const handlePointerDown = useCallback(
+    (clientX, pointerId = 0) => {
+      const paddleEffectWide = effects.WIDE
+      const paddleWidth = stats.paddleWidth * (paddleEffectWide ? 1.4 : 1)
+      const x = clampPaddleX(toLogicalX(clientX), paddleWidth)
+      pointerActive.current = false
+      isDragging.current = true
+      dragPointerId.current = pointerId
+      dragStartX.current = x
+      paddleStartX.current = pointerX.current
+      paddleTargetX.current = pointerX.current
+    },
+    [clampPaddleX, effects.WIDE, stats.paddleWidth, toLogicalX]
+  )
+
+  const handlePointerMoveDrag = useCallback(
+    (clientX, pointerId = 0) => {
+      if (!isDragging.current) return
+      if (dragPointerId.current !== null && dragPointerId.current !== pointerId) return
+      const paddleEffectWide = effects.WIDE
+      const paddleWidth = stats.paddleWidth * (paddleEffectWide ? 1.4 : 1)
+      const x = toLogicalX(clientX)
+      const dx = (x - dragStartX.current) * TOUCH_SENSITIVITY
+      const target = clampPaddleX(paddleStartX.current + dx, paddleWidth)
+      paddleTargetX.current = target
+    },
+    [clampPaddleX, effects.WIDE, stats.paddleWidth, toLogicalX]
+  )
+
+  const handlePointerEnd = useCallback(
+    (pointerId = 0) => {
+      if (dragPointerId.current !== null && dragPointerId.current !== pointerId) return
+      isDragging.current = false
+      dragPointerId.current = null
+    },
+    []
+  )
+
+  const onPointerDown = (e) => {
+    e.preventDefault()
+    handlePointerDown(e.clientX, e.pointerId ?? 0)
   }
 
   const onPointerMove = (e) => {
-    handlePointer(e.clientX)
+    if (!isDragging.current) return
+    e.preventDefault()
+    handlePointerMoveDrag(e.clientX, e.pointerId ?? 0)
+  }
+
+  const onPointerUp = (e) => {
+    e.preventDefault()
+    handlePointerEnd(e.pointerId ?? 0)
+  }
+
+  const onTouchStart = (e) => {
+    const t = e.touches[0]
+    if (!t) return
+    e.preventDefault()
+    handlePointerDown(t.clientX, t.identifier ?? 0)
   }
 
   const onTouchMove = (e) => {
-    e.preventDefault()
     const t = e.touches[0]
-    if (t) handlePointer(t.clientX)
+    if (!t) return
+    e.preventDefault()
+    handlePointerMoveDrag(t.clientX, t.identifier ?? 0)
+  }
+
+  const onTouchEnd = (e) => {
+    const t = e.changedTouches[0]
+    handlePointerEnd(t?.identifier ?? 0)
   }
 
   const onCanvasClick = () => {
@@ -602,8 +692,14 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
           left: '50%',
           touchAction: 'none',
         }}
+        onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onPointerLeave={onPointerUp}
+        onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
         onClick={onCanvasClick}
         aria-label="Breakout game canvas"
       />
