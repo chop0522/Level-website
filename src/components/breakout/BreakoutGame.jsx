@@ -1,9 +1,21 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Box, Button, LinearProgress, Typography } from '@mui/material'
-import { BASE_CONFIG, COLORS, ITEM_TYPES } from '../../games/breakout/breakoutConfig'
+import {
+  BASE_CONFIG,
+  COLORS,
+  ITEM_TYPES,
+  BALL_SPEED_BASE,
+  BALL_SPEED_MAX,
+  BALL_SPEED_PER_STAGE,
+} from '../../games/breakout/breakoutConfig'
 import { submitBreakoutRun } from '../../services/api'
 
 const GAME_STATE = { READY: 'ready', RUNNING: 'running', OVER: 'over' }
+
+function getBallSpeed(stage = 1) {
+  const s = Math.max(1, Number(stage) || 1)
+  return Math.min(BALL_SPEED_BASE + (s - 1) * BALL_SPEED_PER_STAGE, BALL_SPEED_MAX)
+}
 
 function useAnimationFrame(callback, enabled) {
   const rafRef = useRef()
@@ -55,6 +67,18 @@ function pickItem(weights) {
   return entries[0][0]
 }
 
+function createBall(stage) {
+  const speed = getBallSpeed(stage)
+  const dir = { x: 0.45, y: -0.9 }
+  const len = Math.hypot(dir.x, dir.y) || 1
+  return {
+    x: BASE_CONFIG.canvas.width / 2,
+    y: BASE_CONFIG.canvas.height - 80,
+    vx: (dir.x / len) * speed,
+    vy: (dir.y / len) * speed,
+  }
+}
+
 export default function BreakoutGame({ runId, stats, onEnded }) {
   const [gameState, setGameState] = useState(GAME_STATE.RUNNING)
   const [stage, setStage] = useState(1)
@@ -74,12 +98,13 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
   const scaleRef = useRef(1)
   const pointerX = useRef(BASE_CONFIG.canvas.width / 2)
   const pointerActive = useRef(false)
+  const focusHeld = useRef(false)
 
   const resetStage = useCallback(
     (stageNum, keepScore = true) => {
       setStage(stageNum)
       setBlocks(createBlocks(stageNum))
-      setBalls([{ x: BASE_CONFIG.canvas.width / 2, y: BASE_CONFIG.canvas.height - 80, vx: 180, vy: -220 }])
+      setBalls([createBall(stageNum)])
       setShadowSaves(stats.shadowSaves)
       setFocusGauge(stats.focusMax)
       setEffects({})
@@ -94,6 +119,15 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
   useEffect(() => {
     resetStage(1, false)
   }, [resetStage])
+
+  useEffect(() => {
+    const handleBlur = () => {
+      focusHeld.current = false
+      setFocusActive(false)
+    }
+    window.addEventListener('blur', handleBlur)
+    return () => window.removeEventListener('blur', handleBlur)
+  }, [])
 
   const submitResult = useCallback(
     async (finalScore, finalStage, finalCleared) => {
@@ -117,11 +151,13 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
 
   const loseLife = useCallback(() => {
     setLives((prev) => prev - 1)
-    setBalls([{ x: BASE_CONFIG.canvas.width / 2, y: BASE_CONFIG.canvas.height - 80, vx: 180, vy: -220 }])
+    setBalls([createBall(stage)])
     setFocusGauge(stats.focusMax)
     setEffects({})
     setItems([])
-  }, [stats.focusMax])
+    setFocusActive(false)
+    focusHeld.current = false
+  }, [stage, stats.focusMax])
 
   const updateBalls = useCallback(
     (dt) => {
@@ -138,6 +174,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       const newItems = []
       const newBlocks = [...blocks]
       let addScore = 0
+      const baseBallSpeed = getBallSpeed(stage)
 
       nextBalls = nextBalls
         .map((ball) => {
@@ -145,7 +182,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
           const speed = Math.hypot(vx, vy) || 1
           const normVx = vx / speed
           const normVy = vy / speed
-          const targetSpeed = BASE_CONFIG.ballSpeed * speedScale
+          const targetSpeed = baseBallSpeed * speedScale
           vx = normVx * targetSpeed
           vy = normVy * targetSpeed
 
@@ -250,7 +287,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       setBlocks(newBlocks)
       setBalls(nextBalls)
     },
-    [balls, blocks, effects.SLOW, effects.WIDE, loseLife, shadowSaves, stats]
+    [balls, blocks, effects.SLOW, effects.WIDE, loseLife, shadowSaves, stage, stats]
   )
 
   const updateItems = useCallback(
@@ -313,20 +350,33 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
     (ts) => {
       if (gameState !== GAME_STATE.RUNNING) return
       const last = lastTs || ts
-      let dt = (ts - last) / 1000
-      if (dt > BASE_CONFIG.dtClampMs / 1000) dt = BASE_CONFIG.dtClampMs / 1000
+      const dtMs = ts - last
+      const clampedMs = Math.min(dtMs, BASE_CONFIG.dtClampMs)
+      const dtSec = clampedMs / 1000
 
-      const timeScale = focusActive ? stats.focusTimeScale : 1
-      const scaledDt = dt * timeScale
+      const wantFocus = focusHeld.current
+      const canFocus = wantFocus && focusGauge > 0
+      let nextGauge = focusGauge
+      let timeScale = 1
 
-      updateBalls(scaledDt)
-      updateItems(scaledDt)
+      if (canFocus) {
+        timeScale = stats.focusTimeScale
+        nextGauge = Math.max(0, focusGauge - dtSec)
+        if (nextGauge === 0) {
+          focusHeld.current = false
+        }
+      } else {
+        nextGauge = Math.min(stats.focusMax, focusGauge + dtSec * 0.5)
+      }
+
+      const simDt = dtSec * timeScale
+
+      updateBalls(simDt)
+      updateItems(simDt)
       clearEffects()
 
-      setFocusGauge((prev) => {
-        if (focusActive) return Math.max(0, prev - dt)
-        return Math.min(stats.focusMax, prev + dt * 0.5)
-      })
+      if (focusActive !== canFocus) setFocusActive(canFocus)
+      if (nextGauge !== focusGauge) setFocusGauge(nextGauge)
 
       setLastTs(ts)
 
@@ -422,11 +472,12 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
   useEffect(() => {
     const handleKey = (e) => {
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
-        setFocusActive(e.type === 'keydown' && focusGauge > 0)
+        const active = e.type === 'keydown'
+        handleFocusToggle(active)
       }
       if (e.code === 'Space' && e.type === 'keydown') {
         if (balls.length === 0) {
-          setBalls([{ x: BASE_CONFIG.canvas.width / 2, y: BASE_CONFIG.canvas.height - 80, vx: 180, vy: -220 }])
+          setBalls([createBall(stage)])
         }
       }
       if (['ArrowLeft', 'KeyA'].includes(e.code)) {
@@ -468,7 +519,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       window.removeEventListener('keydown', handleKey)
       window.removeEventListener('keyup', handleKey)
     }
-  }, [balls.length, focusGauge, stats.paddleSpeed, stats.paddleWidth])
+  }, [balls.length, handleFocusToggle, stage, stats.paddleSpeed, stats.paddleWidth])
 
   useEffect(() => {
     if (gameState === GAME_STATE.RUNNING && lives <= 0) {
@@ -496,17 +547,24 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
   const onCanvasClick = () => {
     if (gameState !== GAME_STATE.RUNNING) return
     if (balls.length === 0) {
-      setBalls([{ x: BASE_CONFIG.canvas.width / 2, y: BASE_CONFIG.canvas.height - 80, vx: 180, vy: -220 }])
+      setBalls([createBall(stage)])
     }
   }
 
   const handleFocusToggle = useCallback(
     (active) => {
-      if (focusGauge <= 0) {
+      if (!active) {
+        focusHeld.current = false
         setFocusActive(false)
         return
       }
-      setFocusActive(active)
+      if (focusGauge <= 0) {
+        focusHeld.current = false
+        setFocusActive(false)
+        return
+      }
+      focusHeld.current = true
+      setFocusActive(true)
     },
     [focusGauge]
   )
@@ -552,13 +610,19 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
         <Button
           size="small"
           variant={focusActive ? 'contained' : 'outlined'}
-          onMouseDown={() => handleFocusToggle(true)}
-          onMouseUp={() => handleFocusToggle(false)}
-          onTouchStart={(e) => {
+          onPointerDown={(e) => {
             e.preventDefault()
             handleFocusToggle(true)
           }}
-          onTouchEnd={(e) => {
+          onPointerUp={(e) => {
+            e.preventDefault()
+            handleFocusToggle(false)
+          }}
+          onPointerCancel={(e) => {
+            e.preventDefault()
+            handleFocusToggle(false)
+          }}
+          onPointerLeave={(e) => {
             e.preventDefault()
             handleFocusToggle(false)
           }}
