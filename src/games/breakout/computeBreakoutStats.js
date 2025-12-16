@@ -1,8 +1,12 @@
 import { BASE_CONFIG } from './breakoutConfig'
 
-function xpToPower(xp = 0) {
-  const p = 1 - Math.exp(-xp / 400)
-  return Math.max(0, Math.min(1, p))
+const XP_CAP = 1000
+const XP_CURVE = 0.65
+
+function norm(xp = 0) {
+  const v = Number(xp) || 0
+  const t = Math.min(Math.max(v, 0), XP_CAP) / XP_CAP
+  return Math.pow(t, XP_CURVE)
 }
 
 export function computeBreakoutStats(userInfo = {}) {
@@ -15,23 +19,23 @@ export function computeBreakoutStats(userInfo = {}) {
     quiz: userInfo.xp_quiz || 0,
   }
 
-  const pHidden = xpToPower(xp.hidden)
-  const pHeavy = xpToPower(xp.heavy)
-  const pLight = xpToPower(xp.light)
-  const pParty = xpToPower(xp.party)
-  const pGamble = xpToPower(xp.gamble)
-  const pQuiz = xpToPower(xp.quiz)
+  const pHidden = norm(xp.hidden)
+  const pHeavy = norm(xp.heavy)
+  const pLight = norm(xp.light)
+  const pParty = norm(xp.party)
+  const pGamble = norm(xp.gamble)
+  const pQuiz = norm(xp.quiz)
 
-  const paddleSpeed = BASE_CONFIG.paddle.baseSpeed + 300 * pLight
-  const paddleWidth = BASE_CONFIG.paddle.baseWidth + 60 * pParty
-  const startLives = BASE_CONFIG.lives + (pParty >= 0.55 ? 1 : 0) + (pParty >= 0.85 ? 1 : 0)
+  const paddleSpeed = 900 + 450 * pLight
+  const paddleWidth = 120 + 80 * pParty
+  const startLives = 3 + (pParty >= 0.55 ? 1 : 0) + (pParty >= 0.85 ? 1 : 0)
 
-  const critChance = BASE_CONFIG.crit.baseChance + BASE_CONFIG.crit.bonus * pHeavy
-  const dropChance = BASE_CONFIG.drop.baseChance + BASE_CONFIG.drop.bonus * pGamble
-  const focusMax = BASE_CONFIG.focus.baseMax + 6 * pQuiz
+  const critChance = 0.05 + 0.15 * pHeavy
+  const dropChance = 0.03 + 0.09 * pGamble
+  const focusMax = 2 + 6 * pQuiz
   const focusTimeScale = BASE_CONFIG.focus.timeScale
   const reflectionNoiseDeg = 6 * (1 - pQuiz)
-  const shadowSaves = BASE_CONFIG.shadow.base + (pHidden >= 0.55 ? 1 : 0) + (pHidden >= 0.85 ? 1 : 0)
+  const shadowSaves = 1 + (pHidden >= 0.6 ? 1 : 0) + (pHidden >= 0.85 ? 1 : 0)
 
   // アイテム重み（ギャンブルでMULTI/LIFEを厚めに）
   const baseWeights = { WIDE: 1, SLOW: 1, MULTI: 1, LIFE: 1 }

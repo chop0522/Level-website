@@ -1,8 +1,8 @@
 export const BASE_CONFIG = {
   canvas: { width: 900, height: 600 },
-  ballSpeed: 320,
+  ballSpeed: 380,
   ballRadius: 8,
-  paddle: { baseWidth: 120, baseSpeed: 700 },
+  paddle: { baseWidth: 120, baseSpeed: 900 },
   lives: 3,
   block: {
     baseRows: 4,
@@ -17,7 +17,7 @@ export const BASE_CONFIG = {
   },
   focus: {
     baseMax: 2,
-    timeScale: 0.55,
+    timeScale: 0.6,
   },
   shadow: {
     base: 1,
@@ -29,12 +29,12 @@ export const BASE_CONFIG = {
   },
   crit: {
     baseChance: 0.05,
-    bonus: 0.2,
+    bonus: 0.15,
     damage: 2,
   },
   drop: {
-    baseChance: 0.08,
-    bonus: 0.12,
+    baseChance: 0.03,
+    bonus: 0.09,
     durationMs: 10000,
   },
   dtClampMs: 33,
@@ -56,3 +56,7 @@ export const COLORS = {
     LIFE: '#81c784',
   },
 }
+
+export const BALL_SPEED_BASE = 380
+export const BALL_SPEED_PER_STAGE = 18
+export const BALL_SPEED_MAX = 620
