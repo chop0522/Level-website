@@ -46,6 +46,11 @@ export default function BreakoutPage() {
       if (!res || res.error || !res.runId) {
         setError(res?.error || 'プレイ開始に失敗しました')
       } else {
+        try {
+          sessionStorage.setItem('breakoutRunId', String(res.runId))
+        } catch (_) {
+          // ignore sessionStorage failures (Safari private mode等)
+        }
         navigate('/mypage/breakout/play', { state: { runId: res.runId } })
       }
     } catch (e) {
@@ -133,7 +138,7 @@ export default function BreakoutPage() {
             </Button>
           </Stack>
           <Typography variant="body2">
-            操作: ← → / A D で移動、Spaceで発射、Shiftでフォーカス。モバイルはドラッグで移動、タップで発射、右下ボタンでフォーカス。
+            操作: ← → / A D で移動、Spaceで発射、Shift/FOCUSボタンで「短時間スロー（ゲージ消費）」。モバイルはドラッグで移動、タップで発射、右下FOCUSをタップで短時間スロー。
           </Typography>
         </Grid>
 

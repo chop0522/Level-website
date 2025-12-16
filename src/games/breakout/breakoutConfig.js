@@ -60,3 +60,7 @@ export const COLORS = {
 export const BALL_SPEED_BASE = 380
 export const BALL_SPEED_PER_STAGE = 18
 export const BALL_SPEED_MAX = 620
+
+export const FOCUS_TIMESCALE = 0.6
+export const FOCUS_BURST_SEC = 0.8
+export const FOCUS_TAP_COOLDOWN_SEC = 0.15

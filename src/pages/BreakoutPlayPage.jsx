@@ -11,13 +11,22 @@ export default function BreakoutPlayPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { userInfo } = useContext(AuthContext)
-  const runId = location.state?.runId || null
+  const runId = location.state?.runId || (() => {
+    try {
+      return sessionStorage.getItem('breakoutRunId')
+    } catch (_) {
+      return null
+    }
+  })()
 
   useEffect(() => {
-    if (!runId) {
-      navigate('/mypage/breakout', { replace: true })
+    if (!runId) return
+    try {
+      sessionStorage.setItem('breakoutRunId', String(runId))
+    } catch (_) {
+      // ignore
     }
-  }, [navigate, runId])
+  }, [runId])
 
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -30,10 +39,43 @@ export default function BreakoutPlayPage() {
   const stats = useMemo(() => computeBreakoutStats(userInfo || {}), [userInfo])
 
   const handleEnd = () => {
+    try {
+      sessionStorage.removeItem('breakoutRunId')
+    } catch (_) {
+      // ignore
+    }
     navigate('/mypage/breakout', { replace: true })
   }
 
-  if (!runId) return null
+  if (!runId) {
+    return (
+      <>
+        <Helmet>
+          <title>ブロック崩し プレイ中</title>
+          <meta name="robots" content="noindex,nofollow" />
+        </Helmet>
+        <Box
+          sx={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 5000,
+            bgcolor: '#000',
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            gap: 2,
+          }}
+        >
+          <Box>プレイを開始できませんでした。ロビーに戻ります。</Box>
+          <Button variant="contained" size="small" onClick={() => navigate('/mypage/breakout', { replace: true })}>
+            戻る
+          </Button>
+        </Box>
+      </>
+    )
+  }
 
   return (
     <>
