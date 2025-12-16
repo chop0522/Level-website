@@ -479,6 +479,14 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
     ctx.fillText(`Focus ${focusGauge.toFixed(1)}s`, 20, 84)
   }, [balls, blocks, effects.WIDE, focusGauge, items, lives, score, shadowSaves, stage, stats.paddleWidth])
 
+  const triggerFocusBurst = useCallback(() => {
+    if (focusCooldown > 0) return
+    if (focusGauge <= 0) return
+    const use = Math.min(FOCUS_BURST_SEC, focusGauge)
+    setFocusBurst((prev) => Math.max(prev, use))
+    setFocusCooldown(FOCUS_TAP_COOLDOWN_SEC)
+  }, [focusCooldown, focusGauge])
+
   useEffect(() => {
     const handleKey = (e) => {
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
@@ -561,14 +569,6 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       setBalls([createBall(stage)])
     }
   }
-
-  const triggerFocusBurst = useCallback(() => {
-    if (focusCooldown > 0) return
-    if (focusGauge <= 0) return
-    const use = Math.min(FOCUS_BURST_SEC, focusGauge)
-    setFocusBurst((prev) => Math.max(prev, use))
-    setFocusCooldown(FOCUS_TAP_COOLDOWN_SEC)
-  }, [focusCooldown, focusGauge])
 
   return (
     <Box
