@@ -46,6 +46,11 @@ export default function BreakoutPage() {
       if (!res || res.error || !res.runId) {
         setError(res?.error || 'プレイ開始に失敗しました')
       } else {
+        try {
+          sessionStorage.setItem('breakoutRunId', String(res.runId))
+        } catch (_) {
+          // ignore sessionStorage failures (Safari private mode等)
+        }
         navigate('/mypage/breakout/play', { state: { runId: res.runId } })
       }
     } catch (e) {
