@@ -211,8 +211,21 @@ export default function MahjongPage() {
                     <TableCell>{i + 1}</TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <UserAvatar id={r.id} size={28} sx={{ mr: 1 }} />
-                        <Typography component="span">{r.name}</Typography>
+                        <Box
+                          component={RouterLink}
+                          to={`/profile/${r.id}`}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            textDecoration: 'none',
+                            color: 'inherit',
+                          }}
+                        >
+                          <UserAvatar id={r.id} size={28} />
+                          <Typography component="span" sx={{ ml: 1 }}>
+                            {r.name}
+                          </Typography>
+                        </Box>
                         <Chip
                           label={lifetimeRank.label}
                           size="small"
