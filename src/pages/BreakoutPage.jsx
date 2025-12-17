@@ -1,9 +1,22 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { Box, Button, Card, CardContent, Divider, Grid, Stack, Typography, Alert } from '@mui/material'
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
+  Stack,
+  Typography,
+  Alert,
+  Switch,
+  FormControlLabel,
+} from '@mui/material'
 import { Helmet } from 'react-helmet-async'
 import { useNavigate } from 'react-router-dom'
 import { AuthContext } from '../contexts/TokenContext'
 import { computeBreakoutStats } from '../games/breakout/computeBreakoutStats'
+import { initSfx, playSfx, setSfxEnabled as setGlobalSfxEnabled } from '../games/breakout/breakoutSfx'
 import { getBreakoutStatus, startBreakoutRun } from '../services/api'
 
 function StatRow({ label, value }) {
@@ -18,11 +31,13 @@ function StatRow({ label, value }) {
 }
 
 export default function BreakoutPage() {
+  const SFX_KEY = 'breakout_sfx_enabled'
   const { userInfo } = useContext(AuthContext)
   const navigate = useNavigate()
   const [status, setStatus] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [sfxEnabled, setSfxEnabled] = useState(false)
   const stats = useMemo(() => computeBreakoutStats(userInfo || {}), [userInfo])
 
   const loadStatus = useCallback(async () => {
@@ -38,10 +53,24 @@ export default function BreakoutPage() {
     loadStatus()
   }, [loadStatus])
 
+  useEffect(() => {
+    let stored = null
+    try {
+      stored = localStorage.getItem(SFX_KEY)
+    } catch (_) {
+      stored = null
+    }
+    const next = stored === 'true'
+    setSfxEnabled(next)
+    setGlobalSfxEnabled(next)
+  }, [])
+
   const handleStart = async () => {
     setLoading(true)
     setError('')
     try {
+      await initSfx()
+      playSfx('focus')
       const res = await startBreakoutRun()
       if (!res || res.error || !res.runId) {
         setError(res?.error || 'プレイ開始に失敗しました')
@@ -58,6 +87,20 @@ export default function BreakoutPage() {
     } finally {
       setLoading(false)
       loadStatus()
+    }
+  }
+
+  const handleSfxToggle = async (event) => {
+    const next = event.target.checked
+    setSfxEnabled(next)
+    setGlobalSfxEnabled(next)
+    try {
+      localStorage.setItem(SFX_KEY, String(next))
+    } catch (_) {
+      // ignore
+    }
+    if (next) {
+      await initSfx()
     }
   }
 
@@ -124,6 +167,21 @@ export default function BreakoutPage() {
                 <StatRow label="反射ノイズ (quiz)" value={`${stats.reflectionNoiseDeg.toFixed(1)}°`} />
                 <StatRow label="シャドーセーブ (hidden)" value={stats.shadowSaves} />
               </Stack>
+            </CardContent>
+          </Card>
+
+          <Card sx={{ mb: 2 }}>
+            <CardContent>
+              <Typography variant="h6" component="h2" gutterBottom>
+                効果音
+              </Typography>
+              <FormControlLabel
+                control={<Switch checked={sfxEnabled} onChange={handleSfxToggle} />}
+                label="SE"
+              />
+              <Typography variant="caption" color="text.secondary">
+                初回はOFFです。ONにするとプレイ中に効果音が鳴ります。
+              </Typography>
             </CardContent>
           </Card>
 

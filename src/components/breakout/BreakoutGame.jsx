@@ -11,6 +11,7 @@ import {
   FOCUS_TAP_COOLDOWN_SEC,
   FOCUS_TIMESCALE,
 } from '../../games/breakout/breakoutConfig'
+import { playSfx } from '../../games/breakout/breakoutSfx'
 import { submitBreakoutRun } from '../../services/api'
 
 const GAME_STATE = { READY: 'ready', RUNNING: 'running', OVER: 'over' }
@@ -161,6 +162,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
 
   const loseLife = useCallback(() => {
     setLives((prev) => prev - 1)
+    playSfx('lifeLost')
     setBalls([createBall(stage)])
     setFocusGauge(stats.focusMax)
     setFocusBurst(0)
@@ -206,6 +208,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
               attachOffset,
             }
           }
+          let hitWall = false
           const speed = Math.hypot(vx, vy) || 1
           const normVx = vx / speed
           const normVy = vy / speed
@@ -219,14 +222,18 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
           if (x < ballRadius) {
             x = ballRadius
             vx = Math.abs(vx)
+            hitWall = true
           } else if (x > BASE_CONFIG.canvas.width - ballRadius) {
             x = BASE_CONFIG.canvas.width - ballRadius
             vx = -Math.abs(vx)
+            hitWall = true
           }
           if (y < ballRadius) {
             y = ballRadius
             vy = Math.abs(vy)
+            hitWall = true
           }
+          if (hitWall) playSfx('wall')
 
           if (
             y + ballRadius >= paddleY &&
@@ -240,6 +247,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
               const offsetLimit = paddleWidth / 2 - ballRadius
               const attachOffset = Math.max(-offsetLimit, Math.min(x - paddleX, offsetLimit))
               catchCooldownRef.current = stats.catchCooldownSec || 0
+              playSfx('catch')
               return {
                 ...ball,
                 x: paddleX + attachOffset,
@@ -257,6 +265,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
             vx = Math.sin(angle) * speedAfter
             vy = -Math.abs(Math.cos(angle) * speedAfter)
             y = paddleY - ballRadius - 1
+            playSfx('paddle')
           }
 
           for (const block of newBlocks) {
@@ -292,6 +301,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
                 block.hp -= dmg
                 if (block.hp <= 0) {
                   addScore += BASE_CONFIG.score.destroy * block.baseHp
+                  playSfx(block.baseHp >= 2 ? 'brickHard' : 'brick')
                   if (Math.random() < stats.dropChance) {
                     newItems.push({
                       type: pickItem(stats.itemWeights),
@@ -299,6 +309,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
                       y: block.y,
                       vy: 120,
                     })
+                    playSfx('itemDrop')
                   }
                 }
               }
@@ -359,6 +370,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
             ...prev,
             [item.type]: now + BASE_CONFIG.drop.durationMs,
           }))
+          playSfx('itemGet')
           if (item.type === 'MULTI') {
             setBalls((prev) => {
               if (prev.some((b) => b.attached)) return prev
@@ -434,6 +446,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       if (totalBlocks.length === 0 || aliveBlocks.length === 0) {
         const bonus = stage * BASE_CONFIG.score.clearStage + lives * BASE_CONFIG.score.lifeBonus
         setScore((prev) => prev + bonus)
+        playSfx('stageClear')
         resetStage(stage + 1, true)
       }
     },
@@ -522,6 +535,7 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
     const use = Math.min(FOCUS_BURST_SEC, focusGauge)
     setFocusBurst((prev) => Math.max(prev, use))
     setFocusCooldown(FOCUS_TAP_COOLDOWN_SEC)
+    playSfx('focus')
   }, [focusCooldown, focusGauge])
 
   const handleLaunch = useCallback(() => {
