@@ -183,6 +183,7 @@ function createUserRouter({
         SELECT id, name, avatar_url, bio,
                xp_total, xp_stealth, xp_heavy, xp_light,
                xp_party, xp_gamble, xp_quiz,
+               total_pt, monthly_pt,
                is_public
           FROM users
          WHERE id = $1
@@ -211,6 +212,44 @@ function createUserRouter({
       }
 
       delete profile.is_public
+
+      try {
+        const {
+          rows: [mjStats],
+        } = await pool.query(
+          `SELECT 
+              COALESCE(MAX(final_score), 0) AS highest_score,
+              COALESCE(AVG(final_score), 0) AS average_score,
+              COALESCE(AVG(rank), 0) AS average_rank,
+              COALESCE(COUNT(*) FILTER (WHERE rank = 1), 0) AS rank1_count,
+              COALESCE(COUNT(*) FILTER (WHERE rank = 2), 0) AS rank2_count,
+              COALESCE(COUNT(*) FILTER (WHERE rank = 3), 0) AS rank3_count,
+              COALESCE(COUNT(*) FILTER (WHERE rank = 4), 0) AS rank4_count,
+              COALESCE(COUNT(*), 0) AS game_count
+           FROM public.mahjong_games
+           WHERE user_id = $1 AND (is_test IS NOT TRUE)`,
+          [userId]
+        )
+        profile.highest_score = Number(mjStats?.highest_score ?? 0)
+        profile.average_score = Number(mjStats?.average_score ?? 0)
+        profile.average_rank = Number(mjStats?.average_rank ?? 0)
+        profile.rank1_count = Number(mjStats?.rank1_count ?? 0)
+        profile.rank2_count = Number(mjStats?.rank2_count ?? 0)
+        profile.rank3_count = Number(mjStats?.rank3_count ?? 0)
+        profile.rank4_count = Number(mjStats?.rank4_count ?? 0)
+        profile.game_count = Number(mjStats?.game_count ?? 0)
+      } catch (e) {
+        console.warn('failed to fetch mahjong stats for public profile:', e?.message || e)
+        profile.highest_score = 0
+        profile.average_score = 0
+        profile.average_rank = 0
+        profile.rank1_count = 0
+        profile.rank2_count = 0
+        profile.rank3_count = 0
+        profile.rank4_count = 0
+        profile.game_count = 0
+      }
+
       res.json({ success: true, profile })
     } catch (err) {
       console.error(err)

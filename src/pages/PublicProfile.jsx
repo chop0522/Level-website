@@ -6,6 +6,9 @@ import {
   Typography,
   Grid,
   Button,
+  Stack,
+  Chip,
+  Tooltip as MuiTooltip,
   Snackbar,
   Alert,
   keyframes,
@@ -18,6 +21,7 @@ import XPCard from '../components/xp/XPCard'
 import MyPageNav from '../components/MyPageNav'
 import { Helmet } from 'react-helmet-async'
 import { XP_CATEGORIES, getRankByXP, getBadgeAsset } from '../utils/rankConfig'
+import { getRankFromPoint } from '../utils/mahjongRank'
 
 /**
  * 公開プロフィールページ（閲覧専用 + ハイタッチ）
@@ -32,6 +36,18 @@ const highfiveKF = keyframes`
   80%  { transform: scale(1.05); }
   100% { transform: scale(1); }
 `
+
+const formatAverageScore = (value) => {
+  const num = Number(value)
+  if (!Number.isFinite(num)) return '0'
+  return Math.round(num).toLocaleString('ja-JP')
+}
+
+const formatAverageRank = (value) => {
+  const num = Number(value)
+  if (!Number.isFinite(num)) return '0.00'
+  return num.toFixed(2)
+}
 export default function PublicProfile() {
   const { id } = useParams()
   const { token, userInfo } = useContext(AuthContext)
@@ -90,6 +106,11 @@ export default function PublicProfile() {
     )
   }
 
+  const rankInfo = getRankFromPoint(profile?.total_pt || 0)
+  const hasMahjongGames = (profile?.game_count ?? 0) > 0
+  const averageScoreLabel = hasMahjongGames ? formatAverageScore(profile?.average_score) : '-'
+  const averageRankLabel = hasMahjongGames ? formatAverageRank(profile?.average_rank) : '-'
+
   return (
     <Container sx={{ mt: 4 }}>
       <Helmet>
@@ -111,9 +132,16 @@ export default function PublicProfile() {
             animation: anim ? `${highfiveKF} 0.7s ease-in-out` : 'none',
           }}
         />
-        <Typography variant="h5" component="h1">
-          {profile.name || `User ${id}`}
-        </Typography>
+        <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+          <Typography variant="h5" component="h1">
+            {profile.name || `User ${id}`}
+          </Typography>
+          <Chip
+            label={rankInfo.label}
+            size="small"
+            sx={{ bgcolor: rankInfo.color, color: '#fff' }}
+          />
+        </Stack>
         {profile.bio && (
           <Typography variant="body2" sx={{ mt: 1 }}>
             {profile.bio}
@@ -133,6 +161,35 @@ export default function PublicProfile() {
             友情パワー: {friendship}
           </Typography>
         )}
+      </Card>
+
+      <Card sx={{ p: 2, mt: 2 }}>
+        <Typography variant="h6" gutterBottom>
+          麻雀成績
+        </Typography>
+        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+          <Chip label={`通算 ${profile?.total_pt ?? 0}`} size="small" color="primary" />
+          <Chip label={`今月 ${profile?.monthly_pt ?? 0}`} size="small" color="success" />
+        </Stack>
+        <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }}>
+          <MuiTooltip title="これまでの最終持ち点の最高値">
+            <Chip
+              label={`最高得点 ${profile?.highest_score ?? 0}`}
+              size="small"
+              color="secondary"
+            />
+          </MuiTooltip>
+          <MuiTooltip title="これまでの最終持ち点の平均値">
+            <Chip label={`平均得点 ${averageScoreLabel}`} size="small" color="info" />
+          </MuiTooltip>
+          <MuiTooltip title="これまでの平均順位 (低いほど良い)">
+            <Chip label={`平均順位 ${averageRankLabel}`} size="small" variant="outlined" />
+          </MuiTooltip>
+          <Chip label={`1位 ${profile?.rank1_count ?? 0}回`} size="small" variant="outlined" />
+          <Chip label={`2位 ${profile?.rank2_count ?? 0}回`} size="small" variant="outlined" />
+          <Chip label={`3位 ${profile?.rank3_count ?? 0}回`} size="small" variant="outlined" />
+          <Chip label={`4位 ${profile?.rank4_count ?? 0}回`} size="small" variant="outlined" />
+        </Stack>
       </Card>
 
       {/* XP Cards */}
