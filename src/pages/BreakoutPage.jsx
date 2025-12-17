@@ -114,9 +114,10 @@ export default function BreakoutPage() {
                 XPによる効果
               </Typography>
               <Stack spacing={1}>
-                <StatRow label="パドル速度 (light)" value={`${Math.round(stats.paddleSpeed)} px/s`} />
                 <StatRow label="パドル幅 (party)" value={`${Math.round(stats.paddleWidth)} px`} />
                 <StatRow label="初期ライフ (party)" value={stats.startLives} />
+                <StatRow label="キャッチ率 (light)" value={`${Math.round((stats.catchChance || 0) * 100)}%`} />
+                <StatRow label="キャッチCT (light)" value={`${(stats.catchCooldownSec || 0).toFixed(1)}s`} />
                 <StatRow label="クリティカル (heavy)" value={`${Math.round(stats.critChance * 100)}%`} />
                 <StatRow label="ドロップ率 (gamble)" value={`${Math.round(stats.dropChance * 100)}%`} />
                 <StatRow label="フォーカス秒 (quiz)" value={`${stats.focusMax.toFixed(1)}s`} />
