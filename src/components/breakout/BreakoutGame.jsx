@@ -188,18 +188,22 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       const newBlocks = [...blocks]
       let addScore = 0
       const baseBallSpeed = getBallSpeed(stage)
+      const canCatchSingle = balls.length === 1 && catchCooldownRef.current <= 0
 
       nextBalls = nextBalls
         .map((ball) => {
           let { x, y, vx, vy } = ball
           if (ball.attached) {
+            const offsetLimit = paddleWidth / 2 - ballRadius
+            const attachOffset = Math.max(-offsetLimit, Math.min(ball.attachOffset || 0, offsetLimit))
             return {
               ...ball,
-              x: paddleX,
+              x: paddleX + attachOffset,
               y: paddleY - ballRadius - 1,
               vx: 0,
               vy: 0,
               attached: true,
+              attachOffset,
             }
           }
           const speed = Math.hypot(vx, vy) || 1
@@ -231,17 +235,19 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
             x <= paddleX + paddleWidth / 2 &&
             vy > 0
           ) {
-            const canCatch =
-              catchCooldownRef.current <= 0 && Math.random() < (stats.catchChance || 0)
+            const canCatch = canCatchSingle && Math.random() < (stats.catchChance || 0)
             if (canCatch) {
+              const offsetLimit = paddleWidth / 2 - ballRadius
+              const attachOffset = Math.max(-offsetLimit, Math.min(x - paddleX, offsetLimit))
               catchCooldownRef.current = stats.catchCooldownSec || 0
               return {
                 ...ball,
-                x: paddleX,
+                x: paddleX + attachOffset,
                 y: paddleY - ballRadius - 1,
                 vx: 0,
                 vy: 0,
                 attached: true,
+                attachOffset,
               }
             }
             const rel = (x - paddleX) / (paddleWidth / 2)
@@ -354,7 +360,13 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
             [item.type]: now + BASE_CONFIG.drop.durationMs,
           }))
           if (item.type === 'MULTI') {
-            setBalls((prev) => [...prev, ...prev.map((b) => ({ ...b, vx: -b.vx }))])
+            setBalls((prev) => {
+              if (prev.some((b) => b.attached)) return prev
+              return [
+                ...prev,
+                ...prev.map((b) => ({ ...b, vx: -b.vx, attached: false, attachOffset: 0 })),
+              ]
+            })
           }
           if (item.type === 'LIFE') {
             setLives((l) => l + 1)
@@ -526,15 +538,17 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
       if (hasAttached) {
         return prev.map((b) => {
           if (!b.attached) return b
-          const dirX = Math.random() < 0.5 ? -0.45 : 0.45
-          const vx = dirX * speed
+          const offset = b.attachOffset ?? b.x - paddleX
+          const t = Math.max(-1, Math.min(1, offset / (paddleWidth / 2)))
+          const vx = t * 0.7 * speed
           const vy = -Math.sqrt(Math.max(speed * speed - vx * vx, 0))
           return {
-            x: paddleX,
+            x: paddleX + offset,
             y: launchY,
             vx,
             vy,
             attached: false,
+            attachOffset: 0,
           }
         })
       }
@@ -652,6 +666,8 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
     handleLaunch()
   }
 
+  const hasAttached = balls.some((b) => b.attached)
+
   return (
     <Box
       ref={containerRef}
@@ -695,6 +711,25 @@ export default function BreakoutGame({ runId, stats, onEnded }) {
         onClick={onCanvasClick}
         aria-label="Breakout game canvas"
       />
+      {hasAttached && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 16,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            px: 2,
+            py: 0.75,
+            bgcolor: 'rgba(0,0,0,0.6)',
+            borderRadius: 1,
+            border: '1px solid rgba(255,255,255,0.3)',
+          }}
+        >
+          <Typography variant="body2" color="common.white">
+            タップ / Space で発射
+          </Typography>
+        </Box>
+      )}
       <Box sx={{ position: 'absolute', right: 12, bottom: 12 }}>
         <Button
           size="small"

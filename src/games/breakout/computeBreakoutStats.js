@@ -30,8 +30,8 @@ export function computeBreakoutStats(userInfo = {}) {
   const paddleWidth = 120 + 80 * pParty
   const startLives = 3 + (pParty >= 0.55 ? 1 : 0) + (pParty >= 0.85 ? 1 : 0)
 
-  const catchChance = 0.03 + 0.17 * pLight
-  const catchCooldownSec = 3 - 2 * pLight
+  const catchChance = 0.03 + 0.12 * pLight
+  const catchCooldownSec = 2.5 - 1.5 * pLight
 
   const critChance = 0.05 + 0.15 * pHeavy
   const dropChance = 0.03 + 0.09 * pGamble
