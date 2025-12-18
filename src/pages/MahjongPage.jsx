@@ -235,6 +235,12 @@ export default function MahjongPage() {
                             ml: 1,
                           }}
                         />
+                        <Chip
+                          label={`今月 ${r.monthly_games ?? r.games ?? 0}戦`}
+                          size="small"
+                          variant="outlined"
+                          sx={{ ml: 1 }}
+                        />
                       </Box>
                     </TableCell>
                     <TableCell align="right">{r.monthly_pt}</TableCell>

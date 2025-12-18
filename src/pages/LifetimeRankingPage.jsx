@@ -105,6 +105,12 @@ export default function LifetimeRankingPage() {
                             color: '#fff',
                           }}
                         />
+                        <Chip
+                          label={`通算 ${r.game_count ?? 0}戦`}
+                          size="small"
+                          variant="outlined"
+                          sx={{ ml: 1 }}
+                        />
                       </Box>
                     </TableCell>
                     <TableCell align="right">{r.total_pt}</TableCell>
