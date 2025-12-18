@@ -375,6 +375,7 @@ function createMahjongRouter({
           u.id,
           u.name,
           m.total_points AS monthly_pt,
+          m.games AS monthly_games,
           COALESCE(u.total_pt, 0) AS total_pt
         FROM public.mahjong_monthly m
         JOIN public.users u ON u.id = m.user_id
@@ -398,7 +399,11 @@ function createMahjongRouter({
     try {
       const limit = Math.min(parseInt(req.query.limit || '100', 10), 200)
       const sql = `
-        SELECT u.id, u.name, COALESCE(u.total_pt, 0) AS total_pt
+        SELECT u.id, u.name, COALESCE(u.total_pt, 0) AS total_pt,
+               (
+                 SELECT COUNT(*) FROM public.mahjong_games g
+                  WHERE g.user_id = u.id AND (g.is_test IS NOT TRUE)
+               ) AS game_count
           FROM public.users u
          WHERE u.role <> 'admin'
            AND EXISTS (
