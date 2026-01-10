@@ -361,12 +361,13 @@ function Home() {
           <Typography variant="h6" component="h3" sx={{ mt: 2, fontWeight: 'bold' }}>
             『お知らせ』
           </Typography>
-          <Typography variant="body2" sx={{ mt: 0.5 }}>
-            年末年始の営業について
-            12月29、30日は13時から営業致します、こちらの日程は土日祝日料金となります。
-            12月31日は貸切営業となっております。
-            新年1月は3日土曜日13時から営業予定となります。
-            2025年もたくさんのご来店ありがとうございました。2026年もよろしくお願いいたします。
+          <Typography variant="body2" sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>
+            {`1月イベント情報
+1月15日19時30分　テキサスホールデム会
+1月25日14時　クイズ会
+イベントは当店のオープンチャットや公式ラインからご予約も可能です。
+イベント追加料金などはございません。
+皆様のご参加をお待ちしております。`}
           </Typography>
         </Paper>
       </Container>
