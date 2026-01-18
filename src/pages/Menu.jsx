@@ -29,10 +29,18 @@ function Menu() {
             <Typography variant="h5" component="h2" gutterBottom>
               プレイ料金
             </Typography>
-            <Typography variant="body1">
-              30分 300円 ／ 4時間パック 1,200円 ／ 1日パック 2,400円
-              <br />
-              ワンドリンク制 (ソフトドリンク 300円 / アルコール 500円)
+            <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+              {`平日
+30分 300円
+4時間パック 1,200円
+1日パック 2,400円
+
+土日祝日
+30分 400円
+4時間パック 1,600円
+1日パック 2,800円
+
+ワンドリンク制 (ソフトドリンク 300円 / アルコール 500円)`}
             </Typography>
           </Paper>
         </Box>
