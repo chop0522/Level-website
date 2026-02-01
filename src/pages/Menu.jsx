@@ -52,47 +52,83 @@ function Menu() {
             </Typography>
 
             <Typography variant="h6" component="h3" gutterBottom sx={{ mt: 2 }}>
-              ALL 500円 (アルコール系)
+              ソフトドリンク
             </Typography>
-            <Typography variant="body1">
-              <strong>Highball</strong>
-              <br />
-              ・角ハイボール
-              <br />
-              ・ビームハイボール
-              <br />
-              <br />
-              <strong>Cocktail</strong>
-              <br />
-              ・カシスオレンジ / カシスソーダ / ジントニック / パライングレープフルーツ /
-              チャイナブルー / ピーチウーロン / ピーチグレープフルーツ / カルーアミルク /
-              カルーアオレンジ / マリブコーク / マリブオレンジ / マリブサーフ / スクリュードライバー
-              / ブルドッグ / テキーラ(ショット) / イエガーマイスター(ショット) /
-              <br />
-              <br />
-              <strong>Whisky</strong>
-              <br />
-              ・角 (ロック/ソーダ/水割り)
-              <br />
-              ・ジムビーム
-              <br />
-              <br />
-              <strong>Wine</strong>
-              <br />
-              ・グラスワイン (赤/白)
-              <br />
-              <br />
-              <strong>Plum-Wine (梅酒)</strong>
-              <br />
-              ・ロック / ソーダ
+            <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+              {`ホットカフェオレ　450円
+カフェオレ　400円
+ホットココア　400円
+
+350円
+ホットミルク
+ホットウーロン
+ホット緑茶
+オレンジジュース
+コーヒー
+トマトジュース
+
+300円
+アップル
+ジンジャーエール
+コーラ
+メロンソーダ
+ウーロン茶
+緑茶
+ミルク`}
             </Typography>
 
-            <Typography variant="h6" component="h3" gutterBottom sx={{ mt: 2 }}>
-              ALL 300円 (ソフトドリンク)
+            <Typography variant="h6" component="h3" gutterBottom sx={{ mt: 3 }}>
+              アルコール
             </Typography>
-            <Typography variant="body1">
-              ・オレンジジュース / ジンジャーエール / コーラ / メロンソーダ / トマトジュース /
-              アップルジュース / ウーロン茶 / 緑茶 / コーヒー
+            <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+              {`スパークリングワイン　3,500円
+（ボトル）
+
+エルディンガーヴァイスビール（瓶）　1,050円
+コロナビール（瓶）　950円
+カルスバーグビール（瓶）　850円
+
+角　550円
+（ハイボール/水割り/ロック）
+
+ジムビーム　500円
+（ハイボール/水割り/ロック）
+
+レモンサワー　500円
+
+カクテル 600円
+ホワイトルシアン　／　ブラッディマリー
+
+カクテル 550円
+カシスオレンジ
+カシスウーロン
+カシスソーダ
+カシスアップル
+カシスジンジャー
+カシスミルク
+パライソオレンジ
+ライチグレープティー
+ファジーネーブル
+ピーチウーロン
+ピーチフィズ
+ピーチジンジャー
+スクリュードライバー
+ジントニック
+ジンバック
+モスコミュール
+
+500円
+テキーラショット
+イェーガーマイスターショット
+ラムショット
+梅酒（ロック/ソーダ）
+グラスワイン（白/赤）
+ウーロンハイ
+緑茶ハイ
+タコハイ`}
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 2 }}>
+              ※価格はすべて税込表示です
             </Typography>
           </Paper>
         </Box>
