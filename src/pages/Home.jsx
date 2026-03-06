@@ -1,5 +1,5 @@
 // src/pages/Home.jsx
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import {
   Container,
   Box,
@@ -16,6 +16,7 @@ import {
 import { Link as RouterLink } from 'react-router-dom'
 import { styled } from '@mui/material/styles'
 import { Helmet } from 'react-helmet-async'
+import { AuthContext } from '../contexts/TokenContext'
 
 /* ▼ Big-Calendar */
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar'
@@ -74,6 +75,8 @@ const locales = { ja }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
 
 function Home() {
+  const { userRole } = useContext(AuthContext)
+  const isAdmin = userRole === 'admin'
   const [events, setEvents] = useState([])
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -111,8 +114,16 @@ function Home() {
     fetchEvents()
   }, [])
 
+  useEffect(() => {
+    if (!isAdmin && showDeleteModal) {
+      setShowDeleteModal(false)
+      setSelectedEvent(null)
+    }
+  }, [isAdmin, showDeleteModal])
+
   /* ② 新規イベント追加 */
   const handleSelectSlot = async (slotInfo) => {
+    if (!isAdmin) return
     const token = localStorage.getItem('token')
     if (!token) {
       alert('ログインが必要です (管理者のみ編集可能)')
@@ -154,6 +165,7 @@ function Home() {
 
   /* ③ クリック → 削除モーダル */
   const handleSelectEvent = (event) => {
+    if (!isAdmin) return
     setSelectedEvent(event)
     setShowDeleteModal(true)
   }
@@ -161,6 +173,11 @@ function Home() {
   /* ④ 削除実行 */
   const handleDeleteEvent = async () => {
     if (!selectedEvent) return
+    if (!isAdmin) {
+      setShowDeleteModal(false)
+      setSelectedEvent(null)
+      return
+    }
     const token = localStorage.getItem('token')
     if (!token) {
       alert('ログインが必要です (管理者のみ編集可能)')
@@ -187,6 +204,7 @@ function Home() {
 
   /* ⑤ ドラッグ移動／リサイズ */
   const handleEventDropOrResize = async ({ event, start, end, allDay }) => {
+    if (!isAdmin) return
     const token = localStorage.getItem('token')
     if (!token) {
       alert('ログインが必要です (管理者のみ編集可能)')
@@ -362,14 +380,10 @@ function Home() {
             『お知らせ』
           </Typography>
           <Typography variant="body2" sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>
-            {`2月イベント情報
-2月11日　TRPG会
-2月19日　テキサスホールデム会
-2月22日　クイズ会
-
-3月イベント情報
+            {`3月イベント情報
 3月19日　テキサスホールデム会
 3月22日　初心者クイズ会
+3月22日　TRPG会
 3月29日　クイズ会
 イベントは当店のオープンチャットや公式ラインからご予約も可能です。
 イベント追加料金などはございません。
@@ -418,10 +432,10 @@ function Home() {
                 startAccessor="start"
                 endAccessor="end"
                 style={{ height: '100%' }}
-                selectable
-                onSelectSlot={handleSelectSlot}
-                onSelectEvent={handleSelectEvent}
-                draggableAccessor={() => true}
+                selectable={isAdmin}
+                onSelectSlot={isAdmin ? handleSelectSlot : undefined}
+                onSelectEvent={isAdmin ? handleSelectEvent : undefined}
+                draggableAccessor={() => isAdmin}
                 onEventDrop={handleEventDropOrResize}
                 onEventResize={handleEventDropOrResize}
               />
@@ -492,13 +506,26 @@ function Home() {
       </Container>
 
       {/* ---------- 削除モーダル ---------- */}
-      <Dialog open={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
+      <Dialog
+        open={isAdmin && showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setSelectedEvent(null)
+        }}
+      >
         <DialogTitle>イベント削除確認</DialogTitle>
         <DialogContent>
           {selectedEvent && <Typography>「{selectedEvent.title}」を削除しますか？</Typography>}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowDeleteModal(false)}>戻る</Button>
+          <Button
+            onClick={() => {
+              setShowDeleteModal(false)
+              setSelectedEvent(null)
+            }}
+          >
+            戻る
+          </Button>
           <Button color="error" variant="contained" onClick={handleDeleteEvent}>
             削除
           </Button>
