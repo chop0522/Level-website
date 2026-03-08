@@ -1,10 +1,10 @@
 /* src/components/Footer.module.css */
 .footer {
-  padding: 10px 20px;
+  padding: 24px 20px 18px;
   border-top: 1px solid #ccc;
-  text-align: center;
   font-size: 0.9rem;
   color: #666;
+  background: #fff;
   /* 日本語とローマ字を同じ書体に統一 */
   font-family:
     'Noto Sans JP',
@@ -19,6 +19,67 @@
   letter-spacing: 0.02em;
 }
 
-.footer p {
+.inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: grid;
+  gap: 20px;
+}
+
+.primary,
+.nav,
+.sns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.heading,
+.subheading {
   margin: 0;
+  color: #153047;
+}
+
+.heading {
+  font-size: 1.1rem;
+}
+
+.subheading {
+  font-size: 0.95rem;
+}
+
+.address,
+.meta,
+.copyright {
+  margin: 0;
+  font-style: normal;
+  line-height: 1.7;
+}
+
+.nav {
+  font-weight: 600;
+}
+
+.link {
+  color: #005a9c;
+  text-decoration: none;
+}
+
+.link:hover,
+.link:focus-visible {
+  text-decoration: underline;
+}
+
+.copyright {
+  max-width: 1120px;
+  margin: 18px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+@media (min-width: 720px) {
+  .inner {
+    grid-template-columns: 2fr 1fr 1fr;
+    align-items: start;
+  }
 }

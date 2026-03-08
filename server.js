@@ -5,10 +5,15 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const cors = require('cors')
 const path = require('path')
-const dayjs = require('dayjs')
 const { Pool } = require('pg')
 const upload = require('./uploadConfig')
 const { calcMahjongPoint } = require('./utils/mahjong')
+const {
+  buildRobotsTxt,
+  buildSitemapXml,
+  renderPublicPageHtml,
+  getPageByPath,
+} = require('./utils/seoShell')
 
 const {
   DATABASE_URL,
@@ -138,18 +143,7 @@ app.use(
 
 // --- SEO assets ---
 app.get('/robots.txt', (_req, res) => {
-  const robots = [
-    'User-agent: *',
-    'Disallow: /admin',
-    'Disallow: /mypage',
-    'Disallow: /login',
-    'Disallow: /signup',
-    'Disallow: /achievements',
-    'Disallow: /mahjong',
-    'Disallow: /qr',
-    'Sitemap: https://gamecafe-level.com/sitemap.xml',
-  ].join('\n')
-  res.type('text/plain').send(robots)
+  res.type('text/plain').send(buildRobotsTxt())
 })
 
 const NOINDEX_PATHS = ['/mypage', '/mypage/*', '/login', '/signup', '/achievements', '/mahjong', '/mahjong/*', '/qr']
@@ -161,35 +155,7 @@ app.get(NOINDEX_PATHS, (_req, res) => {
 
 app.get('/sitemap.xml', (_req, res) => {
   try {
-    const base = 'https://gamecafe-level.com'
-    const urls = [
-      { loc: `${base}/`, changefreq: 'weekly', priority: '1.0' },
-      { loc: `${base}/menu`, changefreq: 'monthly', priority: '0.7' },
-      { loc: `${base}/faq`, changefreq: 'monthly', priority: '0.6' },
-      { loc: `${base}/leaderboard`, changefreq: 'weekly', priority: '0.8' },
-      { loc: `${base}/equipment`, changefreq: 'monthly', priority: '0.6' },
-      { loc: `${base}/reservation`, changefreq: 'monthly', priority: '0.6' },
-    ]
-
-    const xmlItems = urls
-      .map((u) =>
-        [
-          '<url>',
-          `<loc>${u.loc}</loc>`,
-          `<lastmod>${dayjs().format('YYYY-MM-DD')}</lastmod>`,
-          `<changefreq>${u.changefreq}</changefreq>`,
-          `<priority>${u.priority}</priority>`,
-          '</url>',
-        ].join('')
-      )
-      .join('')
-
-    const xml =
-      `<?xml version="1.0" encoding="UTF-8"?>` +
-      `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` +
-      xmlItems +
-      `</urlset>`
-    res.type('application/xml').send(xml)
+    res.type('application/xml').send(buildSitemapXml())
   } catch (err) {
     console.error(err)
     res.status(500).type('text/plain').send('sitemap error')
@@ -199,6 +165,7 @@ app.get('/sitemap.xml', (_req, res) => {
 // --- Static assets ---
 app.use(
   express.static(path.join(__dirname, 'build'), {
+    index: false,
     maxAge: '365d',
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('index.html')) {
@@ -209,6 +176,19 @@ app.use(
 )
 
 app.get('*', (_req, res) => {
+  const pageEntry = getPageByPath(_req.path)
+
+  if (pageEntry) {
+    res.setHeader('Cache-Control', 'no-cache')
+    res.type('html').send(
+      renderPublicPageHtml(_req.path, {
+        buildDir: path.join(__dirname, 'build'),
+        googleSiteVerification: process.env.GOOGLE_SITE_VERIFICATION || '',
+      })
+    )
+    return
+  }
+
   res.setHeader('Cache-Control', 'no-cache')
   res.sendFile(path.join(__dirname, 'build', 'index.html'))
 })

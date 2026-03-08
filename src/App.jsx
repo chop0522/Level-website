@@ -8,6 +8,7 @@ import Footer from './components/Footer'
 import { Helmet, HelmetProvider } from 'react-helmet-async'
 import './styles/skipLink.css'
 import theme from './theme'
+import businessInfo from './config/businessInfo.json'
 
 /* =========================================
    1) lazy‑import するページ群
@@ -21,6 +22,7 @@ const FAQ = lazy(() => import('./pages/FAQ'))
 const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'))
 const PublicProfile = lazy(() => import('./pages/PublicProfile'))
 const Equipment = lazy(() => import('./pages/Equipment'))
+const Access = lazy(() => import('./pages/Access'))
 const Reservation = lazy(() => import('./pages/Reservation'))
 const BreakoutPage = lazy(() => import('./pages/BreakoutPage'))
 const BreakoutLeaderboardPage = lazy(() => import('./pages/BreakoutLeaderboardPage'))
@@ -90,52 +92,34 @@ function App() {
         value={{ token, setToken, userRole, userInfo, setUserInfo, handleLogout }}
       >
         {/* ---------- 共通メタ ---------- */}
-        <Helmet
-          defaultTitle="ゲームカフェ.Level｜行徳のボードゲーム＆麻雀カフェ"
-          titleTemplate="%s｜ゲームカフェ.Level"
-        >
+        <Helmet defaultTitle={businessInfo.name}>
           <html lang="ja" />
-          <meta
-            name="description"
-            content="千葉県市川市・行徳駅徒歩5分、ボードゲーム＆麻雀カフェ『ゲームカフェ.Level』公式サイト。営業時間・料金・設備、月間麻雀ランキングを掲載。公式LINEで予約受付中。"
-          />
+          <meta name="description" content={businessInfo.description} />
           <meta name="format-detection" content="telephone=no" />
 
           {/* OGP / Twitter Card (site-wide defaults) */}
           <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="ゲームカフェ.Level" />
-          <meta property="og:title" content="ゲームカフェ.Level" />
+          <meta property="og:site_name" content={businessInfo.name} />
+          <meta property="og:title" content={businessInfo.name} />
+          <meta property="og:description" content={businessInfo.description} />
+          <meta property="og:url" content={businessInfo.siteUrl} />
           <meta
-            property="og:description"
-            content="行徳駅徒歩5分、1000種類以上のボードゲーム＆麻雀。料金・設備・アクセス、最新の麻雀ランキングを掲載。"
+            property="og:image"
+            content={`${businessInfo.siteUrl.slice(0, -1)}${businessInfo.defaultOgImage}`}
           />
-          <meta property="og:url" content="https://gamecafe-level.com/" />
-          <meta property="og:image" content="https://gamecafe-level.com/ogp/home.jpg" />
           <meta property="og:locale" content="ja_JP" />
 
           <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content="ゲームカフェ.Level" />
+          <meta name="twitter:title" content={businessInfo.name} />
+          <meta name="twitter:description" content={businessInfo.description} />
           <meta
-            name="twitter:description"
-            content="行徳駅徒歩5分、1000種類以上のボードゲーム＆麻雀カフェ。最新情報とランキングはこちら。"
+            name="twitter:image"
+            content={`${businessInfo.siteUrl.slice(0, -1)}${businessInfo.defaultOgImage}`}
           />
-          <meta name="twitter:image" content="https://gamecafe-level.com/ogp/home.jpg" />
 
           {/* hreflang（日本語のみ） */}
-          <link rel="alternate" hrefLang="ja" href="https://gamecafe-level.com/" />
-          <link rel="alternate" hrefLang="x-default" href="https://gamecafe-level.com/" />
-
-          {/* WebSite 構造化データ（サイト全体） */}
-          <script type="application/ld+json">
-            {JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'WebSite',
-              name: 'ゲームカフェ.Level',
-              url: 'https://gamecafe-level.com/',
-              inLanguage: 'ja',
-              sameAs: ['https://lin.ee/CWJf4Ui'],
-            })}
-          </script>
+          <link rel="alternate" hrefLang="ja" href={businessInfo.siteUrl} />
+          <link rel="alternate" hrefLang="x-default" href={businessInfo.siteUrl} />
         </Helmet>
 
         <div style={appStyle}>
@@ -159,6 +143,7 @@ function App() {
                 <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/profile/:id" element={<PublicProfile />} />
                 <Route path="/equipment" element={<Equipment />} />
+                <Route path="/access" element={<Access />} />
                 <Route path="/reservation" element={<Reservation />} />
                 <Route path="/qr" element={<QRPage />} />
 

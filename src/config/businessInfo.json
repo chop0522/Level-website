@@ -1,0 +1,49 @@
+{
+  "name": "ゲームカフェ.Level",
+  "siteUrl": "https://gamecafe-level.com/",
+  "description": "ゲームカフェ.Levelの公式サイトです。千葉県市川市湊新田の店舗情報、メニュー、アクセス、利用案内を掲載しています。",
+  "address": {
+    "postalCode": "272-0132",
+    "addressRegion": "千葉県",
+    "addressLocality": "市川市",
+    "streetAddress": "湊新田2-1-18",
+    "addressCountry": "JP"
+  },
+  "displayAddress": "〒272-0132 千葉県市川市湊新田2-1-18",
+  "telephone": "050-5449-3088",
+  "openingHours": [
+    {
+      "label": "平日",
+      "schemaDays": ["Tuesday", "Wednesday", "Thursday", "Friday"],
+      "opens": "15:00",
+      "closes": "24:00"
+    },
+    {
+      "label": "土日祝",
+      "schemaDays": ["Saturday", "Sunday"],
+      "opens": "13:00",
+      "closes": "24:00"
+    }
+  ],
+  "closedDayNote": "定休日：月曜",
+  "menuUrl": "https://gamecafe-level.com/menu",
+  "accessUrl": "https://gamecafe-level.com/access",
+  "faqUrl": "https://gamecafe-level.com/faq",
+  "reservationUrl": "https://gamecafe-level.com/reservation",
+  "xUrl": "https://x.com/GamecafeLevel",
+  "instagramUrl": "https://www.instagram.com/gamecafe.level/",
+  "lineUrl": "https://lin.ee/pyc6UjM",
+  "sameAs": ["https://x.com/GamecafeLevel", "https://www.instagram.com/gamecafe.level/"],
+  "logoPath": "/icons/icon-512.png",
+  "defaultOgImage": "/icons/icon-512.png",
+  "googleMapsEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3240.867767207533!2d139.90914127620368!3d35.6802578300267!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188768af217c7b%3A0x42dc8c85cafabf51!2z44Ky44O844Og44Kr44OV44KnLkxldmVs!5e0!3m2!1sja!2sjp!4v1741783603258!5m2!1sja!2sjp",
+  "googleMapsPlaceUrl": "https://www.google.com/maps?cid=0x42dc8c85cafabf51",
+  "searchConsole": {
+    "verificationEnvName": "GOOGLE_SITE_VERIFICATION",
+    "verificationToken": ""
+  },
+  "todo": {
+    "searchConsoleVerification": "TODO: GOOGLE_SITE_VERIFICATION を本番環境変数に設定してください。",
+    "logoImage": "TODO: 公式ロゴ画像の差し替えが必要なら logoPath を更新してください。"
+  }
+}

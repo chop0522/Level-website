@@ -1,0 +1,44 @@
+{
+  "home": {
+    "path": "/",
+    "label": "ホーム",
+    "title": "ゲームカフェ.Level | 千葉県市川市のゲームカフェ",
+    "description": "ゲームカフェ.Levelの公式サイトです。千葉県市川市湊新田の店舗情報、メニュー、アクセス、利用案内はこちら。",
+    "includeInSitemap": true
+  },
+  "menu": {
+    "path": "/menu",
+    "label": "メニュー",
+    "title": "メニュー | ゲームカフェ.Level",
+    "description": "ゲームカフェ.Levelのプレイ料金とドリンクメニューを掲載しています。GBP からも案内しやすい公式メニューページです。",
+    "includeInSitemap": true
+  },
+  "access": {
+    "path": "/access",
+    "label": "アクセス・店舗情報",
+    "title": "アクセス・店舗情報 | ゲームカフェ.Level",
+    "description": "ゲームカフェ.Levelの住所、公式URL、公式SNS、アクセス情報を掲載しています。",
+    "includeInSitemap": true
+  },
+  "faq": {
+    "path": "/faq",
+    "label": "よくある質問",
+    "title": "よくある質問 | ゲームカフェ.Level",
+    "description": "ゲームカフェ.Levelの料金、予約方法、飲食、支払い方法などのよくある質問をまとめています。",
+    "includeInSitemap": true
+  },
+  "equipment": {
+    "path": "/equipment",
+    "label": "設備紹介",
+    "title": "設備紹介 | ゲームカフェ.Level",
+    "description": "ゲームカフェ.Levelの店内設備やボードゲーム棚、全自動麻雀卓などの写真と案内を掲載しています。",
+    "includeInSitemap": true
+  },
+  "reservation": {
+    "path": "/reservation",
+    "label": "予約案内",
+    "title": "予約案内 | ゲームカフェ.Level",
+    "description": "ゲームカフェ.Levelの予約案内ページです。公式LINEからの予約方法を掲載しています。",
+    "includeInSitemap": true
+  }
+}
