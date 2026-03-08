@@ -8,10 +8,12 @@
     "dev": "nodemon server.js",
     "prebuild": "node scripts/generate-seo-assets.js",
     "build": "react-scripts build",
+    "postbuild": "node scripts/generate-prerendered-pages.js",
     "postinstall": "npm run build",
     "lint": "eslint src --ext .js,.jsx",
     "lint:fix": "eslint src --ext .js,.jsx --fix",
-    "format": "prettier --write \"src/**/*.{js,jsx,css,md,ts,tsx}\""
+    "format": "prettier --write \"src/**/*.{js,jsx,css,md,ts,tsx}\"",
+    "verify:seo": "node scripts/verify-seo.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
