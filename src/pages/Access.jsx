@@ -21,9 +21,7 @@ function Access() {
             アクセス・店舗情報
           </Typography>
           <Typography variant="body1" paragraph>
-            {businessInfo.name}の公式店舗情報ページです。Google
-            ビジネスプロフィールや検索結果から見つけた方にも、
-            住所と公式導線が分かるようにまとめています。
+            {businessInfo.name}の住所とアクセス情報を掲載しています。
           </Typography>
           <Box component="address" sx={{ fontStyle: 'normal', lineHeight: 1.8 }}>
             <Typography variant="body1">{businessInfo.name}</Typography>
