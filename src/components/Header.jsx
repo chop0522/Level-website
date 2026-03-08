@@ -52,6 +52,9 @@ function Header() {
           <NavLink to="/menu" className={navLinkClass}>
             Menu
           </NavLink>
+          <NavLink to="/access" className={navLinkClass}>
+            Access
+          </NavLink>
           <NavLink to="/equipment" className={navLinkClass}>
             Equipment
           </NavLink>

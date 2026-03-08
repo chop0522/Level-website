@@ -1,21 +1,32 @@
 // src/pages/FAQ.jsx
 import React from 'react'
-import { Container, Typography, Accordion, AccordionSummary, AccordionDetails } from '@mui/material'
+import {
+  Container,
+  Typography,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Paper,
+} from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { Helmet } from 'react-helmet-async'
+import SeoHead from '../components/SeoHead'
+import PublicPageLinks from '../components/PublicPageLinks'
+import businessInfo from '../config/businessInfo.json'
 
 function FAQ() {
   return (
     <>
-      <Helmet>
-        <title>よくある質問</title>
-        <link rel="canonical" href="https://gamecafe-level.com/faq" />
-        <meta
-          name="description"
-          content="料金や予約方法、飲食の持ち込み、支払い方法などゲームカフェ.Levelへのよくある質問をまとめました。行徳駅近くのボードゲームカフェです。"
-        />
-      </Helmet>
+      <SeoHead pageKey="faq" />
       <Container sx={{ mt: 4, mb: 4 }}>
+        <Paper sx={{ p: 3, mb: 4 }}>
+          <Typography variant="body1" paragraph>
+            {businessInfo.name}の公式サイトに掲載している、よくある質問のまとめです。
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            店舗情報: {businessInfo.displayAddress}
+          </Typography>
+        </Paper>
+
         <Typography variant="h4" component="h1" gutterBottom>
           よくあるご質問 (FAQ)
         </Typography>
@@ -153,17 +164,21 @@ function FAQ() {
             <Typography variant="body1" paragraph>
               ・その他の問い合わせは公式LINEからお願いします。
               <br />　
-              <a href="https://lin.ee/pyc6UjM" target="_blank" rel="noopener noreferrer">
-                https://lin.ee/pyc6UjM
+              <a href={businessInfo.lineUrl} target="_blank" rel="noopener noreferrer">
+                {businessInfo.lineUrl}
               </a>
             </Typography>
             <Typography variant="body1" paragraph>
-              ・電話: 050-5449-3088（LINE優先）
+              ・電話: {businessInfo.telephone}（LINE優先）
               <br />
               メール: 現在受け付けておりません（LINEへ）
             </Typography>
           </AccordionDetails>
         </Accordion>
+
+        <Paper sx={{ p: 3, mt: 4 }}>
+          <PublicPageLinks />
+        </Paper>
       </Container>
     </>
   )

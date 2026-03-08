@@ -1,3 +1,11 @@
 User-agent: *
 Allow: /
+Disallow: /mypage
+Disallow: /mypage/
+Disallow: /login
+Disallow: /signup
+Disallow: /achievements
+Disallow: /mahjong
+Disallow: /mahjong/
+Disallow: /qr
 Sitemap: https://gamecafe-level.com/sitemap.xml

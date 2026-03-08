@@ -1,30 +1,29 @@
 // src/pages/Menu.jsx
 import React from 'react'
 import { Container, Paper, Typography, Box } from '@mui/material'
-import { Helmet } from 'react-helmet-async'
+import SeoHead from '../components/SeoHead'
+import PublicPageLinks from '../components/PublicPageLinks'
+import businessInfo from '../config/businessInfo.json'
 
 function Menu() {
   return (
     <>
-      <Helmet>
-        <title>料金・ドリンクメニュー</title>
-        <link rel="canonical" href="https://gamecafe-level.com/menu" />
-        <meta
-          name="description"
-          content="平日/土日祝の利用料金やワンドリンク制の案内、アルコール・ソフトドリンクメニューを掲載。行徳駅徒歩数分のボードゲーム＆麻雀カフェ。"
-        />
-      </Helmet>
+      <SeoHead pageKey="menu" />
       <Container sx={{ mt: 4, mb: 4 }}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h4" component="h1" gutterBottom>
             メニュー
           </Typography>
           <Typography variant="body1" paragraph>
-            当店のフードメニュー・ドリンクメニュー・プレイ料金などを一覧にまとめています。
+            {businessInfo.name}
+            の公式メニューページです。プレイ料金と店内ドリンクメニューを掲載しています。
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            住所: {businessInfo.displayAddress}
           </Typography>
         </Paper>
 
-        <Box sx={{ mt: 4 }}>
+        <Box component="section" sx={{ mt: 4 }}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h5" component="h2" gutterBottom>
               プレイ料金
@@ -40,12 +39,12 @@ function Menu() {
 4時間パック 1,600円
 1日パック 2,800円
 
-ワンドリンク制 `}
+ワンドリンク制 (ソフトドリンク 300円 / アルコール 500円)`}
             </Typography>
           </Paper>
         </Box>
 
-        <Box sx={{ mt: 4 }}>
+        <Box component="section" sx={{ mt: 4 }}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h5" component="h2" gutterBottom>
               ドリンクメニュー
@@ -133,8 +132,7 @@ function Menu() {
           </Paper>
         </Box>
 
-        {/* 今後、軽食やフードメニューを追加する余地があれば... */}
-        <Box sx={{ mt: 4 }}>
+        <Box component="section" sx={{ mt: 4 }}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="body1">
               現在フードメニューはございませんが、隣のインドカレー屋さんやUber
@@ -142,6 +140,10 @@ function Menu() {
             </Typography>
           </Paper>
         </Box>
+
+        <Paper sx={{ p: 3, mt: 4 }}>
+          <PublicPageLinks />
+        </Paper>
       </Container>
     </>
   )

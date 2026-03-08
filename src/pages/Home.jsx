@@ -8,15 +8,21 @@ import {
   Grid,
   Paper,
   IconButton,
+  Link,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
 } from '@mui/material'
+import InstagramIcon from '@mui/icons-material/Instagram'
 import { Link as RouterLink } from 'react-router-dom'
 import { styled } from '@mui/material/styles'
 import { Helmet } from 'react-helmet-async'
 import { AuthContext } from '../contexts/TokenContext'
+import SeoHead from '../components/SeoHead'
+import PublicPageLinks from '../components/PublicPageLinks'
+import businessInfo from '../config/businessInfo.json'
+import { buildLocalBusinessJsonLd, buildOrganizationJsonLd, buildWebsiteJsonLd } from '../lib/seo'
 
 /* ▼ Big-Calendar */
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar'
@@ -38,15 +44,11 @@ import heroDogJpg from '../assets/images/heroDog.jpg'
 /* ▼ SNSアイコン画像 */
 import xIcon from '../assets/images/x-line-icon-communication-chat-message-photo-messenger-video-emoji-publications-subscribers-views-likes-comments-editorial_855332-4749.avif'
 import lineIcon from '../assets/images/icons8-line-48-2.png'
-import noteIcon from '../assets/images/icon.png'
 
 /* ▼ SNSアイコン（遅延表示） */
 const XIcon = () => <LazyLoadImage src={xIcon} alt="X" width="24" height="24" effect="opacity" />
 const LineIcon = () => (
   <LazyLoadImage src={lineIcon} alt="LINE" width="24" height="24" effect="opacity" />
-)
-const NoteIcon = () => (
-  <LazyLoadImage src={noteIcon} alt="Note" width="24" height="24" effect="opacity" />
 )
 
 /* ▼ Hero ラッパー */
@@ -77,6 +79,14 @@ const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales
 function Home() {
   const { userRole } = useContext(AuthContext)
   const isAdmin = userRole === 'admin'
+  const structuredData = [
+    buildLocalBusinessJsonLd(),
+    buildOrganizationJsonLd(),
+    buildWebsiteJsonLd(),
+  ]
+  const openingHoursLabel = businessInfo.openingHours
+    .map((item) => `${item.label} ${item.opens} - ${item.closes}`)
+    .join(' / ')
   const [events, setEvents] = useState([])
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -252,9 +262,8 @@ function Home() {
   /* ---------------------------- JSX ---------------------------- */
   return (
     <>
+      <SeoHead pageKey="home" structuredData={structuredData} />
       <Helmet>
-        <title>行徳のボードゲーム＆麻雀カフェ</title>
-        <link rel="canonical" href="https://gamecafe-level.com/" />
         <link
           rel="preload"
           as="image"
@@ -264,67 +273,6 @@ function Home() {
           type="image/webp"
           fetchPriority="high"
         />
-        <meta
-          name="description"
-          content="千葉県市川市・行徳駅徒歩5分。ボードゲーム＆麻雀カフェ『ゲームカフェ.Level』公式サイト。営業時間・料金・設備、月間麻雀ランキングを掲載。公式LINEで予約受付中。"
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content="ゲームカフェ.Level｜行徳のボードゲーム＆麻雀カフェ" />
-        <meta
-          property="og:description"
-          content="行徳駅徒歩5分、1000種類以上のボードゲームと全自動麻雀卓。料金・設備・アクセス、最新の麻雀ランキングを掲載。"
-        />
-        <meta property="og:url" content="https://gamecafe-level.com/" />
-        <meta property="og:image" content="https://gamecafe-level.com/ogp/home.jpg" />
-        <meta property="og:locale" content="ja_JP" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="ゲームカフェ.Level｜行徳のボードゲーム＆麻雀カフェ" />
-        <meta
-          name="twitter:description"
-          content="行徳駅徒歩5分、1000種類以上のボードゲームと全自動麻雀卓。料金・設備・アクセス、最新の麻雀ランキングを掲載。"
-        />
-        <meta name="twitter:image" content="https://gamecafe-level.com/ogp/home.jpg" />
-
-        {/* LocalBusiness structured data */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'LocalBusiness',
-            name: 'ゲームカフェ.Level',
-            image: 'https://gamecafe-level.com/ogp/home.jpg',
-            url: 'https://gamecafe-level.com/',
-            telephone: '+81-50-5449-3088',
-            address: {
-              '@type': 'PostalAddress',
-              postalCode: '272-0132',
-              addressCountry: 'JP',
-              addressRegion: '千葉県',
-              addressLocality: '市川市',
-              streetAddress: '湊新田2-1-18 ビアメゾンロジェール101',
-            },
-            openingHoursSpecification: [
-              {
-                '@type': 'OpeningHoursSpecification',
-                dayOfWeek: ['Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-                opens: '15:00',
-                closes: '23:59',
-              },
-              {
-                '@type': 'OpeningHoursSpecification',
-                dayOfWeek: ['Saturday', 'Sunday', 'PublicHolidays'],
-                opens: '13:00',
-                closes: '23:59',
-              },
-            ],
-            sameAs: [
-              'https://lin.ee/CWJf4Ui',
-              'https://x.com/GamecafeLevel',
-              'https://note.com/gamecafe_level',
-            ],
-            geo: { '@type': 'GeoCoordinates', latitude: 35.68025783, longitude: 139.909141276 },
-            hasMap: 'https://www.google.com/maps?cid=0x42dc8c85cafabf51',
-          })}
-        </script>
       </Helmet>
 
       {/* ---------- Hero ---------- */}
@@ -343,7 +291,7 @@ function Home() {
         </picture>
         <HeroOverlay>
           <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold' }}>
-            ゲームカフェ.Levelへようこそ！
+            {businessInfo.name}へようこそ
           </Typography>
           <Typography variant="h6" sx={{ mt: 1 }}>
             1000種類以上のボードゲームを取り揃えております。お一人様での相席、グループでのご来店も大歓迎です！
@@ -358,7 +306,7 @@ function Home() {
             当店のコンセプト
           </Typography>
           <Typography variant="body1">
-            ゲームカフェ.Levelは、ボードゲームを通じて人と人とのつながりを大切にする場所です。
+            {businessInfo.name}は、ボードゲームを通じて人と人とのつながりを大切にする場所です。
           </Typography>
         </Paper>
       </Container>
@@ -370,7 +318,7 @@ function Home() {
             営業情報
           </Typography>
           <Typography variant="body2">
-            平日 15:00 - 24:00 / 土日祝 13:00 - 24:00 / 定休日：月曜
+            {openingHoursLabel} / {businessInfo.closedDayNote}
           </Typography>
           <Typography variant="body2" sx={{ mt: 1 }}>
             月曜祝日も営業しております。
@@ -392,8 +340,27 @@ function Home() {
         </Paper>
       </Container>
 
+      <Container component="section" sx={{ mt: 4 }}>
+        <Paper sx={{ p: 3 }}>
+          <Typography variant="h4" component="h2" gutterBottom>
+            店舗情報
+          </Typography>
+          <Box component="address" sx={{ fontStyle: 'normal', lineHeight: 1.8 }}>
+            <Typography variant="body1">{businessInfo.name}</Typography>
+            <Typography variant="body1">{businessInfo.displayAddress}</Typography>
+            <Typography variant="body1">
+              公式サイト: <Link href={businessInfo.siteUrl}>{businessInfo.siteUrl}</Link>
+            </Typography>
+            {businessInfo.telephone && (
+              <Typography variant="body1">電話番号: {businessInfo.telephone}</Typography>
+            )}
+          </Box>
+          <PublicPageLinks sx={{ mt: 3 }} />
+        </Paper>
+      </Container>
+
       {/* ---------- リンクボタン集 ---------- */}
-      <Container sx={{ mt: 4 }}>
+      <Container component="section" sx={{ mt: 4 }}>
         <Typography variant="h5" component="h2" gutterBottom>
           各種ページリンク
         </Typography>
@@ -401,6 +368,11 @@ function Home() {
           <Grid item>
             <Button variant="contained" component={RouterLink} to="/menu">
               メニューを見る
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button variant="contained" component={RouterLink} to="/access">
+              アクセス
             </Button>
           </Grid>
           <Grid item>
@@ -413,11 +385,16 @@ function Home() {
               予約
             </Button>
           </Grid>
+          <Grid item>
+            <Button variant="contained" component={RouterLink} to="/faq">
+              FAQ
+            </Button>
+          </Grid>
         </Grid>
       </Container>
 
       {/* ---------- カレンダー ---------- */}
-      <Container sx={{ mt: 4 }}>
+      <Container component="section" sx={{ mt: 4 }}>
         <Typography variant="h5" component="h2" gutterBottom>
           イベント&営業予定
         </Typography>
@@ -445,19 +422,17 @@ function Home() {
       </Container>
 
       {/* ---------- アクセス ---------- */}
-      <Container sx={{ mt: 4 }}>
+      <Container component="section" sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h4" component="h2" gutterBottom>
             アクセス
           </Typography>
-          <Typography variant="body1">
-            〒272-0132 千葉県市川市湊新田2−1−18 ビアメゾンロジェール101
-          </Typography>
+          <Typography variant="body1">{businessInfo.displayAddress}</Typography>
           <Box sx={{ mt: 2 }} ref={mapRef}>
             {mapInView && (
               <iframe
                 title="GoogleMap"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3240.867767207533!2d139.90914127620368!3d35.6802578300267!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188768af217c7b%3A0x42dc8c85cafabf51!2z44Ky44O844Og44Kr44OV44KnLkxldmVs!5e0!3m2!1sja!2sjp!4v1741783603258!5m2!1sja!2sjp"
+                src={businessInfo.googleMapsEmbedUrl}
                 width="100%"
                 height="300"
                 style={{ border: 0 }}
@@ -466,18 +441,21 @@ function Home() {
               />
             )}
           </Box>
+          <Button component={RouterLink} to="/access" sx={{ mt: 2 }}>
+            アクセス・店舗情報ページを見る
+          </Button>
         </Paper>
       </Container>
 
       {/* ---------- SNS ---------- */}
-      <Container sx={{ mt: 4, mb: 4 }}>
+      <Container component="section" sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h5" component="h2" gutterBottom>
-          SNSをフォローしよう！
+          公式SNS・予約
         </Typography>
         <Grid container spacing={2}>
           <Grid item>
             <IconButton
-              onClick={() => window.open('https://x.com/GamecafeLevel', '_blank')}
+              onClick={() => window.open(businessInfo.xUrl, '_blank')}
               color="primary"
               aria-label="Xを開く"
             >
@@ -486,20 +464,20 @@ function Home() {
           </Grid>
           <Grid item>
             <IconButton
-              onClick={() => window.open('https://lin.ee/pyc6UjM', '_blank')}
+              onClick={() => window.open(businessInfo.instagramUrl, '_blank')}
               color="primary"
-              aria-label="LINEを開く"
+              aria-label="Instagramを開く"
             >
-              <LineIcon />
+              <InstagramIcon />
             </IconButton>
           </Grid>
           <Grid item>
             <IconButton
-              onClick={() => window.open('https://note.com/gamecafe_level', '_blank')}
+              onClick={() => window.open(businessInfo.lineUrl, '_blank')}
               color="primary"
-              aria-label="noteを開く"
+              aria-label="LINEを開く"
             >
-              <NoteIcon />
+              <LineIcon />
             </IconButton>
           </Grid>
         </Grid>

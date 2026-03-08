@@ -1,7 +1,9 @@
 import React from 'react'
 import { Container, Paper, Typography, Box } from '@mui/material'
-import { Helmet } from 'react-helmet-async'
 import ImageWithFallback from '../components/ImageWithFallback'
+import SeoHead from '../components/SeoHead'
+import PublicPageLinks from '../components/PublicPageLinks'
+import businessInfo from '../config/businessInfo.json'
 
 // 店内写真（jpg ＋ webp）
 import mahjongJpg from '../assets/images/mahjong_table.jpg'
@@ -18,15 +20,18 @@ import cafeExteriorWebp from '../assets/images/cafe_exterior.webp'
 function Equipment() {
   return (
     <>
-      <Helmet>
-        <title>設備紹介</title>
-        <link rel="canonical" href="https://gamecafe-level.com/equipment" />
-        <meta
-          name="description"
-          content="全自動麻雀卓 AMOS REX3 や大型モニター、電源・Wi-Fi完備の店内設備とボードゲーム棚の写真を掲載しています。行徳駅近くのゲームカフェ。"
-        />
-      </Helmet>
+      <SeoHead pageKey="equipment" />
       <Container sx={{ mt: 4, mb: 4 }}>
+        <Paper sx={{ p: 3, mb: 4 }}>
+          <Typography variant="body1" paragraph>
+            {businessInfo.name}
+            の設備紹介ページです。店内設備やボードゲーム棚の写真を掲載しています。
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            店舗情報: {businessInfo.displayAddress}
+          </Typography>
+        </Paper>
+
         <Typography variant="h4" component="h1" gutterBottom>
           設備紹介
         </Typography>
@@ -52,15 +57,15 @@ function Equipment() {
               {/* 写真の説明をここに入れる */}
               テーブル・椅子のイメージ
             </Typography>
-              <ImageWithFallback
-                webp={mahjongWebp}
-                src={mahjongJpg}
-                alt="最新全自動雀卓 AMOS REX3"
-                width={1536}
-                height={1152}
-                style={{ width: '100%', height: 'auto', borderRadius: 8 }}
-              />
-            </Box>
+            <ImageWithFallback
+              webp={mahjongWebp}
+              src={mahjongJpg}
+              alt="最新全自動雀卓 AMOS REX3"
+              width={1536}
+              height={1152}
+              style={{ width: '100%', height: 'auto', borderRadius: 8 }}
+            />
+          </Box>
 
           {/* 大型モニターや雀卓の写真を追加するなら下記を複製 */}
           <Box sx={{ mt: 2 }}>
@@ -166,6 +171,10 @@ function Equipment() {
             </Typography>
           </Paper>
         </Box>
+
+        <Paper sx={{ p: 3, mt: 4 }}>
+          <PublicPageLinks />
+        </Paper>
       </Container>
     </>
   )
