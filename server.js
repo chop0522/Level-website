@@ -146,7 +146,16 @@ app.get('/robots.txt', (_req, res) => {
   res.type('text/plain').send(buildRobotsTxt())
 })
 
-const NOINDEX_PATHS = ['/mypage', '/mypage/*', '/login', '/signup', '/achievements', '/mahjong', '/mahjong/*', '/qr']
+const NOINDEX_PATHS = [
+  '/mypage',
+  '/mypage/*',
+  '/login',
+  '/signup',
+  '/achievements',
+  '/mahjong',
+  '/mahjong/*',
+  '/qr',
+]
 app.get(NOINDEX_PATHS, (_req, res) => {
   res.set('X-Robots-Tag', 'noindex, nofollow')
   res.set('Cache-Control', 'no-cache')

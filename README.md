@@ -39,7 +39,7 @@ npm run lint
 npm run build
 ```
 
-The `build` command also regenerates `public/robots.txt` and `public/sitemap.xml` from the current SEO configuration before bundling the app.
+The `build` command also regenerates `public/robots.txt` and `public/sitemap.xml` from the current SEO configuration before bundling the app, then writes prerendered HTML files for the public routes under `build/`.
 
 ## XP/ランク関連（フロント実装の参照先）
 
@@ -77,6 +77,18 @@ curl -s http://localhost:3001/access | head -n 40
 curl -s http://localhost:3001/faq | head -n 40
 curl -s http://localhost:3001/robots.txt
 curl -s http://localhost:3001/sitemap.xml
+```
+
+You can also run the automated verifier:
+
+```bash
+npm run verify:seo
+```
+
+To check the production site with the same assertions:
+
+```bash
+npm run verify:seo -- https://gamecafe-level.com
 ```
 
 ## Search Console setup
