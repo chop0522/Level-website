@@ -22,7 +22,12 @@ import { AuthContext } from '../contexts/TokenContext'
 import SeoHead from '../components/SeoHead'
 import PublicPageLinks from '../components/PublicPageLinks'
 import businessInfo from '../config/businessInfo.json'
-import { buildLocalBusinessJsonLd, buildOrganizationJsonLd, buildWebsiteJsonLd } from '../lib/seo'
+import {
+  buildLocalBusinessJsonLd,
+  buildOrganizationJsonLd,
+  buildWebsiteJsonLd,
+  getPagePath,
+} from '../lib/seo'
 
 /* ▼ Big-Calendar */
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar'
@@ -366,27 +371,27 @@ function Home() {
         </Typography>
         <Grid container spacing={2}>
           <Grid item>
-            <Button variant="contained" component={RouterLink} to="/menu">
+            <Button variant="contained" component={RouterLink} to={getPagePath('menu')}>
               メニューを見る
             </Button>
           </Grid>
           <Grid item>
-            <Button variant="contained" component={RouterLink} to="/access">
+            <Button variant="contained" component={RouterLink} to={getPagePath('access')}>
               アクセス
             </Button>
           </Grid>
           <Grid item>
-            <Button variant="contained" component={RouterLink} to="/equipment">
+            <Button variant="contained" component={RouterLink} to={getPagePath('equipment')}>
               設備紹介
             </Button>
           </Grid>
           <Grid item>
-            <Button variant="contained" component={RouterLink} to="/reservation">
+            <Button variant="contained" component={RouterLink} to={getPagePath('reservation')}>
               予約
             </Button>
           </Grid>
           <Grid item>
-            <Button variant="contained" component={RouterLink} to="/faq">
+            <Button variant="contained" component={RouterLink} to={getPagePath('faq')}>
               FAQ
             </Button>
           </Grid>
@@ -441,7 +446,7 @@ function Home() {
               />
             )}
           </Box>
-          <Button component={RouterLink} to="/access" sx={{ mt: 2 }}>
+          <Button component={RouterLink} to={getPagePath('access')} sx={{ mt: 2 }}>
             アクセス・店舗情報ページを見る
           </Button>
         </Paper>

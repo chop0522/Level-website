@@ -54,7 +54,7 @@ function Access() {
         <Box component="section" sx={{ mt: 4 }}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h5" component="h2" gutterBottom>
-              公式SNS
+              公式SNS・予約
             </Typography>
             <Typography variant="body1">
               <Link href={businessInfo.xUrl} target="_blank" rel="noopener noreferrer">

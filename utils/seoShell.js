@@ -5,10 +5,10 @@ const sitePages = require('../src/config/sitePages.json')
 
 const publicNavLinks = [
   { href: '/', label: 'ホーム' },
-  { href: '/menu', label: 'メニュー' },
-  { href: '/access', label: 'アクセス・店舗情報' },
-  { href: '/faq', label: 'FAQ' },
-  { href: '/reservation', label: '予約案内' },
+  { href: sitePages.menu.path, label: 'メニュー' },
+  { href: sitePages.access.path, label: 'アクセス・店舗情報' },
+  { href: sitePages.faq.path, label: 'FAQ' },
+  { href: sitePages.reservation.path, label: '予約案内' },
 ]
 
 const menuSections = {
@@ -95,7 +95,8 @@ const faqSections = [
   {
     title: '予約方法',
     paragraphs: [
-      '公式LINE・当サイトの予約フォーム・オープンチャット・X の DM・ホットペッパーで予約できます。',
+      businessInfo.reservationGuide.primaryText,
+      businessInfo.reservationGuide.priorityText,
       '当日の飛び込み来店も可能ですが、席が埋まっている場合はお待ちいただくことがあります。',
     ],
   },
@@ -128,9 +129,7 @@ function normalizePath(routePath = '/') {
 }
 
 function absoluteUrl(routePath = '/') {
-  const base = trimTrailingSlash(businessInfo.siteUrl)
-  const normalized = normalizePath(routePath)
-  return normalized === '/' ? `${base}/` : `${base}${normalized}`
+  return new URL(routePath, businessInfo.siteUrl).toString()
 }
 
 function escapeHtml(value = '') {
@@ -144,7 +143,14 @@ function escapeHtml(value = '') {
 
 function getPageByPath(routePath) {
   const normalized = normalizePath(routePath)
-  return Object.entries(sitePages).find(([, page]) => page.path === normalized) || null
+  return (
+    Object.entries(sitePages).find(([, page]) => normalizePath(page.path) === normalized) || null
+  )
+}
+
+function getCanonicalPublicPath(routePath) {
+  const pageEntry = getPageByPath(routePath)
+  return pageEntry ? pageEntry[1].path : null
 }
 
 function buildLocalBusinessJsonLd() {
@@ -286,7 +292,7 @@ function renderFooter() {
           .join('')}
       </nav>
       <section>
-        <h2>公式SNS</h2>
+        <h2>公式SNS・予約</h2>
         <a class="seo-nav-link" href="${escapeHtml(businessInfo.xUrl)}">X</a>
         <a class="seo-nav-link" href="${escapeHtml(businessInfo.instagramUrl)}">Instagram</a>
         <a class="seo-nav-link" href="${escapeHtml(businessInfo.lineUrl)}">LINE予約</a>
@@ -316,7 +322,7 @@ function renderHomeContent() {
     </section>
     <section class="seo-card">
       <h2>主要ページ</h2>
-      <p><a href="/menu">メニューを見る</a> / <a href="/access">アクセス・店舗情報を見る</a> / <a href="/faq">FAQを見る</a></p>
+      <p><a href="${sitePages.menu.path}">メニューを見る</a> / <a href="${sitePages.access.path}">アクセス・店舗情報を見る</a> / <a href="${sitePages.faq.path}">FAQを見る</a></p>
     </section>
   `
 }
@@ -382,7 +388,7 @@ function renderAccessContent() {
       <p><a href="${escapeHtml(businessInfo.googleMapsPlaceUrl)}">Google マップを見る</a></p>
     </section>
     <section class="seo-card">
-      <h2>公式SNS</h2>
+      <h2>公式SNS・予約</h2>
       <p><a href="${escapeHtml(businessInfo.xUrl)}">X</a> / <a href="${escapeHtml(
         businessInfo.instagramUrl
       )}">Instagram</a> / <a href="${escapeHtml(businessInfo.lineUrl)}">LINE予約</a></p>
@@ -428,8 +434,9 @@ function renderReservationContent() {
   return `
     <section class="seo-card">
       <h1>予約案内</h1>
-      <p>予約は公式LINEから承っております。</p>
-      <p><a href="${escapeHtml(businessInfo.lineUrl)}">LINEで予約する</a></p>
+      <p>${escapeHtml(businessInfo.reservationGuide.primaryText)}</p>
+      <p>${escapeHtml(businessInfo.reservationGuide.priorityText)}</p>
+      <p><a href="${escapeHtml(businessInfo.lineUrl)}">${escapeHtml(businessInfo.reservationGuide.lineButtonLabel)}</a></p>
       <p>ご連絡の際は、お名前・ご希望日時・人数・電話番号・その他ご要望を添えていただくとスムーズです。</p>
     </section>
   `
@@ -574,5 +581,6 @@ module.exports = {
   buildRobotsTxt,
   buildSitemapXml,
   renderPublicPageHtml,
+  getCanonicalPublicPath,
   getPageByPath,
 }

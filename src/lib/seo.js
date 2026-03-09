@@ -6,8 +6,17 @@ export function trimTrailingSlash(value) {
 }
 
 export function absoluteUrl(path = '/') {
-  const base = trimTrailingSlash(businessInfo.siteUrl)
-  return path === '/' ? `${base}/` : `${base}${path}`
+  return new URL(path, businessInfo.siteUrl).toString()
+}
+
+export function getPagePath(pageKey) {
+  const page = sitePages[pageKey]
+
+  if (!page) {
+    throw new Error(`Unknown page key: ${pageKey}`)
+  }
+
+  return page.path
 }
 
 export function getPageSeo(pageKey) {

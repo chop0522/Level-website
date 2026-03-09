@@ -26,13 +26,18 @@
     }
   ],
   "closedDayNote": "定休日：月曜",
-  "menuUrl": "https://gamecafe-level.com/menu",
-  "accessUrl": "https://gamecafe-level.com/access",
-  "faqUrl": "https://gamecafe-level.com/faq",
-  "reservationUrl": "https://gamecafe-level.com/reservation",
+  "menuUrl": "https://gamecafe-level.com/menu/",
+  "accessUrl": "https://gamecafe-level.com/access/",
+  "faqUrl": "https://gamecafe-level.com/faq/",
+  "reservationUrl": "https://gamecafe-level.com/reservation/",
   "xUrl": "https://x.com/GamecafeLevel",
   "instagramUrl": "https://www.instagram.com/gamecafe.level/",
   "lineUrl": "https://lin.ee/pyc6UjM",
+  "reservationGuide": {
+    "primaryText": "予約は公式LINEから承っております。",
+    "priorityText": "イベント参加や貸切のご相談も、まずは公式LINEをご利用ください。",
+    "lineButtonLabel": "LINEで予約する"
+  },
   "sameAs": ["https://x.com/GamecafeLevel", "https://www.instagram.com/gamecafe.level/"],
   "logoPath": "/icons/icon-512.png",
   "defaultOgImage": "/icons/icon-512.png",

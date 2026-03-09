@@ -67,8 +67,10 @@ function FAQ() {
           </AccordionSummary>
           <AccordionDetails>
             <Typography variant="body1" paragraph>
-              ・公式LINE・当サイトの予約フォーム、オープンチャット、X(Twitter)のDM、
-              ホットペッパーでご予約が可能です。
+              ・{businessInfo.reservationGuide.primaryText}
+            </Typography>
+            <Typography variant="body1" paragraph>
+              ・{businessInfo.reservationGuide.priorityText}
             </Typography>
             <Typography variant="body1" paragraph>
               ・当日の飛び込み来店も可能です、席が埋まっている場合はお待ちいただくことがあります。
