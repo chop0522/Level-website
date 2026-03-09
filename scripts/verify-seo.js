@@ -8,7 +8,14 @@ const targetArg = process.argv[2] || ''
 const remoteBase = targetArg ? targetArg.replace(/\/$/, '') : ''
 const localPort = process.env.SEO_VERIFY_PORT || '4110'
 
-const publicPaths = ['/', '/menu', '/access', '/faq', '/equipment', '/reservation']
+const publicPaths = ['/', '/menu/', '/access/', '/faq/', '/equipment/', '/reservation/']
+const redirectPairs = [
+  ['/menu', '/menu/'],
+  ['/access', '/access/'],
+  ['/faq', '/faq/'],
+  ['/equipment', '/equipment/'],
+  ['/reservation', '/reservation/'],
+]
 const requiredStrings = [
   'ゲームカフェ.Level',
   '千葉県市川市湊新田2-1-18',
@@ -39,16 +46,30 @@ function verifyHtml(html, routePath, label) {
     assert(html.includes(required), `${label} ${routePath} is missing "${required}"`)
   }
 
-  assert(html.includes('/menu'), `${label} ${routePath} is missing the menu link`)
-  assert(html.includes('/access'), `${label} ${routePath} is missing the access link`)
-  assert(html.includes('/faq'), `${label} ${routePath} is missing the FAQ link`)
-  assert(html.includes('/reservation'), `${label} ${routePath} is missing the reservation link`)
+  assert(html.includes('/menu/'), `${label} ${routePath} is missing the menu link`)
+  assert(html.includes('/access/'), `${label} ${routePath} is missing the access link`)
+  assert(html.includes('/faq/'), `${label} ${routePath} is missing the FAQ link`)
+  assert(html.includes('/reservation/'), `${label} ${routePath} is missing the reservation link`)
 }
 
 async function fetchText(url) {
   const response = await fetch(url)
   assert(response.ok, `Request failed: ${url} (${response.status})`)
   return response.text()
+}
+
+async function verifyRedirect(baseUrl, fromPath, toPath, label) {
+  const response = await fetch(`${baseUrl}${fromPath}`, { redirect: 'manual' })
+  assert(
+    [301, 302, 307, 308].includes(response.status),
+    `${label} ${fromPath} did not redirect to the canonical URL`
+  )
+
+  const location = response.headers.get('location') || ''
+  assert(
+    location.endsWith(toPath),
+    `${label} ${fromPath} redirected to "${location}" instead of "${toPath}"`
+  )
 }
 
 function verifyBuildArtifacts() {
@@ -108,6 +129,10 @@ async function verifyHttpBase(baseUrl, label) {
   for (const routePath of publicPaths) {
     const html = await fetchText(`${baseUrl}${routePath}`)
     verifyHtml(html, routePath, label)
+  }
+
+  for (const [fromPath, toPath] of redirectPairs) {
+    await verifyRedirect(baseUrl, fromPath, toPath, label)
   }
 
   const robots = await fetchText(`${baseUrl}/robots.txt`)

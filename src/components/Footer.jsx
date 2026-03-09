@@ -3,6 +3,7 @@ import React from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import businessInfo from '../config/businessInfo.json'
 import styles from './Footer.module.css'
+import { getPagePath } from '../lib/seo'
 
 function Footer() {
   const openingHoursLabel = businessInfo.openingHours
@@ -30,22 +31,22 @@ function Footer() {
         </section>
 
         <nav className={styles.nav} aria-label="フッターナビゲーション">
-          <RouterLink to="/menu" className={styles.link}>
+          <RouterLink to={getPagePath('menu')} className={styles.link}>
             メニュー
           </RouterLink>
-          <RouterLink to="/access" className={styles.link}>
+          <RouterLink to={getPagePath('access')} className={styles.link}>
             アクセス・店舗情報
           </RouterLink>
-          <RouterLink to="/faq" className={styles.link}>
+          <RouterLink to={getPagePath('faq')} className={styles.link}>
             FAQ
           </RouterLink>
-          <RouterLink to="/reservation" className={styles.link}>
+          <RouterLink to={getPagePath('reservation')} className={styles.link}>
             予約案内
           </RouterLink>
         </nav>
 
         <section className={styles.sns}>
-          <h3 className={styles.subheading}>公式SNS</h3>
+          <h3 className={styles.subheading}>公式SNS・予約</h3>
           <a
             href={businessInfo.xUrl}
             target="_blank"

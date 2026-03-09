@@ -15,8 +15,10 @@ function Reservation() {
             予約案内
           </Typography>
           <Typography variant="body1" paragraph>
-            {businessInfo.name}
-            の予約は現在、公式LINEから承っております。以下のボタンからご連絡ください。
+            {businessInfo.name}の{businessInfo.reservationGuide.primaryText}
+          </Typography>
+          <Typography variant="body1" paragraph>
+            {businessInfo.reservationGuide.priorityText}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             店舗情報: {businessInfo.displayAddress}
@@ -29,7 +31,7 @@ function Reservation() {
               sx={{ mb: 2 }}
               onClick={() => window.open(businessInfo.lineUrl, '_blank')}
             >
-              LINEで予約する
+              {businessInfo.reservationGuide.lineButtonLabel}
             </Button>
           </Box>
 

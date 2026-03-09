@@ -12,6 +12,7 @@ const {
   buildRobotsTxt,
   buildSitemapXml,
   renderPublicPageHtml,
+  getCanonicalPublicPath,
   getPageByPath,
 } = require('./utils/seoShell')
 
@@ -185,6 +186,14 @@ app.use(
 )
 
 app.get('*', (_req, res) => {
+  const canonicalPath = getCanonicalPublicPath(_req.path)
+
+  if (canonicalPath && canonicalPath !== _req.path) {
+    const query = _req.url.includes('?') ? _req.url.slice(_req.url.indexOf('?')) : ''
+    res.redirect(301, `${canonicalPath}${query}`)
+    return
+  }
+
   const pageEntry = getPageByPath(_req.path)
 
   if (pageEntry) {

@@ -1,12 +1,13 @@
 import React from 'react'
 import { Box, Link, Typography } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
+import { getPagePath } from '../lib/seo'
 
 const defaultLinks = [
-  { to: '/menu', label: 'メニュー' },
-  { to: '/access', label: 'アクセス・店舗情報' },
-  { to: '/faq', label: 'FAQ' },
-  { to: '/reservation', label: '予約案内' },
+  { to: getPagePath('menu'), label: 'メニュー' },
+  { to: getPagePath('access'), label: 'アクセス・店舗情報' },
+  { to: getPagePath('faq'), label: 'FAQ' },
+  { to: getPagePath('reservation'), label: '予約案内' },
 ]
 
 function PublicPageLinks({ title = '関連ページ', links = defaultLinks, sx }) {

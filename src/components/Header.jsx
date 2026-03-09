@@ -8,6 +8,7 @@ const CloseIcon = React.lazy(() => import('@mui/icons-material/Close'))
 import styles from './Header.module.css'
 
 import { AuthContext } from '../contexts/TokenContext'
+import { getPagePath } from '../lib/seo'
 
 function Header() {
   const { token = '', handleLogout } = useContext(AuthContext)
@@ -49,19 +50,19 @@ function Header() {
           <NavLink to="/" end className={navLinkClass}>
             Home
           </NavLink>
-          <NavLink to="/menu" className={navLinkClass}>
+          <NavLink to={getPagePath('menu')} className={navLinkClass}>
             Menu
           </NavLink>
-          <NavLink to="/access" className={navLinkClass}>
+          <NavLink to={getPagePath('access')} className={navLinkClass}>
             Access
           </NavLink>
-          <NavLink to="/equipment" className={navLinkClass}>
+          <NavLink to={getPagePath('equipment')} className={navLinkClass}>
             Equipment
           </NavLink>
-          <NavLink to="/reservation" className={navLinkClass}>
+          <NavLink to={getPagePath('reservation')} className={navLinkClass}>
             Reservation
           </NavLink>
-          <NavLink to="/faq" className={navLinkClass}>
+          <NavLink to={getPagePath('faq')} className={navLinkClass}>
             FAQ
           </NavLink>
 
