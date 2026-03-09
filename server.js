@@ -144,7 +144,7 @@ app.use(
 
 // --- SEO assets ---
 app.get('/robots.txt', (_req, res) => {
-  res.type('text/plain').send(buildRobotsTxt())
+  res.set('Content-Type', 'text/plain; charset=utf-8').send(buildRobotsTxt())
 })
 
 const NOINDEX_PATHS = [

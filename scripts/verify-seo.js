@@ -24,6 +24,19 @@ const requiredStrings = [
   '#website',
   'canonical',
 ]
+const requiredRobotsLines = [
+  'User-agent: *',
+  'Allow: /',
+  'Disallow: /mypage',
+  'Disallow: /mypage/',
+  'Disallow: /login',
+  'Disallow: /signup',
+  'Disallow: /achievements',
+  'Disallow: /mahjong',
+  'Disallow: /mahjong/',
+  'Disallow: /qr',
+  'Sitemap: https://gamecafe-level.com/sitemap.xml',
+]
 
 function assert(condition, message) {
   if (!condition) {
@@ -58,6 +71,26 @@ async function fetchText(url) {
   return response.text()
 }
 
+async function fetchResponse(url, options) {
+  const response = await fetch(url, options)
+  assert(response.ok, `Request failed: ${url} (${response.status})`)
+  return response
+}
+
+function verifyRobotsTxtContent(robots, label) {
+  assert(robots.includes('\n'), `${label} robots.txt does not contain literal newlines`)
+
+  const normalized = robots.replace(/\r\n/g, '\n')
+  const lines = normalized.split('\n').filter(Boolean)
+
+  for (const line of requiredRobotsLines) {
+    assert(lines.includes(line), `${label} robots.txt is missing "${line}"`)
+  }
+
+  const disallowLines = lines.filter((line) => line.startsWith('Disallow: '))
+  assert(disallowLines.length >= 7, `${label} robots.txt is missing Disallow directives`)
+}
+
 async function verifyRedirect(baseUrl, fromPath, toPath, label) {
   const response = await fetch(`${baseUrl}${fromPath}`, { redirect: 'manual' })
   assert(
@@ -89,10 +122,7 @@ function verifyBuildArtifacts() {
 
   const robots = readFile(path.join(buildDir, 'robots.txt'))
   const sitemap = readFile(path.join(buildDir, 'sitemap.xml'))
-  assert(
-    robots.includes('Sitemap: https://gamecafe-level.com/sitemap.xml'),
-    'build robots.txt is missing the sitemap line'
-  )
+  verifyRobotsTxtContent(robots, 'build')
   assert(sitemap.includes('<urlset'), 'build sitemap.xml is not valid XML')
 }
 
@@ -135,11 +165,14 @@ async function verifyHttpBase(baseUrl, label) {
     await verifyRedirect(baseUrl, fromPath, toPath, label)
   }
 
-  const robots = await fetchText(`${baseUrl}/robots.txt`)
+  const robotsResponse = await fetchResponse(`${baseUrl}/robots.txt`)
+  const robotsContentType = robotsResponse.headers.get('content-type') || ''
   assert(
-    robots.includes('Sitemap: https://gamecafe-level.com/sitemap.xml'),
-    `${label} robots.txt is missing the sitemap line`
+    robotsContentType.includes('text/plain'),
+    `${label} robots.txt is not served as plain text`
   )
+  const robots = await robotsResponse.text()
+  verifyRobotsTxtContent(robots, label)
 
   const sitemap = await fetchText(`${baseUrl}/sitemap.xml`)
   assert(sitemap.includes('<urlset'), `${label} sitemap.xml is not valid XML`)

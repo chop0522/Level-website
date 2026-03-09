@@ -544,19 +544,21 @@ function renderPublicPageHtml(routePath, options = {}) {
 }
 
 function buildRobotsTxt() {
-  return [
-    'User-agent: *',
-    'Allow: /',
-    'Disallow: /mypage',
-    'Disallow: /mypage/',
-    'Disallow: /login',
-    'Disallow: /signup',
-    'Disallow: /achievements',
-    'Disallow: /mahjong',
-    'Disallow: /mahjong/',
-    'Disallow: /qr',
-    `Sitemap: ${absoluteUrl('/sitemap.xml')}`,
-  ].join('\n')
+  return (
+    [
+      'User-agent: *',
+      'Allow: /',
+      'Disallow: /mypage',
+      'Disallow: /mypage/',
+      'Disallow: /login',
+      'Disallow: /signup',
+      'Disallow: /achievements',
+      'Disallow: /mahjong',
+      'Disallow: /mahjong/',
+      'Disallow: /qr',
+      `Sitemap: ${absoluteUrl('/sitemap.xml')}`,
+    ].join('\n') + '\n'
+  )
 }
 
 function buildSitemapXml() {
