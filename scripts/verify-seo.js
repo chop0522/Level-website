@@ -23,6 +23,8 @@ const requiredStrings = [
   '#organization',
   '#website',
   'canonical',
+  'https://www.googletagmanager.com/gtag/js?id=AW-18011386164',
+  "gtag('config', 'AW-18011386164')",
 ]
 const requiredRobotsLines = [
   'User-agent: *',
