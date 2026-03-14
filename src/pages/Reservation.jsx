@@ -26,10 +26,13 @@ function Reservation() {
 
           <Box sx={{ textAlign: 'center', mt: 2 }}>
             <Button
+              component="a"
+              href={businessInfo.lineUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               variant="contained"
               color="success"
               sx={{ mb: 2 }}
-              onClick={() => window.open(businessInfo.lineUrl, '_blank')}
             >
               {businessInfo.reservationGuide.lineButtonLabel}
             </Button>

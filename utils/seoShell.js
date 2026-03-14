@@ -267,7 +267,8 @@ function renderGoogleTag() {
 
       gtag('config', '${GOOGLE_ADS_TAG_ID}');
       gtag('config', '${GOOGLE_ANALYTICS_TAG_ID}');
-    </script>`
+    </script>
+    <script defer src="/google-ads-line-conversion.js"></script>`
 }
 
 function renderList(items) {
