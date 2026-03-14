@@ -3,6 +3,9 @@ const path = require('path')
 const businessInfo = require('../src/config/businessInfo.json')
 const sitePages = require('../src/config/sitePages.json')
 
+const GOOGLE_ANALYTICS_TAG_ID = 'G-V4N7RYQ4WQ'
+const GOOGLE_ADS_TAG_ID = 'AW-18011386164'
+
 const publicNavLinks = [
   { href: '/', label: 'ホーム' },
   { href: sitePages.menu.path, label: 'メニュー' },
@@ -254,6 +257,19 @@ function buildAssetTags(buildDir) {
   return { css, js }
 }
 
+function renderGoogleTag() {
+  return `<!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_TAG_ID}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', '${GOOGLE_ADS_TAG_ID}');
+      gtag('config', '${GOOGLE_ANALYTICS_TAG_ID}');
+    </script>`
+}
+
 function renderList(items) {
   return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
 }
@@ -500,6 +516,7 @@ function renderPublicPageHtml(routePath, options = {}) {
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    ${renderGoogleTag()}
     ${jsonLd
       .map((item) => `<script type="application/ld+json">${JSON.stringify(item)}</script>`)
       .join('')}
