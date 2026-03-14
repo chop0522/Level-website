@@ -478,7 +478,10 @@ function Home() {
           </Grid>
           <Grid item>
             <IconButton
-              onClick={() => window.open(businessInfo.lineUrl, '_blank')}
+              component="a"
+              href={businessInfo.lineUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               color="primary"
               aria-label="LINEを開く"
             >
