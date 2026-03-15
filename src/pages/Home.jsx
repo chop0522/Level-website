@@ -313,6 +313,9 @@ function Home() {
           <Typography variant="body1">
             {businessInfo.name}は、ボードゲームを通じて人と人とのつながりを大切にする場所です。
           </Typography>
+          <Typography variant="body1" sx={{ mt: 1 }}>
+            ボードゲームが初めての方にも、ルールの説明やおすすめボードゲームのご案内をしておりますので、安心してお楽しみいただけます。
+          </Typography>
         </Paper>
       </Container>
 
