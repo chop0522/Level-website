@@ -373,7 +373,7 @@ function renderMenuContent() {
     <section class="seo-card">
       <h2>プレイ料金</h2>
       ${pricingHtml}
-      <p>ワンドリンク制（ソフトドリンク 300円 / アルコール 500円）</p>
+      <p>ワンドリンク制</p>
     </section>
     <section class="seo-card">
       <h2>ドリンクメニュー</h2>
