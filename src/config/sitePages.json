@@ -37,8 +37,8 @@
   "reservation": {
     "path": "/reservation/",
     "label": "予約案内",
-    "title": "予約案内 | ゲームカフェ.Level",
-    "description": "ゲームカフェ.Levelの予約案内ページです。公式LINEからの予約方法を掲載しています。",
+    "title": "予約案内・二次会利用 | ゲームカフェ.Level",
+    "description": "ゲームカフェ.Levelの予約案内ページです。会社帰りや飲み会後の二次会利用、空席確認・貸切相談は公式LINEからご連絡ください。",
     "includeInSitemap": true
   }
 }

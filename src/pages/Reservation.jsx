@@ -56,6 +56,38 @@ function Reservation() {
         </Paper>
 
         <Paper sx={{ p: 3, mt: 4 }}>
+          <Typography variant="h5" component="h2" gutterBottom>
+            {businessInfo.nightUseGuide.heading}
+          </Typography>
+          <Typography variant="body1" paragraph>
+            {businessInfo.nightUseGuide.lead}
+          </Typography>
+          <Typography variant="body1" paragraph>
+            {businessInfo.nightUseGuide.description}
+          </Typography>
+          <Typography variant="body1" paragraph>
+            {businessInfo.nightUseGuide.reservationText}
+          </Typography>
+          <Box component="ul" sx={{ pl: 3, mb: 2 }}>
+            {businessInfo.nightUseGuide.bullets.map((item) => (
+              <Typography key={item} component="li" variant="body2" sx={{ mb: 0.5 }}>
+                {item}
+              </Typography>
+            ))}
+          </Box>
+          <Button
+            component="a"
+            href={businessInfo.lineUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="contained"
+            color="success"
+          >
+            {businessInfo.reservationGuide.lineButtonLabel}
+          </Button>
+        </Paper>
+
+        <Paper sx={{ p: 3, mt: 4 }}>
           <PublicPageLinks />
         </Paper>
       </Container>

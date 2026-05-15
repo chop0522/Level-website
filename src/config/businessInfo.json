@@ -38,6 +38,20 @@
     "priorityText": "イベント参加や貸切のご相談も、まずは公式LINEをご利用ください。",
     "lineButtonLabel": "LINEで予約する"
   },
+  "nightUseGuide": {
+    "heading": "飲み会後・二次会利用にもおすすめ",
+    "lead": "平日夜の会社帰りや飲み会後に、少人数でボードゲームや麻雀を楽しめます。",
+    "description": "カラオケ以外の二次会や、友人同士・同僚との集まりにもご利用ください。",
+    "reservationText": "空席確認や予約、貸切相談は公式LINEからご連絡ください。",
+    "shortText": "会社帰りや飲み会後の二次会、カラオケ以外の集まりにも、少人数でボードゲームや麻雀を楽しめます。空席確認・予約は公式LINEからご連絡ください。",
+    "bullets": [
+      "会社帰りにもう少し遊びたい時に",
+      "飲み会後の二次会に、ゲームカフェという選択肢",
+      "カラオケ以外の二次会にも",
+      "少人数グループや同僚との集まりに",
+      "空席確認・予約は公式LINEから"
+    ]
+  },
   "sameAs": ["https://x.com/GamecafeLevel", "https://www.instagram.com/gamecafe.level/"],
   "logoPath": "/icons/icon-512.png",
   "defaultOgImage": "/icons/icon-512.png",

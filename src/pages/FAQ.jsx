@@ -83,7 +83,27 @@ function FAQ() {
           </AccordionDetails>
         </Accordion>
 
-        {/* 3) 飲食関連 */}
+        {/* 3) 夜利用・二次会 */}
+        <Accordion>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="h6" component="h2">
+              飲み会後や二次会として利用できますか？
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Typography variant="body1" paragraph>
+              ・空席状況によりますが、{businessInfo.nightUseGuide.lead}
+            </Typography>
+            <Typography variant="body1" paragraph>
+              ・{businessInfo.nightUseGuide.description}
+            </Typography>
+            <Typography variant="body1" paragraph>
+              ・{businessInfo.nightUseGuide.reservationText}
+            </Typography>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* 4) 飲食関連 */}
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="h6" component="h2">
@@ -101,7 +121,7 @@ function FAQ() {
           </AccordionDetails>
         </Accordion>
 
-        {/* 4) 来店時の注意点 */}
+        {/* 5) 来店時の注意点 */}
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="h6" component="h2">
@@ -118,7 +138,7 @@ function FAQ() {
           </AccordionDetails>
         </Accordion>
 
-        {/* 5) ゲーム関連 */}
+        {/* 6) ゲーム関連 */}
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="h6" component="h2">
@@ -138,7 +158,7 @@ function FAQ() {
           </AccordionDetails>
         </Accordion>
 
-        {/* 6) 支払い方法 */}
+        {/* 7) 支払い方法 */}
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="h6" component="h2">
@@ -155,7 +175,7 @@ function FAQ() {
           </AccordionDetails>
         </Accordion>
 
-        {/* 7) 問い合わせ */}
+        {/* 8) 問い合わせ */}
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="h6" component="h2">

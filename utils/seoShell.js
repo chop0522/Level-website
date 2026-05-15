@@ -104,6 +104,14 @@ const faqSections = [
     ],
   },
   {
+    title: '飲み会後や二次会として利用できますか？',
+    paragraphs: [
+      `空席状況によりますが、${businessInfo.nightUseGuide.lead}`,
+      businessInfo.nightUseGuide.description,
+      businessInfo.nightUseGuide.reservationText,
+    ],
+  },
+  {
     title: '飲食関連',
     paragraphs: [
       '食べ物は持ち込み可能ですが、飲み物の持ち込みはできません。',
@@ -338,6 +346,11 @@ function renderHomeContent() {
       <p>月曜祝日も営業しております。貸切でのご利用も可能です。</p>
     </section>
     <section class="seo-card">
+      <h2>${escapeHtml(businessInfo.nightUseGuide.heading)}</h2>
+      <p>${escapeHtml(businessInfo.nightUseGuide.shortText)}</p>
+      <p><a href="${sitePages.reservation.path}">予約案内を見る</a></p>
+    </section>
+    <section class="seo-card">
       <h2>主要ページ</h2>
       <p><a href="${sitePages.menu.path}">メニューを見る</a> / <a href="${sitePages.access.path}">アクセス・店舗情報を見る</a> / <a href="${sitePages.faq.path}">FAQを見る</a></p>
     </section>
@@ -374,6 +387,7 @@ function renderMenuContent() {
       <h2>プレイ料金</h2>
       ${pricingHtml}
       <p>ワンドリンク制</p>
+      <p>${escapeHtml(businessInfo.nightUseGuide.shortText)}</p>
     </section>
     <section class="seo-card">
       <h2>ドリンクメニュー</h2>
@@ -455,6 +469,14 @@ function renderReservationContent() {
       <p>${escapeHtml(businessInfo.reservationGuide.priorityText)}</p>
       <p><a href="${escapeHtml(businessInfo.lineUrl)}">${escapeHtml(businessInfo.reservationGuide.lineButtonLabel)}</a></p>
       <p>ご連絡の際は、お名前・ご希望日時・人数・電話番号・その他ご要望を添えていただくとスムーズです。</p>
+    </section>
+    <section class="seo-card">
+      <h2>${escapeHtml(businessInfo.nightUseGuide.heading)}</h2>
+      <p>${escapeHtml(businessInfo.nightUseGuide.lead)}</p>
+      <p>${escapeHtml(businessInfo.nightUseGuide.description)}</p>
+      <p>${escapeHtml(businessInfo.nightUseGuide.reservationText)}</p>
+      ${renderList(businessInfo.nightUseGuide.bullets)}
+      <p><a href="${escapeHtml(businessInfo.lineUrl)}">${escapeHtml(businessInfo.reservationGuide.lineButtonLabel)}</a></p>
     </section>
   `
 }

@@ -41,6 +41,9 @@ function Menu() {
 
 ワンドリンク制`}
             </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              {businessInfo.nightUseGuide.shortText}
+            </Typography>
           </Paper>
         </Box>
 
