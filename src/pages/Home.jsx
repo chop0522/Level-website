@@ -319,6 +319,20 @@ function Home() {
         </Paper>
       </Container>
 
+      <Container component="section" sx={{ mt: 4 }}>
+        <Paper sx={{ p: 3 }}>
+          <Typography variant="h4" component="h2" gutterBottom>
+            {businessInfo.nightUseGuide.heading}
+          </Typography>
+          <Typography variant="body1" paragraph>
+            {businessInfo.nightUseGuide.shortText}
+          </Typography>
+          <Button variant="contained" component={RouterLink} to={getPagePath('reservation')}>
+            予約案内を見る
+          </Button>
+        </Paper>
+      </Container>
+
       {/* ---------- 営業情報 ---------- */}
       <Container sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>

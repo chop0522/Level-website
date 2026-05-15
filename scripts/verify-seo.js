@@ -40,6 +40,17 @@ const requiredRobotsLines = [
   'Disallow: /qr',
   'Sitemap: https://gamecafe-level.com/sitemap.xml',
 ]
+const nightUseRoutePaths = new Set([
+  '/',
+  '/menu/',
+  '/faq/',
+  '/reservation/',
+  'index.html',
+  'menu/index.html',
+  'faq/index.html',
+  'reservation/index.html',
+])
+const requiredNightUseStrings = ['飲み会後', '二次会', '会社帰り', 'カラオケ以外', '公式LINE']
 
 function assert(condition, message) {
   if (!condition) {
@@ -66,6 +77,12 @@ function verifyHtml(html, routePath, label) {
   assert(html.includes('/access/'), `${label} ${routePath} is missing the access link`)
   assert(html.includes('/faq/'), `${label} ${routePath} is missing the FAQ link`)
   assert(html.includes('/reservation/'), `${label} ${routePath} is missing the reservation link`)
+
+  if (nightUseRoutePaths.has(routePath)) {
+    for (const required of requiredNightUseStrings) {
+      assert(html.includes(required), `${label} ${routePath} is missing "${required}"`)
+    }
+  }
 }
 
 async function fetchText(url) {
