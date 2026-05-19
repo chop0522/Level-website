@@ -12,6 +12,7 @@ function SeoHead({ pageKey, structuredData = [] }) {
       <link rel="canonical" href={page.canonical} />
       <meta name="description" content={page.description} />
       <meta name="format-detection" content="telephone=no" />
+      {page.noindex && <meta name="robots" content="noindex,follow" />}
 
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content={businessInfo.name} />

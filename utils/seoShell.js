@@ -481,6 +481,67 @@ function renderReservationContent() {
   `
 }
 
+function renderXLandingContent() {
+  const openingHours = businessInfo.openingHours
+    .map((item) => `${item.label} ${item.opens} - ${item.closes}`)
+    .join(' / ')
+
+  return `
+    <section class="seo-card">
+      <p><strong>東西線行徳駅から徒歩5分</strong></p>
+      <h1>Xから来た方へ。初めてでも遊びやすいゲームカフェです。</h1>
+      <p>ボードゲーム未経験でも大丈夫。人数・時間・気分に合わせてゲームをご案内します。おひとり様、相席、会社帰り、飲み会後の少人数の二次会にも使えます。</p>
+      <p><a href="${escapeHtml(businessInfo.lineUrl)}">LINEで空席確認・予約する</a> / <a href="${escapeHtml(businessInfo.xUrl)}">Xを見る</a></p>
+      <p><img src="/x/assets/ogp-gamecafe-level.png" alt="ボードゲームを囲む卓上のビジュアル" width="1200" height="630" style="max-width:100%;height:auto;border-radius:8px"></p>
+    </section>
+    <section class="seo-card">
+      <h2>店舗概要</h2>
+      <p>営業時間: ${escapeHtml(openingHours)}</p>
+      <p>${escapeHtml(businessInfo.closedDayNote)}</p>
+      <p>${escapeHtml(businessInfo.displayAddress)}</p>
+      <p>予約: 公式LINEから空席確認・予約を承っています。</p>
+    </section>
+    <section class="seo-card">
+      <h2>初めての方へ</h2>
+      <ul>
+        <li>ゲーム名を知らなくても問題ありません。人数と遊びたい雰囲気を聞いて、候補をご案内します。</li>
+        <li>初めての方にも、ルールの説明やおすすめボードゲームのご案内をしています。</li>
+        <li>30分から遊べます。待ち合わせ前、会社帰り、二次会前後の短時間利用にも向いています。</li>
+      </ul>
+    </section>
+    <section class="seo-card">
+      <h2>おひとり様・相席歓迎</h2>
+      <p>相席状況は日によって変わります。来店前に公式LINEで確認してもらえると案内しやすいです。</p>
+      <p>経験者だけの場ではありません。初めての方には、料金や遊び方から順番にご案内します。</p>
+    </section>
+    <section class="seo-card">
+      <h2>会社帰り・二次会利用</h2>
+      <p>仕事帰りに少しだけ遊ぶ、飲み会後に友人と集まる、といった使い方ができます。</p>
+      <p>カラオケ以外の選択肢として、少人数でも会話が生まれやすく、人数や時間に合わせてゲームを変えられます。</p>
+      <p>人数、時間、初めてかどうかを公式LINEで送ってください。席状況を確認してご案内します。</p>
+    </section>
+    <section class="seo-card">
+      <h2>料金</h2>
+      <h3>平日</h3>
+      ${renderList(['30分 300円', '4時間 1,200円', '1日 2,400円'])}
+      <h3>土日祝</h3>
+      ${renderList(['30分 400円', '4時間 1,600円', '1日 2,800円'])}
+      <p>ワンドリンク制です。表示は税込です。</p>
+    </section>
+    <section class="seo-card">
+      <h2>アクセス</h2>
+      <address>${escapeHtml(businessInfo.displayAddress)}</address>
+      <p>東京メトロ東西線 行徳駅から徒歩5分です。</p>
+      <p><a href="${escapeHtml(businessInfo.googleMapsPlaceUrl)}">Google マップで見る</a></p>
+    </section>
+    <section class="seo-card">
+      <h2>空席確認・予約</h2>
+      <p>お名前、ご希望日時、人数、電話番号、その他ご要望を送っていただくとスムーズです。</p>
+      <p><a href="${escapeHtml(businessInfo.lineUrl)}">LINEで予約する</a></p>
+    </section>
+  `
+}
+
 function renderPageContent(pageKey) {
   switch (pageKey) {
     case 'home':
@@ -495,6 +556,8 @@ function renderPageContent(pageKey) {
       return renderEquipmentContent()
     case 'reservation':
       return renderReservationContent()
+    case 'x':
+      return renderXLandingContent()
     default:
       return ''
   }
@@ -512,7 +575,7 @@ function renderPublicPageHtml(routePath, options = {}) {
   const { css, js } = buildAssetTags(buildDir)
   const verificationToken = options.googleSiteVerification || ''
   const canonical = absoluteUrl(page.path)
-  const siteImage = absoluteUrl(businessInfo.defaultOgImage)
+  const siteImage = absoluteUrl(page.imagePath || businessInfo.defaultOgImage)
   const jsonLd = [buildLocalBusinessJsonLd(), buildOrganizationJsonLd(), buildWebsiteJsonLd()]
 
   return `<!DOCTYPE html>
@@ -523,6 +586,7 @@ function renderPublicPageHtml(routePath, options = {}) {
     <title>${escapeHtml(page.title)}</title>
     <meta name="description" content="${escapeHtml(page.description)}">
     <meta name="format-detection" content="telephone=no">
+    ${page.noindex ? '<meta name="robots" content="noindex,follow">' : ''}
     <link rel="canonical" href="${escapeHtml(canonical)}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="${escapeHtml(businessInfo.name)}">

@@ -8,13 +8,14 @@ const targetArg = process.argv[2] || ''
 const remoteBase = targetArg ? targetArg.replace(/\/$/, '') : ''
 const localPort = process.env.SEO_VERIFY_PORT || '4110'
 
-const publicPaths = ['/', '/menu/', '/access/', '/faq/', '/equipment/', '/reservation/']
+const publicPaths = ['/', '/menu/', '/access/', '/faq/', '/equipment/', '/reservation/', '/x/']
 const redirectPairs = [
   ['/menu', '/menu/'],
   ['/access', '/access/'],
   ['/faq', '/faq/'],
   ['/equipment', '/equipment/'],
   ['/reservation', '/reservation/'],
+  ['/x', '/x/'],
 ]
 const requiredStrings = [
   'ゲームカフェ.Level',
@@ -45,12 +46,15 @@ const nightUseRoutePaths = new Set([
   '/menu/',
   '/faq/',
   '/reservation/',
+  '/x/',
   'index.html',
   'menu/index.html',
   'faq/index.html',
   'reservation/index.html',
+  'x/index.html',
 ])
 const requiredNightUseStrings = ['飲み会後', '二次会', '会社帰り', 'カラオケ以外', '公式LINE']
+const campaignRoutePaths = new Set(['/x/', 'x/index.html'])
 
 function assert(condition, message) {
   if (!condition) {
@@ -82,6 +86,18 @@ function verifyHtml(html, routePath, label) {
     for (const required of requiredNightUseStrings) {
       assert(html.includes(required), `${label} ${routePath} is missing "${required}"`)
     }
+  }
+
+  if (campaignRoutePaths.has(routePath)) {
+    assert(
+      html.includes('<meta name="robots" content="noindex,follow">'),
+      `${label} ${routePath} is missing the campaign noindex meta`
+    )
+    assert(
+      html.includes('https://gamecafe-level.com/x/assets/ogp-gamecafe-level.png'),
+      `${label} ${routePath} is missing the X campaign OGP image`
+    )
+    assert(html.includes('Xから来た方へ'), `${label} ${routePath} is missing the campaign title`)
   }
 }
 
@@ -133,6 +149,7 @@ function verifyBuildArtifacts() {
     path.join(buildDir, 'faq', 'index.html'),
     path.join(buildDir, 'equipment', 'index.html'),
     path.join(buildDir, 'reservation', 'index.html'),
+    path.join(buildDir, 'x', 'index.html'),
   ]
 
   for (const filePath of buildFiles) {
@@ -144,6 +161,10 @@ function verifyBuildArtifacts() {
   const sitemap = readFile(path.join(buildDir, 'sitemap.xml'))
   verifyRobotsTxtContent(robots, 'build')
   assert(sitemap.includes('<urlset'), 'build sitemap.xml is not valid XML')
+  assert(
+    !sitemap.includes('<loc>https://gamecafe-level.com/x/</loc>'),
+    'campaign page is listed in sitemap.xml'
+  )
 }
 
 function waitForReady(child) {

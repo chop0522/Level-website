@@ -27,7 +27,7 @@ export function getPageSeo(pageKey) {
   }
 
   const canonical = absoluteUrl(page.path)
-  const image = absoluteUrl(businessInfo.defaultOgImage)
+  const image = absoluteUrl(page.imagePath || businessInfo.defaultOgImage)
 
   return {
     ...page,

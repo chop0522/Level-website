@@ -24,6 +24,7 @@ const PublicProfile = lazy(() => import('./pages/PublicProfile'))
 const Equipment = lazy(() => import('./pages/Equipment'))
 const Access = lazy(() => import('./pages/Access'))
 const Reservation = lazy(() => import('./pages/Reservation'))
+const XLanding = lazy(() => import('./pages/XLanding'))
 const BreakoutPage = lazy(() => import('./pages/BreakoutPage'))
 const BreakoutLeaderboardPage = lazy(() => import('./pages/BreakoutLeaderboardPage'))
 const BreakoutHistoryPage = lazy(() => import('./pages/BreakoutHistoryPage'))
@@ -145,6 +146,7 @@ function App() {
                 <Route path="/equipment" element={<Equipment />} />
                 <Route path="/access" element={<Access />} />
                 <Route path="/reservation" element={<Reservation />} />
+                <Route path="/x" element={<XLanding />} />
                 <Route path="/qr" element={<QRPage />} />
 
                 {/* Auth */}

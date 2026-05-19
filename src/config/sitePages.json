@@ -40,5 +40,14 @@
     "title": "予約案内・二次会利用 | ゲームカフェ.Level",
     "description": "ゲームカフェ.Levelの予約案内ページです。会社帰りや飲み会後の二次会利用、空席確認・貸切相談は公式LINEからご連絡ください。",
     "includeInSitemap": true
+  },
+  "x": {
+    "path": "/x/",
+    "label": "XプロフィールLP",
+    "title": "Xから来た方へ | ゲームカフェ.Level",
+    "description": "行徳駅徒歩5分。ボードゲーム未経験、おひとり様、相席、会社帰りの二次会にも使いやすいゲームカフェ.Levelの案内ページです。",
+    "imagePath": "/x/assets/ogp-gamecafe-level.png",
+    "noindex": true,
+    "includeInSitemap": false
   }
 }
