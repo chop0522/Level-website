@@ -38,7 +38,7 @@ function XLanding() {
                 東西線行徳駅から徒歩5分
               </Typography>
               <Typography variant="h3" component="h1" sx={{ fontWeight: 800, lineHeight: 1.18 }}>
-                Xから来た方へ。初めてでも遊びやすいゲームカフェです。
+                初めてでも遊びやすいゲームカフェです。
               </Typography>
               <Typography variant="h6" component="p" sx={{ mt: 2, color: '#344050' }}>
                 ボードゲーム未経験でも大丈夫。人数・時間・気分に合わせてゲームをご案内します。おひとり様、相席、会社帰り、飲み会後の少人数の二次会にも使えます。

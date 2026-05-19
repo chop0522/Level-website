@@ -97,7 +97,7 @@ function verifyHtml(html, routePath, label) {
       html.includes('https://gamecafe-level.com/x/assets/ogp-gamecafe-level.png'),
       `${label} ${routePath} is missing the X campaign OGP image`
     )
-    assert(html.includes('Xから来た方へ'), `${label} ${routePath} is missing the campaign title`)
+    assert(html.includes('初めてでも遊びやすいゲームカフェ'), `${label} ${routePath} is missing the campaign title`)
   }
 }
 

@@ -489,7 +489,7 @@ function renderXLandingContent() {
   return `
     <section class="seo-card">
       <p><strong>東西線行徳駅から徒歩5分</strong></p>
-      <h1>Xから来た方へ。初めてでも遊びやすいゲームカフェです。</h1>
+      <h1>初めてでも遊びやすいゲームカフェです。</h1>
       <p>ボードゲーム未経験でも大丈夫。人数・時間・気分に合わせてゲームをご案内します。おひとり様、相席、会社帰り、飲み会後の少人数の二次会にも使えます。</p>
       <p><a href="${escapeHtml(businessInfo.lineUrl)}">LINEで空席確認・予約する</a> / <a href="${escapeHtml(businessInfo.xUrl)}">Xを見る</a></p>
       <p><img src="/x/assets/ogp-gamecafe-level.png" alt="ボードゲームを囲む卓上のビジュアル" width="1200" height="630" style="max-width:100%;height:auto;border-radius:8px"></p>
